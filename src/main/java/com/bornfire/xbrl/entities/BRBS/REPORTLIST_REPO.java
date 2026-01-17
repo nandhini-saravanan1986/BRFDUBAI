@@ -33,8 +33,7 @@ public interface REPORTLIST_REPO extends JpaRepository<BRF_MAPPING_ENTITY, Strin
 	@Query(value = "select s.cust_id as custid, s.foracid as foracid, s.acct_name as acctname, s.report_name_1 as reportname1, "
 	        + "s.report_lable_1 as reportlabel1, s.glsh_code as glsubheadcode, s.schm_code as schmcode, "
 	        + "s.report_addl_criteria_1 as reportaddlcriteria1, '' as reportaddlcriteria2, '' as reportaddlcriteria3 " // Use empty string if columns don't exist
-	        + "from BRF1_MAPPING_TABLE s WHERE s.report_lable_1 is not null AND s.report_addl_criteria_1 IS NOT NULL "
-	        + "and s.report_name_1=?1", nativeQuery = true)
+	        + "from BRF1_MAPPING_TABLE s WHERE s.report_lable_1 is not null AND s.report_addl_criteria_1 IS NOT NULL ", nativeQuery = true)
 	List<BRF_MAPPING_PROPERTY> genMapped(String report_code);
 
 	@Query(value = "select s.cust_id as custid, s.foracid as foracid, s.acct_name as acctname, s.report_name_1 as reportname1, "
