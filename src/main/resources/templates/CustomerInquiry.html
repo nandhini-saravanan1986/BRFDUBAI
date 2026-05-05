@@ -1,0 +1,1195 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
+	th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/font-awesome/5.9.0/css/all.min.css"
+	th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css"
+	th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/datatables/1.10.19/css/jquery.dataTables.min.css"
+	th:href="@{/webjars/datatables/1.10.19/css/jquery.dataTables.min.css}">
+<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+
+<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
+	th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+<script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
+	th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+<script src="/webjars/jquery/3.4.1/jquery.min.js"
+	th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js"
+	th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
+
+<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js"
+	th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
+
+<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js"
+	th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
+
+<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
+<script
+	src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
+
+<style>
+
+
+.btns {
+	float: right;
+	margin: 5px;
+}
+
+.col-sm-5 {
+	padding-bottom: 15px;
+}
+
+.list-body {
+	padding: 0px;
+}
+
+.error {
+	color: red;
+	padding-left: 10px;
+}
+
+.formline {
+	padding-bottom: 15px;
+}
+
+.btn-primary {
+	background-color: #d77410b8;
+	border-color: #0c0c0c;
+}
+
+.btn-primary:not(:disabled ):not(.disabled ).active, .btn-primary:not(:disabled ):not(.disabled ):active, .show>.btn-primary.dropdown-toggle
+	{
+	color: #fff;
+	background-color: #cc000000;
+	border-color: #161617;
+}
+
+#finusertb {
+	width: 460px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	padding: 0px;
+}
+.container {
+    max-width: 1400px !important;
+}
+</style>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	$(function() {
+
+		var finusers = /*[[${FinUserProfiles}]]*/null;
+
+		console.log(finusers);
+
+		$("#usertable,#finusertb").DataTable({
+			"info" : false,
+			"lengthChange" : true
+
+		});
+
+		$("#disableDate1,#disableDate,#disableTilDate,#passExDate,#effectiveTill")
+				.datepicker({
+					maxDate: new Date(),
+					changeMonth : true,
+					changeYear : true,
+					dateFormat : "dd-mm-yy"
+				});
+
+		
+		$("#start_datedep").datepicker({
+			maxDate : 0,
+			changeMonth : true,
+			changeYear : true,
+			dateFormat : "dd/mm/yy",
+			onSelect : function(selected) {
+				var dt = $(this).datepicker('getDate');
+				dt.setDate(dt.getDate());
+				$("#start_datedep").datepicker("option", "minDate", dt);
+
+			}
+		});
+		$("#end_datedep").datepicker({
+			maxDate : 0,
+			changeMonth : true,
+			changeYear : true,
+			dateFormat : "dd/mm/yy",
+			onSelect : function(selected) {
+				var dt = new Date(selected);
+				dt.setDate(dt.getDate() - 1);
+
+			}
+		}); 
+	});
+
+	
+	function getdeposit() {
+		var fromdate = $("#start_datedep").val();
+		var todate = $("#end_datedep").val();
+		var acid =$("#hiddenAcid").val();
+		if(fromdate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else if(todate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else{
+		
+		
+		location.href = 'XBRLAccountInquiry?account=' + acid+ '&formmode=accountlist'+'&fd=' +fromdate + '&td=' +todate;
+		}
+	}
+	
+	
+	function getUserlist(mode, num, maxpage) {
+
+		var n = parseInt(num);
+		var max = parseInt(maxpage);
+		var Callurl = 'UserProfile?formmode=list';
+
+		switch (mode) {
+		case "nextpage":
+			n = n + 1;
+			if (n > max) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "prevpage":
+			n = n - 1;
+			if (n < 0) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "givenpage":
+			n = parseInt($("#pageno").val()) - 1;
+			if (n > max || n < 0) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+		}
+
+		location.href = Callurl;
+	}
+
+	function finuser(a) {
+
+		$
+				.ajax({
+					type : 'get',
+					url : '/XBRL/Finuserdata?userid=' + a.id,
+
+					success : function(data) {
+
+						/*<![CDATA[*/
+
+						$('.finuserapply').html(data);
+
+						$(
+								"#expiryDate,#disableDate,#disableTilDate,#passExDate,#effectiveTill")
+								.datepicker({
+									changeMonth : true,
+									changeYear : true,
+									dateFormat : "dd-mm-yy"
+								});
+
+						/*]]>*/
+
+						$("#finusers").modal("hide");
+					}
+
+				})
+
+	}
+
+	function home() {
+		location.href = 'Dashboard'
+	}
+
+/* 	function back() {
+		window.history.back();
+	} */
+
+	function fnClick(a) {
+		var userid = a.getAttribute("data-userid")
+		location.href = 'UserProfile?formmode=edit&userid=' + userid
+	}
+
+	function adduser(a) {
+		location.href = 'UserProfile?formmode=add';
+	}
+
+	function list() {
+		location.href = 'UserProfile?formmode=list';
+	}
+
+	function verify(a) {
+
+		var entryuser = a.getAttribute("data-entry_user");
+		var modifyuser = a.getAttribute("data-modify_user");
+
+		var loginuser = /*[[${session.USERID}]]*/null;
+
+		if ((modifyuser != null && modifyuser == loginuser)
+				|| (modifyuser == null && entryuser == loginuser)) {
+
+			$("#alertmsg").text("Same user cannot verify");
+
+			$('#alert').modal("toggle");
+
+		} else {
+
+			if ($("#userProfile").valid()) {
+
+				var userid = a.getAttribute("data-userid");
+				var url = './verifyUser';
+				$("#userProfile").attr('action', url);
+
+				var options = {
+					success : showResponse
+				// post-submit callback 
+				};
+
+				$('#userProfile').ajaxSubmit(options);
+
+				function showResponse(responseText, statusText, xhr, $form) {
+
+					$("#alertmsg").text(responseText);
+
+					$('#alert').modal("toggle");
+
+				}
+				;
+
+			}
+
+		}
+
+	};
+
+	function passwordReset() {
+
+		var url = './passwordReset';
+		$("#userProfile").attr('action', url);
+
+		var options = {
+			success : showResponse
+		// post-submit callback 
+		};
+
+		$('#userProfile').ajaxSubmit(options);
+
+		function showResponse(responseText, statusText, xhr, $form) {
+
+			$("#alertmsg").text(responseText);
+
+			$('#alert').modal("toggle");
+
+		}
+		;
+	};
+
+	function roledesc() {
+
+		var roleid = $("#roleId").find(':selected').val();
+
+		if (roleid == 'ADM') {
+			$("#roleDesc").val("Admin");
+		} else if (roleid == 'ADT') {
+			$("#roleDesc").val("Audit");
+		} else if (roleid == 'GEN') {
+			$("#roleDesc").val("General User");
+		}
+		$(this).find(':selected').text();
+
+	}
+
+	function submitform() {
+
+		//Creating Validating Rules
+		$('#userProfile').validate({
+			messages : {
+				userid : "Please Provide User Id"
+			}
+		});
+
+		if ($("#userProfile").valid()) {
+
+			var formmode = /*[[${formmode}]]*/null;
+
+			var url = "./createUser?formmode=" + formmode;
+
+			$("#userProfile").attr('action', url);
+
+			var options = {
+				success : showResponse
+			// post-submit callback 
+			};
+
+			$("#userProfile").ajaxSubmit(options);
+
+			function showResponse(responseText, statusText, xhr, $form) {
+
+				$("#alertmsg").text(responseText);
+
+				$('#alert').modal("toggle");
+
+			}
+			;
+
+		}
+
+	};
+
+	/*]]>*/
+</script>
+
+<script th:inline="javascript">
+	$(function() {
+
+
+	});
+
+	function getUserlist(mode, num, maxpage) {
+		$("#loadermodal").modal("toggle");
+		var n = parseInt(num);
+		var max = parseInt(maxpage);
+
+		/* 		alert(n+"  "+max);
+		 */var Callurl = 'CustomerList?formmode=list';
+
+		switch (mode) {
+		case "nextpage":
+			n = n + 1;
+			if (n > max) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "prevpage":
+			n = n - 1;
+			if (n < 0) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "givenpage":
+			n = parseInt($("#pageno").val()) - 1;
+			if (n > max || n < 0) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
+		}
+
+		/* 		alert(Callurl);
+		 */location.href = Callurl;
+	}
+
+	function home() {
+		$("#loadermodal").modal("toggle");
+		location.href = 'Dashboard'
+	}
+
+	function back() {
+		$("#loadermodal").modal("toggle");
+		var Callurl = 'XBRLAccountInquiry';
+		location.href = Callurl;
+		//window.history.back();
+	}
+	function convertDate(dateString) {
+		var p = dateString.split(/\D/g)
+		return [ p[2], p[1], p[0] ].join("-")
+	}
+
+	function searchcustDOB() {
+		$("#CustDOBSearch").modal('hide');
+
+		var custName2 = $("#custDOB").val();
+		if (custName2 != '') {
+			$("#loadermodal").modal("toggle");
+			location.href = 'getcustomerRESIDINGCOUNTRY?custName2=' + custName2;
+			$('#CustomerInq').empty();
+		}
+	}
+	function searchcustNUMBER() {
+		$("#CustNUMBERSearch").modal('hide');
+		var custName2 = $("#custNumber").val();
+		if (custName2 != '') {
+			$("#loadermodal").modal("toggle");
+			location.href = 'getcustomerNUMBER?custName2=' + custName2;
+			$('#CustomerInq').empty();
+		}
+
+	}
+	
+	function fnClick(a) {
+		$("#loadermodal").modal("toggle");
+		var custId = a.getAttribute("data-custId")
+		location.href = 'CustomerProfile?custId=' + custId;
+	}
+	
+	
+	function getAccountenquiry(a){
+		$("#loadermodal").modal("toggle");
+		var custId = a.getAttribute("data-ref_id");
+		var acid = a.getAttribute("data-acid");
+		
+		location.href = 'XBRLAccountInquiry?account=' + acid+ '&formmode=account';
+	}
+	
+	function getCustenquiry(a){
+		$("#loadermodal").modal("toggle");
+		var custId = a.getAttribute("data-ref_id");
+		
+		
+		location.href = 'XBRLAccountInquiry?account=' + custId+ '&formmode=list';
+	}
+	
+	
+	
+	function Exebtn(a) {
+		$("#loadermodal").modal("toggle");
+		
+		/* var ref_id= $("#rpt_code_id").val();
+		var Param1 =$("#value_1_id").val();
+		var Param2 = $("#value_2_id").val();
+		var Param3 =$("#value_3_id").val();
+		var Param4 = $("#value_4_id").val();
+		var Param5 = $("#value_5_id").val();
+		var filename = $("#filename_id").val();
+		var userid =$("#userid_id").val();
+		var username = $("#username_id").val(); */
+	
+		
+		
+		$("#addedit").modal('hide');
+		$("#alertmsg").text("Customer Record Modified Successfully");
+		$("#alert").modal("toggle");
+	//	location.href = 'Reports/ReportDownloadByScript?ref_id='+ref_id+'&Param1=' + Param1+ '&Param2=' + Param2 + '&Param3=' + Param3+ '&Param4=' + Param4+ '&Param5=' + Param5 + '&userid=' + userid + '&username=' + username;
+	/*  	$
+		.ajax({
+			type : 'get',
+			url : 'Reports/ReportDownloadByScript?ref_id='+ref_id+'&Param1=' + Param1+ '&Param2=' + Param2 + '&Param3=' + Param3+ '&Param4=' + Param4+ '&Param5=' + Param5 + '&userid=' + userid + '&username=' + username,
+
+			success : function(data) {
+
+		
+
+			
+				$("#alertmsg").text(data);
+				$("#alert").modal("toggle");
+
+
+
+			}
+
+		}) */
+
+	}
+	
+	function editRecord(a){
+
+		
+
+
+													
+		$("#rpt_code_id").val(a.getAttribute("data-tier1"));
+		$("#rpt_name_id").val(a.getAttribute("data-tier2"));
+		$("#scr_name_id").val(a.getAttribute("data-tier3"));
+		$("#filename_id").val(a.getAttribute("data-base_deposit_rate"));
+		$("#value_1_id").val(a.getAttribute("data-assigned_capital"));
+		$("#value_2_id").val(a.getAttribute("data-assigned_capital_fc"));
+		$("#value_3_id").val(a.getAttribute("data-add1"));
+		$("#value_4_id").val(a.getAttribute("data-add2"));
+		$("#value_5_id").val(a.getAttribute("data-add3"));
+		$("#value_6_id").val(a.getAttribute("data-mail"));
+
+
+
+		
+		
+		
+		$("#addedit").modal("toggle");
+		
+		//Make readonly fields
+		$("#rpt_code_id").attr("readonly",true);
+		$("#rpt_name_id").attr("readonly",true);
+		$("#scr_name_id").attr("readonly",true);
+	//	$("#filename_id").attr("readonly",true);
+		
+	
+	};
+	
+	
+	function getpdfDep() {
+		
+		var fromdate = $("#start_datedep").val();
+		var todate = $("#end_datedep").val();
+		var acid = $("#hiddenAcid").val();
+		if(fromdate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else if(todate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else{
+		location.href = 'ReportsAccount/ReportDownloadPDF?reportId=RISK_DEP&formmode=list&filetype=pdf&fromdate='
+				+ fromdate + '&todate=' + todate+'&userid='+acid+'&acid='+acid;
+		}
+	}
+	function getexcelDep() {
+		var fromdate = $("#start_datedep").val();
+		var todate = $("#end_datedep").val();
+		var acid = $("#hiddenAcid").val();
+		if(fromdate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else if(todate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else{
+		location.href = 'ReportsAccount/ReportDownloadXLSX?reportId=RISK_DEP&formmode=list&filetype=xlsx&fromdate='
+				+ fromdate + '&todate=' + todate+'&userid='+acid+'&acid='+acid;
+		}	}
+
+	
+
+	
+	function getEpdfDep() {
+		
+		var fromdate = $("#start_datedep").val();
+		var todate = $("#end_datedep").val();
+		var acid = $("#hiddenAcid").val();
+		if(fromdate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else if(todate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else{
+		location.href = 'ReportsAccount/ReportDownloadPDFE?reportId=RISK_DEP&formmode=list&filetype=pdf&fromdate='
+				+ fromdate + '&todate=' + todate+'&userid='+acid+'&acid='+acid;
+		}
+	}
+	function getEexcelDep() {
+		var fromdate = $("#start_datedep").val();
+		var todate = $("#end_datedep").val();
+		var acid = $("#hiddenAcid").val();
+		if(fromdate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else if(todate===""){
+			$("#alertmsgdate").text("Select start date and end date");
+
+			$('#alertdate').modal("toggle");
+		}else{
+		location.href = 'ReportsAccount/ReportDownloadXLSXE?reportId=RISK_DEP&formmode=list&filetype=xlsx&fromdate='
+				+ fromdate + '&todate=' + todate+'&userid='+acid+'&acid='+acid;
+		}	}
+
+	/*]]>*/
+</script>
+
+<script>
+	function submitdata() {
+		var domainids = [];
+		$.each($("input[name='dom']:checked"), function() {
+			domainids.push($(this).val());
+		});
+		$("#getDomain").modal('hide');
+		$("#domainId").val(domainids.join(","));
+	}
+</script>
+
+</head>
+<title>XBRL</title>
+<body>
+	<div th:insert="XBRLHeaderMenu :: header"></div>
+	<i class="fa fa-question-circle" aria-hidden="true"
+		onclick="docEmb('UserProfile')" id="ques"></i>
+	<!---------------------User List Starts------------------------------------------------------->
+	
+		<div th:if="${formmode}=='cuslist'" class="container content">
+		<div class="row" style="width: 1550px;margin-left: auto;">
+			<div class="col-sm-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="float-left">
+							<h4> E-Statement Customer Inquiry</h4>
+						</div>
+						
+					</div>
+					<div class="card-body">
+						<table class="table  table-bordered  table-hover table-sm"
+							style="margin-bottom: 0px" id="usertable">
+							<thead class="thead-light">
+								<tr>
+									 <th></th> 
+								<th>Customer ID</th>
+										<th>Customer Name</th>
+										<th>Customer DOB</th>
+										<th>Customer Gender</th>
+										<th>Customer Mobile</th>
+										<th>Customer Email</th>
+										<th>Customer Country</th>
+										<th>Customer Type</th>
+										
+								</tr>
+							</thead>
+							<tbody id="CustomerInq">
+									<tr th:if="${COUNT} == '0'">
+										<td colspan="9" style="text-align: center; color: red">No
+											Data Found</td>
+									</tr>
+									<tr th:if="${COUNT} != '0'" th:each="custInq : ${custParameter}"
+										th:attr="data-ref_id=${custInq.orgkey}"
+										th:id="${custInq.orgkey}" class="userlist">
+<td><a  data-toggle="tooltip" class="editrec"
+										title="Click to Edit this Record"><i 
+										th:classappend="${session.PERMISSIONS == 'W'}  ? addedit "
+										class="fas fa-edit"
+											th:attr="data-tier1=${custInq.orgkey},
+													data-tier2=${custInq.cust_last_name},
+													data-tier3=${custInq.gender},
+													data-base_deposit_rate=${custInq.phone_cell},
+													data-staturoty_reserve=${#dates.format(custInq.cust_dob, 'dd-MM-yyyy')},
+													data-assigned_capital=${custInq.country},
+													data-assigned_capital_fc=${custInq.cust_type_code},
+													data-add1=${custInq.address1},
+													data-add2=${custInq.address2},
+													data-add3=${custInq.address3},
+													data-mail=${custInq.preferredemail}"
+											onclick="editRecord(this)"></i></a></td>
+										<td th:text="${custInq.orgkey}"
+											th:attr="data-ref_id=${custInq.orgkey}"
+										 onclick="getCustenquiry(this);" style="color: blue;text-decoration: underline;"></td>
+
+										<td th:text="${custInq.cust_last_name}"></td>
+										<td th:text="${#dates.format(custInq?.cust_dob, 'dd-MM-yyyy')}"></td>
+
+
+										<td th:text="${custInq.gender}"></td>
+										<td th:text="${custInq.phone_cell}"></td>
+										
+										<td th:text="${custInq.preferredemail}" style=" text-transform: uppercase;"></td>
+										<td th:text="${custInq.country}"></td>
+										<td th:text="${custInq.cust_type_code}"></td>
+										
+
+									</tr>
+								</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div th:if="${formmode}=='list'" class="container content">
+		<div class="row" style="width: 1550px;margin-left: auto;">
+			<div class="col-sm-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="float-left">
+							<h4>E-Statement Account Inquiry</h4>
+						</div>
+						
+					</div>
+					<div class="card-body">
+						<table class="table  table-bordered  table-hover table-sm"
+							style="margin-bottom: 0px" id="usertable">
+							<thead class="thead-light">
+								<tr>
+									<!-- <th></th> -->
+								<th>Account Number</th>
+										<th>Account Name</th>
+										<th>Scheme Code</th>
+										<th>Scheme Type</th>
+										<th>Account Open Date</th>
+										<th>Account Currency</th>
+										<th style="width:10px;">Customer ID</th>
+								</tr>
+							</thead>
+							<tbody id="CustomerInq">
+									<tr th:if="${COUNT} == '0'">
+										<td colspan="9" style="text-align: center; color: red">No
+											Data Found</td>
+									</tr>
+									<tr th:if="${COUNT} != '0'" th:each="custInq : ${repParameter}"
+										th:attr="data-ref_id=${custInq.acct_number},data-acid=${custInq.acid}"
+										th:id="${custInq.acct_number}" class="userlist">
+
+										<td th:text="${custInq.acct_number}"
+											th:attr="data-ref_id=${custInq.acct_number},data-acid=${custInq.acid}"
+										 onclick="getAccountenquiry(this);" style="color: blue;text-decoration: underline;"></td>
+
+										<td th:text="${custInq.acct_name}"></td>
+										<td th:text="${custInq.schm_code}"></td>
+
+
+										<td th:text="${custInq.schm_type}"></td>
+										<td th:text="${#dates.format(custInq?.acct_opn_date, 'dd-MM-yyyy')}"></td>
+										
+										<td th:text="${custInq.acct_crncy_code}"></td>
+										<td th:text="${custInq.cust_id}"></td>
+										
+
+									</tr>
+								</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div th:if="${formmode}=='account'" class="container content">
+		<div class="row" style="width: 1550px;margin-left: auto;">
+			<div class="col-sm-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="float-left">
+							<h4>E-Statement Account Inquiry</h4>
+						</div>
+						
+					<div class="btn-group nav-buttons float-right">
+									<button class="btn btn-secondary dropdown-toggle" type="button"
+										id="dropdownMenuButton"
+										style="line-height: 0.7; font-size: 22px; color: #3a4550; background: #e3e3e4;"
+										data-toggle="dropdown" aria-haspopup="true"
+										aria-expanded="false">Generate</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+										style="background-color: #e3e3e4; color: #3a4550;">
+										<a class="dropdown-item" title="Inquiry"  
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											onclick="getEpdfDep()" id="view_btn">PDF </a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" title="Modify" 
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											id="edit_value" onclick="getEexcelDep()">EXCEL</a>
+										
+
+
+									</div>
+								</div>
+								<div class="btn-group nav-buttons float-right">
+									<button class="btn btn-secondary dropdown-toggle" type="button"
+										id="dropdownMenuButton"
+										style="line-height: 0.7; font-size: 22px; color: #3a4550; background: #e3e3e4;"
+										data-toggle="dropdown" aria-haspopup="true"
+										aria-expanded="false">Download</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+										style="background-color: #e3e3e4; color: #3a4550;">
+										<a class="dropdown-item" title="Inquiry"  
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											onclick="getpdfDep()" id="view_btn">PDF </a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" title="Modify" 
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											id="edit_value" onclick="getexcelDep()">EXCEL</a>
+										
+
+
+									</div>
+								</div>
+						
+					</div>
+					<div class="card-body">
+					<div class="row formline">
+
+									<label class="col-sm-2">From Date:</label>
+									<div class="col-sm-2">
+										<input type="hidden" readonly id="current_date" value=""
+											class="form-control form-control-sm" autocomplete="off"
+											required /> <input type="text" readonly id="start_datedep"
+											value="" th:value="${opr_datefd}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<label class="col-sm-2"></label>
+									<label class="col-sm-2">To Date:</label>
+									<div class="col-sm-2">
+										<input type="hidden" readonly id="current_date" value=""
+											class="form-control form-control-sm" autocomplete="off"
+											required /> <input type="text" readonly id="end_datedep"
+											value="" th:value="${opr_datetd}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<i class="fa fa-arrow-circle-right"
+																			style="font-size: 38px; color: #080876; float: right;"
+																			onclick="getdeposit();"></i>
+									</div>
+									
+									
+						<div class="row formline">
+
+									<label class="col-sm-2">Account Name</label>
+									<div class="col-sm-2">
+										 <input type="text" readonly id="Acct_name"
+											th:value="${repParameter.acct_name}"
+											class="form-control form-control-sm" autocomplete="off" />
+											 <input type="hidden" readonly id="hiddenAcid"
+											th:value="${repParameter.acid}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<label class="col-sm-2"></label>
+									<label class="col-sm-2">Account Number</label>
+									<div class="col-sm-2">
+										<input type="text" readonly id="Acct_number"
+											 th:value="${repParameter.acct_number}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									</div>
+						<table class="table  table-bordered  table-hover table-sm"
+							style="margin-bottom: 0px" id="usertableTransaction">
+							<thead class="thead-light">
+								<tr>
+									<!-- <th></th> -->
+										<th>Tran Date</th>
+										<th>Tran ID</th>
+										<th>Part Tran Type</th>
+										<th>Value Date</th>
+										<th>Tran Particular</th>
+										<th>Debit Amount</th>
+										<th>Credit Amount</th>
+										<th>Tran Currency</th>
+								</tr>
+							</thead>
+							<tbody id="CustomerInq">
+									<tr th:if="${COUNT} == '0'">
+										<td colspan="9" style="text-align: center; color: red">No
+											Data Found</td>
+									</tr>
+									<tr th:if="${COUNT} != '0'" th:each="custInq : ${tranInquiry}"
+										th:attr="data-acid=${custInq.acid}"
+										th:id="${custInq.acid}" class="userlist">
+
+										<td th:text="${#dates.format(custInq?.tran_date, 'dd-MM-yyyy')}"></td>
+
+										<td th:text="${custInq.tran_id}"></td>
+										<th:block
+												th:switch="${custInq.part_tran_type}">
+												<td th:case="'D'">Debit</td>
+												<td th:case="'C'">Credit</td>
+											</th:block>
+<td th:text="${#dates.format(custInq?.value_date, 'dd-MM-yyyy')}"></td>
+<td th:text="${custInq.tran_particular}"></td>
+<th:block th:switch="${custInq.part_tran_type}">
+										<td th:case="'D'"  align="right" th:text="'-'+${#numbers.formatDecimal(custInq.tran_amt 	,1,'COMMA',2,'POINT')}"></td>
+										<td th:case="'C'" align="right">-</td>
+									</th:block>
+
+										<th:block th:switch="${custInq.part_tran_type}" >
+										<td th:case="'C'" align="right" th:text="${#numbers.formatDecimal(custInq.tran_amt 	,1,'COMMA',2,'POINT')}"></td>
+										<td th:case="'D'" align="right">-</td>
+									</th:block>
+										
+										
+										<td th:text="${custInq.tran_crncy_code}"></td>
+										
+										
+										
+
+									</tr>
+								</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div th:if="${formmode}=='accountlist'" class="container content">
+		<div class="row" style="width: 1550px;margin-left: auto;">
+			<div class="col-sm-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="float-left">
+							<h4>Account Inquiry</h4>
+						</div>
+						
+						<div class="btn-group nav-buttons float-right">
+									<button class="btn btn-secondary dropdown-toggle" type="button"
+										id="dropdownMenuButton"
+										style="line-height: 0.7; font-size: 22px; color: #3a4550; background: #e3e3e4;"
+										data-toggle="dropdown" aria-haspopup="true"
+										aria-expanded="false">Generate</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+										style="background-color: #e3e3e4; color: #3a4550;">
+										<a class="dropdown-item" title="Inquiry"  
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											onclick="getEpdfDep()" id="view_btn">PDF </a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" title="Modify" 
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											id="edit_value" onclick="getEexcelDep()">EXCEL</a>
+										
+
+
+									</div>
+								</div>
+								<div class="btn-group nav-buttons float-right">
+									<button class="btn btn-secondary dropdown-toggle" type="button"
+										id="dropdownMenuButton"
+										style="line-height: 0.7; font-size: 22px; color: #3a4550; background: #e3e3e4;"
+										data-toggle="dropdown" aria-haspopup="true"
+										aria-expanded="false">Download</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+										style="background-color: #e3e3e4; color: #3a4550;">
+										<a class="dropdown-item" title="Inquiry"  
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											onclick="getpdfDep()" id="view_btn">PDF </a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item" title="Modify" 
+											style="cursor: pointer; height: 20px; color: #12161b; background: #e3e3e4; height: 16px; border-radius: .20rem; padding: 2px 10px; top: 10px;"
+											id="edit_value" onclick="getexcelDep()">EXCEL</a>
+										
+
+
+									</div>
+								</div>
+						
+					</div>
+					<div class="card-body">
+					<div class="row formline">
+
+									<label class="col-sm-2">From Date:</label>
+									<div class="col-sm-2">
+										<input type="hidden" readonly id="current_date" value=""
+											class="form-control form-control-sm" autocomplete="off"
+											required /> <input type="text" readonly id="start_datedep"
+											value="" th:value="${opr_datefd}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<label class="col-sm-2"></label>
+									<label class="col-sm-2">To Date:</label>
+									<div class="col-sm-2">
+										<input type="hidden" readonly id="current_date" value=""
+											class="form-control form-control-sm" autocomplete="off"
+											required /> <input type="text" readonly id="end_datedep"
+											value="" th:value="${opr_datetd}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<i class="fa fa-arrow-circle-right"
+																			style="font-size: 38px; color: #080876; float: right;"
+																			onclick="getdeposit();"></i>
+									</div>
+									
+									
+						<div class="row formline">
+
+									<label class="col-sm-2">Account Name</label>
+									<div class="col-sm-2">
+										 <input type="text" readonly id="Acct_name"
+											th:value="${repParameter.acct_name}"
+											class="form-control form-control-sm" autocomplete="off" />
+											 <input type="hidden" readonly id="hiddenAcid"
+											th:value="${repParameter.acid}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									<label class="col-sm-2"></label>
+									<label class="col-sm-2">Account Number</label>
+									<div class="col-sm-2">
+										<input type="text" readonly id="Acct_number"
+											 th:value="${repParameter.acct_number}"
+											class="form-control form-control-sm" autocomplete="off" />
+
+
+									</div>
+									</div>
+						<table class="table  table-bordered  table-hover table-sm"
+							style="margin-bottom: 0px" id="usertableTransaction">
+							<thead class="thead-light">
+								<tr>
+									<!-- <th></th> -->
+										<th>Tran Date</th>
+										<th>Tran ID</th>
+										<th>Part Tran Type</th>
+										<th>Value Date</th>
+										<th>Tran Particular</th>
+										<th>Debit Amount</th>
+										<th>Credit Amount</th>
+										<th>Tran Currency</th>
+								</tr>
+							</thead>
+							<tbody id="CustomerInq">
+									<tr th:if="${COUNT} == '0'">
+										<td colspan="9" style="text-align: center; color: red">No
+											Data Found</td>
+									</tr>
+									<tr th:if="${COUNT} != '0'" th:each="custInq : ${tranInquiry}"
+										th:attr="data-acid=${custInq.acid}"
+										th:id="${custInq.acid}" class="userlist">
+
+										<td th:text="${#dates.format(custInq?.tran_date, 'dd-MM-yyyy')}"></td>
+
+										<td th:text="${custInq.tran_id}"></td>
+										<th:block
+												th:switch="${custInq.part_tran_type}">
+												<td th:case="'D'">Debit</td>
+												<td th:case="'C'">Credit</td>
+											</th:block>
+<td th:text="${#dates.format(custInq?.value_date, 'dd-MM-yyyy')}"></td>
+<td th:text="${custInq.tran_particular}"></td>
+<th:block th:switch="${custInq.part_tran_type}">
+										<td th:case="'D'"  align="right" th:text="'-'+${#numbers.formatDecimal(custInq.tran_amt 	,1,'COMMA',2,'POINT')}"></td>
+										<td th:case="'C'" align="right">-</td>
+									</th:block>
+
+										<th:block th:switch="${custInq.part_tran_type}" >
+										<td th:case="'C'" align="right" th:text="${#numbers.formatDecimal(custInq.tran_amt 	,1,'COMMA',2,'POINT')}"></td>
+										<td th:case="'D'" align="right">-</td>
+									</th:block>
+										
+										
+										<td th:text="${custInq.tran_crncy_code}"></td>
+										
+										
+										
+
+									</tr>
+								</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!---------------------User List Ends--------------------------------------------------------->
+	<div class="modal fade" id="addedit" th:fragment="dataedit">
+					<div
+						class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+						<div class="modal-content">
+
+							<form th:object=${singledetail} id="dataedit" method="post">
+								<div class="modal-header">
+									<h4 class="modal-title">Edit Records</h4>
+									<button type="reset" class="close" data-dismiss="modal">×</button>
+								</div>
+								<div class="modal-body" style="text-align: center">
+
+									<div class="form-group">
+										<div class="row">
+											<label class="col-sm-4">Customer ID</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="rpt_code_id" required />
+												 <input type ="hidden" id="username_id">
+												  <input type ="hidden" id="userid_id">
+										</div>
+										<div class="row">
+											<label class="col-sm-4">Customer Name</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="rpt_name_id" required />
+										</div>
+										<div class="row">
+											<label class="col-sm-4">Gender</label> <input
+												class="form-control col-sm-5" type="text"
+												id="scr_name_id" />
+										</div>
+										<div class="row" id="div_5_id">
+											<label class="col-sm-4" id="input_5_id">Email ID</label> <input
+												class="form-control col-sm-5" type="text" style=" text-transform: uppercase;"
+												 id="value_6_id"  >
+										</div>
+										<div class="row">
+											<label class="col-sm-4">Mobile Number</label> <input
+												class="form-control col-sm-5" type="text"
+												id="filename_id" />
+										</div>
+										
+										<div class="row" id="div_2_id">
+											<label class="col-sm-4" id="input_2_id">Customer Type</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="value_2_id" >
+										</div>
+										<div class="row" id="div_3_id">
+											<label class="col-sm-4" for="modes" id="input_3_id">Address 1</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="value_3_id" >
+										</div>
+										<div class="row" id="div_4_id">
+											<label class="col-sm-4" id="input_4_id">Address 2</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="value_4_id"  >
+										</div>
+										<div class="row" id="div_5_id">
+											<label class="col-sm-4" id="input_5_id">Address 3</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="value_5_id"  >
+										</div>
+										<div class="row" id="div_2_id">
+											<label class="col-sm-4" id="input_2_id">Country</label> <input
+												class="form-control col-sm-5" type="text"
+												 id="value_1_id" >
+										</div>
+									
+									</div>
+								</div>
+							</form>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-primary"
+									th:onclick="Exebtn(this);">Execute</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-------------------------------------Details edit modal form----------------------------------------------------->
+	
+	
+	<!------------------------Pop window - Domain  list Ends--------------------------------->
+	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
+	<div class="modal fade" id="alert">
+		<div
+			class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-body" style="text-align: center">
+					<p id="alertmsg"></p>
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="back();">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
+</body>
+</html>

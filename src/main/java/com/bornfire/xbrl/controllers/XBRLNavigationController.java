@@ -11,16 +11,19 @@ import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,6 +141,7 @@ import com.bornfire.xbrl.entities.Ecl_status_repo;
 import com.bornfire.xbrl.entities.Facility_Repo;
 import com.bornfire.xbrl.entities.Facitlity_Entity;
 import com.bornfire.xbrl.entities.GenRefCodeMast;
+import com.bornfire.xbrl.entities.GeneralMasterTbRep;
 import com.bornfire.xbrl.entities.Gl_balance_recon_rep;
 import com.bornfire.xbrl.entities.KYC_Audit_Rep;
 import com.bornfire.xbrl.entities.Kyc_Corprate_Repo;
@@ -160,6 +164,7 @@ import com.bornfire.xbrl.entities.SCORE_CALCULATION_REPO;
 import com.bornfire.xbrl.entities.SCORE_CARD_PERSONAL_LOAN_REPO;
 import com.bornfire.xbrl.entities.Security_Entity;
 import com.bornfire.xbrl.entities.Security_Repo;
+import com.bornfire.xbrl.entities.TransactionInquiryRep;
 import com.bornfire.xbrl.entities.UserProfile;
 import com.bornfire.xbrl.entities.UserProfileRep;
 import com.bornfire.xbrl.entities.Vat_Ledger_Entity;
@@ -207,11 +212,18 @@ import net.sf.jasperreports.engine.JRException;
 public class XBRLNavigationController {
 
 	private static final Logger logger = LoggerFactory.getLogger(XBRLNavigationController.class);
+	
+	@Autowired
+	GeneralMasterTbRep generalMasterTbRep;
+	
+	@Autowired
+	TransactionInquiryRep transactionInquiryRep;
+	
 	@Autowired
 	SessionFactory sessionFactory;
 	@Autowired
 	LoginServices loginServices;
-
+	
 	@Autowired
 	Kyc_individual_service kyc_individual_service;
 
@@ -9947,5 +9959,70 @@ public class XBRLNavigationController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
+	}
+	
+	
+	@RequestMapping(value = "XBRLAccountInquiry", method = { RequestMethod.GET, RequestMethod.POST })
+	public String XBRLAccountInquiry(@RequestParam(required = false) String formmode,
+			@RequestParam(value = "account",required = false) String Account,
+			@RequestParam(value = "fd",required = false) String fromdate,
+			@RequestParam(value = "td",required = false) String todate,
+			@RequestParam(required = false) String userid, @RequestParam(required = false) Optional<Integer> page,
+			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
+
+		int currentPage = page.orElse(0);
+		int pageSize = size.orElse(Integer.parseInt(pagesize));
+		String userid1 = (String) req.getSession().getAttribute("USERID");
+
+		System.out.println("page" + currentPage);
+		System.out.println("page" + pageSize);
+		String roleId = (String) req.getSession().getAttribute("ROLEID");
+		// md.addAttribute("AMLRoleMenu", AccessRoleService.getRoleMenu(roleId));
+		if (formmode == null || formmode.equals("cuslist")) {
+			md.addAttribute("menu", "Report Generator");
+			md.addAttribute("userProfile", loginServices.getUser(userid1));
+			md.addAttribute("formmode", "cuslist"); // to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("custParameter", etlServices.getcustdata());
+		}
+		else if (formmode.equals("list")) {
+			md.addAttribute("menu", "Report Generator");
+			md.addAttribute("userProfile", loginServices.getUser(userid1));
+			md.addAttribute("formmode", "list"); // to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("repParameter", generalMasterTbRep.findAllCustom(Account));
+		}else if (formmode.equals("account")) {
+			md.addAttribute("menu", "Report Generator");
+			md.addAttribute("userProfile", loginServices.getUser(userid1));
+			md.addAttribute("formmode", formmode); // to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("repParameter", generalMasterTbRep.findAllCustomind(Account));
+			md.addAttribute("tranInquiry", transactionInquiryRep.findAllCustomind(Account));
+		
+			DateFormat dateFormat1 = new SimpleDateFormat("dd/MM/yyyy");
+			 DateTimeFormatter formatters = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			String reportDate = dateFormat1.format(new Date());
+			 LocalDate currentDate = LocalDate.now();
+			 
+		        // Get the start date of the current month
+		        LocalDate startDate = currentDate.withDayOfMonth(1);
+		        String StreportDate = startDate.format(formatters);
+		        // Get the last date of the current month
+		        YearMonth yearMonth = YearMonth.from(currentDate);
+		        LocalDate endDate = yearMonth.atEndOfMonth();
+		    	md.addAttribute("opr_datefd",StreportDate);
+				md.addAttribute("opr_datetd",reportDate);
+		        // Print the dates
+		        System.out.println("Start Date of the Current Month: " + startDate);
+		        System.out.println("End Date of the Current Month: " + endDate);
+		}else if (formmode.equals("accountlist")) {
+			md.addAttribute("menu", "Report Generator");
+			md.addAttribute("userProfile", loginServices.getUser(userid1));
+			md.addAttribute("formmode", formmode); // to set which form - valid values are "edit" , "add" & "list"
+			md.addAttribute("repParameter", generalMasterTbRep.findAllCustomind(Account));
+			md.addAttribute("tranInquiry", transactionInquiryRep.findAllCustominddate(Account,fromdate,todate));
+			md.addAttribute("opr_datefd",fromdate);
+			md.addAttribute("opr_datetd",todate);
+			
+		}
+
+		return "CustomerInquiry";
 	}
 }
