@@ -1557,7 +1557,7 @@ public class RegulatoryReportServices {
 
 	public ModelAndView getReportDetails(String reportId, String instanceCode, String asondate, String fromdate,
 			String todate, String currency, String reportingTime, String dtltype, String subreportid, String secid,
-			Pageable pageable, String Filter) {
+			Pageable pageable, String Filter,String searchVal) {
 
 		ModelAndView repdetail = new ModelAndView();
 		logger.info("Getting Details for the Report :" + reportId);
@@ -2064,12 +2064,12 @@ public class RegulatoryReportServices {
 			break;
 		case "BRF001":
 			repdetail = brf001ReportService.getBRF001currentDtl(reportId, fromdate, todate, currency, dtltype, pageable,
-					Filter);
+					Filter,searchVal);
 			break;
 
 		case "BRF002":
 			repdetail = brf002ReportService.getBRF002currentDtl(reportId, fromdate, todate, currency, dtltype, pageable,
-					Filter);
+					Filter,searchVal);
 			break;
 
 		case "BRF005":
@@ -3261,7 +3261,7 @@ public class RegulatoryReportServices {
 	/****** arch view ****/
 	public ModelAndView getArchiveReportView(String reportId, String reportDate, String fromdate, String todate,
 			String currency, String dtltype, String subreportid, String secid, String reportingTime, Pageable pageable,
-			BigDecimal srl_no) {
+			BigDecimal srl_no,String type) {
 
 		ModelAndView repsummary = new ModelAndView();
 
@@ -3270,7 +3270,7 @@ public class RegulatoryReportServices {
 
 		case "BRF001":
 			repsummary = brf001ReportService.getArchieveBRF001View(reportId, fromdate, todate, currency, dtltype,
-					pageable);
+					pageable,type);
 			break;
 		case "BRF0001":
 			repsummary = brf001_FORT_SERVIVE.getArchieveBRF0001View(reportId, fromdate, todate, currency, dtltype,

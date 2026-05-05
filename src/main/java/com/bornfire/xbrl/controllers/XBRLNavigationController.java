@@ -23,7 +23,12 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+
 import java.util.Base64;
+
+import java.util.Arrays;
+import java.util.Calendar;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +64,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.InputStreamResource;
@@ -68,6 +74,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,6 +90,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.bornfire.xbrl.services.CalculationService;
 import com.bornfire.xbrl.config.PasswordEncryption;
 import com.bornfire.xbrl.config.SequenceGenerator;
 import com.bornfire.xbrl.entities.AccessAndRoles;
@@ -2362,20 +2370,215 @@ public class XBRLNavigationController {
 	@GetMapping("/checkDomainFlag")
 	@ResponseBody
 	public ResponseEntity<String> checkDomainFlag(@RequestParam String rptcode) {
-		Optional<RRReport> report = rrReportRepo.getParticularReport3(rptcode);
 
-		if (report.isPresent()) {
-			String domain = report.get().getDOMAIN(); // Add getter in entity if not already
-			if ("Y".equalsIgnoreCase(domain)) {
-				return ResponseEntity.ok("ENABLED");
-			} else {
-				return ResponseEntity.ok("DISABLED");
-			}
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
-		}
+	    List<RRReport> report = rrReportRepo.getParticularReport3list(rptcode);
+
+	    if (report != null && !report.isEmpty()) {
+
+	        for (RRReport each : report) {
+	            String domain = each.getDOMAIN();
+
+	            if ("Y".equalsIgnoreCase(domain)) {
+	                return ResponseEntity.ok("ENABLED");
+	            }
+	        }
+	        return ResponseEntity.ok("DISABLED");
+
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
+	    }
 	}
 
+
+	@GetMapping("/checkDomainFlagwithdate")
+	@ResponseBody
+	public ResponseEntity<String> checkDomainFlagwithdate(@RequestParam String rptcode,
+			@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,Model md) {
+		//System.out.println("Date : " + date);
+		md.addAttribute("reportDate", "2025-12-31");
+		List<Date> datelist = rrReportRepo.getdatelist(rptcode);
+		for (Date eachdate : datelist) {
+			//System.out.println("Each date : " + eachdate);
+			if (eachdate != null && eachdate.compareTo(date) == 0) {
+				return ResponseEntity.ok("ENABLED");
+			}
+		}
+		return ResponseEntity.ok("DISABLED");
+	}
+	
+	@Autowired
+	JdbcTemplate jdbcTemplate;
+
+	@GetMapping("/datavalidationdetails")
+	public ResponseEntity<List<Map<String, String>>> getModifyDetails(
+			@RequestParam("report_date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date report_date) {
+
+		List<Map<String, String>> parsedList = new ArrayList<>();
+		Map<String, String> rowMap = new HashMap<>();
+		rowMap.put("tableName", "CBS DATA");
+
+		String sql = "SELECT CASE " + "WHEN NVL(SUM(ACT_BALANCE_AMT_LC),0) >= 0 AND NVL(SUM(ACT_BALANCE_AMT_LC),0) < 1 "
+				+ "AND NVL(SUM(ACCT_BALANCE_AMT_AC),0) >= 0 AND NVL(SUM(ACCT_BALANCE_AMT_AC),0) < 1 " + "THEN 'VALID' "
+				+ "ELSE 'INVALID' " + "END AS validation_result " + "FROM GENERAL_MASTER_TABLE "
+				+ "WHERE report_date = ?";
+		String result = jdbcTemplate.queryForObject(sql, new Object[] { report_date }, String.class);
+
+		String sql1 = "SELECT COUNT(*) " + "FROM GENERAL_MASTER_TABLE " + "WHERE  report_date = ?";
+		Integer result1 = jdbcTemplate.queryForObject(sql1, new Object[] { report_date }, Integer.class);
+		String dataValidation = "VALID";
+		String status = "OK";
+		if (result1 == 0) {
+			dataValidation = "INVALID";
+		}
+		if (result1 == 0 || "INVALID".equals(result)) {
+			status = "FAIL";
+		}
+		rowMap.put("dataValidation", dataValidation);
+		rowMap.put("logicValidation", result);
+		rowMap.put("status", status);
+
+		parsedList.add(rowMap);
+
+		// String tablename="BRF_TREASURY_INVEST_TB";
+
+		List<String> tablelist = Arrays.asList("BRF_TREASURY_INVEST_TB", "BRF_TREASURY_MASTER_TB",
+				"BRF_TREASURY_PLACEMENT_ID", "BRF_FORWARD_REVEAL_MANUAL_TABLE");
+		List<String> tablelisttodisplay = Arrays.asList("TREASURY INVESTMENT DATA", "TREASURY MASTER DATA",
+				"TREASURY PLACEMENT DATA", "FORWARD DEAL DATA");
+		for (int i = 0; i < tablelist.size(); i++) {
+
+			String tablename = tablelist.get(i);
+			String displayName = tablelisttodisplay.get(i);
+
+			Map<String, String> looprowMap = new HashMap<>();
+			looprowMap.put("tableName", displayName);
+
+			String countsql = "SELECT COUNT(*) " + "FROM " + tablename + " WHERE  report_date = ?";
+			Integer countresult = jdbcTemplate.queryForObject(countsql, new Object[] { report_date }, Integer.class);
+			dataValidation = "VALID";
+			status = "OK";
+			if (countresult == 0) {
+				dataValidation = "INVALID";
+				status = "FAIL";
+			}
+
+			looprowMap.put("dataValidation", dataValidation);
+			looprowMap.put("logicValidation", "-");
+			looprowMap.put("status", status);
+			parsedList.add(looprowMap);
+		}
+
+		return ResponseEntity.ok(parsedList);
+	}
+		
+	@PostMapping("/executeProcedure")
+	public ResponseEntity<String> executeProcedure(@RequestParam(value = "reportDate", required = false) String reportDate,
+			@RequestParam(value = "srl_no", required = false) Integer srl_no, HttpServletRequest req) {
+		try {
+			System.out.println("Report_Date : " + reportDate);
+			if (reportDate == null || reportDate.trim().isEmpty() || reportDate.equals("null")) {
+			    if (srl_no != null && !srl_no.toString().equals("null")) {
+			        Optional<RRReport> existingData = rrReportlist.findById(srl_no);
+			        if (existingData.isPresent() && existingData.get().getEnd_date() != null) {
+			            reportDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(existingData.get().getEnd_date());
+			            System.out.println("Report_Date is null. Using DB Date : " + reportDate);
+			        }
+			    }
+			}
+			System.out.println("srl_no : " + srl_no);
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			LocalDate parsedDate;
+			//String formattedDate = parsedDate.format(dateFormatter);
+			String formattedDate;
+			String rpt_code;
+			Date utildate;
+			if (srl_no != null && !srl_no.equals(null) && srl_no.toString() != "null" && !srl_no.toString().equals("null")) {
+				Optional<RRReport> data = rrReportlist.findById(srl_no);
+				rpt_code = data.get().getRpt_code();
+			} else {
+				rpt_code = "ALL";
+			}
+			if (srl_no != null && !srl_no.equals(null) && srl_no.toString() != "null" && !srl_no.toString().equals("null")) {
+				Optional<RRReport> data = rrReportlist.findById(srl_no);
+				System.out.println("Data's Report date : "+data.get().getEnd_date());			
+				utildate = data.get().getEnd_date();
+				LocalDate localDate = utildate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				formattedDate = inputFormatter.format(localDate);					
+				parsedDate = LocalDate.parse(reportDate, inputFormatter);
+				formattedDate = parsedDate.format(dateFormatter);
+			}
+			else {
+				parsedDate = LocalDate.parse(reportDate, inputFormatter);
+				formattedDate = parsedDate.format(dateFormatter);
+				utildate = java.sql.Date.valueOf(parsedDate);
+			}
+			System.out.println("Report_Date Formatted Date : " + formattedDate +"utildate : "+utildate);
+			//ReportGenerationService.generateFullReport(formattedDate, rpt_code); 
+			jdbcTemplate.setQueryTimeout(60000);
+			String sql = "CALL COMMON_TRIGGERING_PROCEDURE(?, ?)";
+			jdbcTemplate.update(sql, formattedDate, rpt_code);
+			//ReportGenerationService.executeCommonTrigger(formattedDate, rpt_code);				
+			int nextSerialno = rrReportlist.findMaxSerialNo() + 1;
+			//Date utildate = java.sql.Date.valueOf(parsedDate);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(java.sql.Date.valueOf(parsedDate));
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			Date firstDayOfMonth = cal.getTime();
+			if (srl_no != null && !srl_no.equals(null) && srl_no.toString() != "null" && !srl_no.toString().equals("null")) {		
+				System.out.println("Entered Sigle Procedure");
+				Optional<RRReport> entities = rrReportlist.findById(srl_no);
+				RRReport entity = entities.get();
+				RRReport newentity = new RRReport();
+				BeanUtils.copyProperties(entity, newentity);
+				System.out.println("Report date : " + utildate + " - serial no :" + nextSerialno
+						+ " - Rport code : " + newentity.getRpt_code());
+				newentity.setSrl_no(nextSerialno);
+				newentity.setStart_date(firstDayOfMonth);
+				LocalDate passLocal = LocalDate.parse(reportDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				Date passedDateObj = java.sql.Date.valueOf(passLocal);
+				newentity.setEnd_date(passedDateObj);
+				newentity.setEntry_date(new Date());
+				newentity.setModify_user(null);
+				newentity.setVerify_suer(null);
+				newentity.setEntry_user((String) req.getSession().getAttribute("USERID"));
+				newentity.setModify_date(null);
+				newentity.setVerify_date(null);					
+				if (passedDateObj != null && entity.getEnd_date() != null && passedDateObj.compareTo(entity.getEnd_date()) != 0) {
+				    System.out.println("Saved into RRPT");
+				    rrReportlist.save(newentity);    
+				}
+
+			} else {
+				//System.out.println("Entered Multiple Procedure");
+				List<RRReport> list = rrReportlist.findDataMissing(utildate, "M1");
+				if (list != null && !list.equals(null)) {
+					for (RRReport entity : list) {
+						RRReport newentity = new RRReport();
+						BeanUtils.copyProperties(entity, newentity);
+						System.out.println("Report date : " + utildate + " - serial no :" + nextSerialno
+								+ " - Rport code : " + newentity.getRpt_code());
+						newentity.setSrl_no(nextSerialno++);
+						newentity.setStart_date(firstDayOfMonth);
+						newentity.setEnd_date(utildate);
+						newentity.setEntry_date(new Date());
+						newentity.setModify_user(null);
+						newentity.setVerify_suer(null);
+						newentity.setEntry_user((String) req.getSession().getAttribute("USERID"));
+						newentity.setModify_date(null);
+						newentity.setVerify_date(null);
+						rrReportlist.save(newentity);
+					}
+				}
+			}
+			return ResponseEntity.ok("{\"message\": \"Procedure executed successfully!\"}");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("{\"error\": \"Failed to execute procedure: " + e.getMessage() + "\"}");
+		}
+	}
+	
 	@RequestMapping(value = "bankingbook", method = { RequestMethod.GET, RequestMethod.POST })
 	public String bankingbook(Model md, HttpServletRequest req) {
 		String roleId = (String) req.getSession().getAttribute("ROLEID");
@@ -2395,19 +2598,26 @@ public class XBRLNavigationController {
 	}
 
 	@RequestMapping(value = "monthly1", method = { RequestMethod.GET, RequestMethod.POST })
-	public String monthly1(Model md, HttpServletRequest req) {
+	public String monthly1(Model md, HttpServletRequest req,
+			@RequestParam(value = "report_date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date report_date) {
 		String roleId = (String) req.getSession().getAttribute("ROLEID");
-
 		// md.addAttribute("reportvalue", "RBS Reports");
 		// md.addAttribute("reportid", "RBSReports");
-
 		String domainid = (String) req.getSession().getAttribute("DOMAINID");
 		// md.addAttribute("reportsflag", "reportsflag");
 		md.addAttribute("menu", "Monthly 1 - BRF Report");
+		md.addAttribute("reportlist", rrReportlist.findReportsByRemarks("M1"));
 
 		// md.addAttribute("reportlist", rrReportlist.getReportList());
-		md.addAttribute("reportlist", rrReportlist.getReportListmonthly1());
+		//md.addAttribute("reportlist", rrReportlist.getReportListmonthly1());
 
+		if (report_date != null && !report_date.equals(null)) {
+			System.out.println("report_date" + report_date);
+			md.addAttribute("reportlist", rrReportlist.findDataByDate(report_date, "M1"));
+			// md.addAttribute("reportlist",
+			// rrReportlist.findDataMissing(report_date))//missing data for this date
+			md.addAttribute("reportDate", report_date);
+		}
 		return "RR/RRReports";
 	}
 
@@ -2527,26 +2737,67 @@ public class XBRLNavigationController {
 
 		return "RBS_AML/RBSDataMaintenance";
 	}
-
+	
+	@Autowired
+	CalculationService CalculationService;
+	
 	@RequestMapping(value = "BRFValidations", method = { RequestMethod.GET, RequestMethod.POST })
-	public String BRFValidations(Model md, @RequestParam(value = "rptcode", required = false) String rptcode,
-			@RequestParam(value = "todate", required = false) String todate, HttpServletRequest req) {
-		String roleId = (String) req.getSession().getAttribute("ROLEID");
-		System.out.println("role id issssssssssssssssssssssssssss" + roleId);
+	public String BRFValidations(Model md,
+	        @RequestParam(value = "rptcode", required = false) String rptcode,
+	        @RequestParam(value = "todate", required = false) String todate,
+	        HttpServletRequest req) {
 
-		// md.addAttribute("reportvalue", "RBS Reports");
-		// md.addAttribute("reportid", "RBSReports");
+	    String roleId = (String) req.getSession().getAttribute("ROLEID");
 
-		String domainid = (String) req.getSession().getAttribute("DOMAINID");
-		// md.addAttribute("reportsflag", "reportsflag");
-		// md.addAttribute("menu", "RBS Data Maintenance");
+	    System.out.println("Report Code: " + rptcode);
+	    System.out.println("Report Date: " + todate);
 
-		md.addAttribute("reportlist", brfValidationsRepo.getValidationList(rptcode));
-		md.addAttribute("reportlist1", rrReportlist.getReportbyrptcode(rptcode));
-		md.addAttribute("RoleId", roleId);
+	    try {
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-		md.addAttribute("rpt_date", todate);
-		return "RR/BRFValidations";
+	        LocalDate parsedDate = LocalDate.parse(todate, inputFormatter);
+	        String formattedDate = parsedDate.format(outputFormatter);
+
+	        md.addAttribute("reportlist1",
+	                rrReportlist.getReportbyrptcodeandtodate(rptcode, formattedDate));
+
+	        md.addAttribute("rpt_date", todate);
+	        md.addAttribute("rptcode", rptcode);
+	        md.addAttribute("RoleId", roleId);
+
+	        List<BRFValidations> list = brfValidationsRepo.getValidationList(rptcode);
+
+	        if (list != null && !list.isEmpty()) {
+	            for (BRFValidations data : list) {
+
+	                if (data.getSRC_FORMULA() != null &&
+	                    data.getDEST_FORMULA() != null) {
+
+	                    BigDecimal srcvalue =
+	                            CalculationService.calculate(data.getSRC_FORMULA(), formattedDate);
+
+	                    BigDecimal destvalue =
+	                            CalculationService.calculate(data.getDEST_FORMULA(), formattedDate);
+
+	                    if (srcvalue != null && destvalue != null &&
+	                        srcvalue.compareTo(destvalue) == 0) {
+
+	                        data.setCur_status("Y");
+	                    } else {
+	                        data.setCur_status("N");
+	                    }
+	                }
+	            }
+	        }
+
+	        md.addAttribute("reportlist", list);
+
+	    } catch (Exception e) {
+	        System.out.println("Error in BRFValidations: " + e.getMessage());
+	    }
+
+	    return "RR/BRFValidations";
 	}
 
 	@RequestMapping(value = "RBSArchival", method = { RequestMethod.GET, RequestMethod.POST })
@@ -6734,6 +6985,116 @@ public class XBRLNavigationController {
 	 * 
 	 */
 
+	@GetMapping("/brfvalidationdetails")
+	public ResponseEntity<Map<String, List<Map<String, String>>>> brfvalidationdetails(
+			@RequestParam(value = "srlno", required = false) String srlno,
+			@RequestParam(value = "reportdate", required = false) String reportdate) {
+
+		// System.out.println("Report Date : " + reportdate);
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		LocalDate parsedDate = LocalDate.parse(reportdate, inputFormatter);
+		String formattedDate = parsedDate.format(dateFormatter);
+		// System.out.println("Report_Date Formatted Date : " + formattedDate);
+
+		Map<String, List<Map<String, String>>> combinedResponse = new HashMap<>();
+
+		List<Map<String, String>> srcparsedList = new ArrayList<>();
+		List<Map<String, String>> destparsedList = new ArrayList<>();
+		List<Map<String, String>> calcvalueList = new ArrayList<>();
+		List<Map<String, String>> errorList = new ArrayList<>();
+
+		boolean calcorerror = true;
+
+		BRFValidations entity = brfValidationsRepo.findById(srlno).get();
+
+		if (entity.getSRC_FORMULA() != null && !entity.getSRC_FORMULA().equals(null) && entity.getDEST_FORMULA() != null
+				&& !entity.getDEST_FORMULA().equals(null) && entity.getSRC_TABLE() != null
+				&& !entity.getSRC_TABLE().equals(null) && entity.getDEST_TABLE() != null
+				&& !entity.getDEST_TABLE().equals(null) && entity.getSRC_COLUMN() != null
+				&& !entity.getSRC_COLUMN().equals(null) && entity.getDEST_COLUMN() != null
+				&& !entity.getDEST_COLUMN().equals(null)) {
+			List<String> srcformulalist = CalculationService.extractCombinations(entity.getSRC_FORMULA());
+			List<String> destformulalist = CalculationService.extractCombinations(entity.getDEST_FORMULA());
+
+			List<String> srcreportcodelist = CalculationService.extractlefttext(entity.getSRC_TABLE());
+			List<String> srcreportnamelist = CalculationService.extractrighttext(entity.getSRC_TABLE());
+			List<String> destreportcodelist = CalculationService.extractlefttext(entity.getDEST_TABLE());
+			List<String> destreportnamelist = CalculationService.extractrighttext(entity.getDEST_TABLE());
+
+			List<String> srcsrlnolist = CalculationService.extractlefttext(entity.getSRC_COLUMN());
+			List<String> srcdesclist = CalculationService.extractrighttext(entity.getSRC_COLUMN());
+			List<String> destsrlnolist = CalculationService.extractlefttext(entity.getDEST_COLUMN());
+			List<String> destdesclist = CalculationService.extractrighttext(entity.getDEST_COLUMN());
+
+			List<String> srcvalues = new ArrayList<>();
+			List<String> destvalues = new ArrayList<>();
+
+			for (String singleformula : srcformulalist) {
+				if (CalculationService.fetchSingleValue(singleformula, formattedDate) == null
+						|| CalculationService.fetchSingleValue(singleformula, formattedDate).equals(null)) {
+					srcvalues.add("No Data Found");
+					calcorerror = false;
+				} else {
+					srcvalues.add(CalculationService.fetchSingleValue(singleformula, formattedDate).toString());
+				}
+			}
+			for (String singleformula : destformulalist) {
+				if (CalculationService.fetchSingleValue(singleformula, formattedDate) == null
+						|| CalculationService.fetchSingleValue(singleformula, formattedDate).equals(null)) {
+					destvalues.add("No Data Found");
+				} else {
+					destvalues.add(CalculationService.fetchSingleValue(singleformula, formattedDate).toString());
+				}
+			}
+
+			for (int i = 0; i < srcformulalist.size(); i++) {
+				Map<String, String> srcrowMap = new HashMap<>();
+				srcrowMap.put("reportname", srcreportnamelist.get(i));
+				srcrowMap.put("reportcode", srcreportcodelist.get(i));
+				srcrowMap.put("srlno", srcsrlnolist.get(i));
+				srcrowMap.put("desc", srcdesclist.get(i));
+				srcrowMap.put("value", srcvalues.get(i));
+				srcparsedList.add(srcrowMap);
+			}
+			// System.out.println("Size of the Source list :" + srcformulalist.size() + " & Destination list : " + destformulalist.size());
+			if (srcformulalist.size() > 1) {
+				Map<String, String> calcvalueMap = new HashMap<>();
+				calcvalueMap.put("desc", "Calculated Value");
+				calcvalueMap.put("value",
+						CalculationService.calculate(entity.getSRC_FORMULA(), formattedDate).toString());
+				// System.out.println(" Calculated Value : "+ CalculationService.calculate(entity.getSRC_FORMULA(),formattedDate).toString());
+				calcvalueList.add(calcvalueMap);
+			}
+			for (int i = 0; i < destformulalist.size(); i++) {
+				Map<String, String> destrowMap = new HashMap<>();
+				destrowMap.put("reportname", destreportnamelist.get(i));
+				destrowMap.put("reportcode", destreportcodelist.get(i));
+				destrowMap.put("srlno", destsrlnolist.get(i));
+				destrowMap.put("desc", destdesclist.get(i));
+				destrowMap.put("value", destvalues.get(i));
+				destparsedList.add(destrowMap);
+			}
+
+			if (calcorerror) {
+				combinedResponse.put("calclist", calcvalueList);
+			} else {
+				Map<String, String> errorvalueMap = new HashMap<>();
+				errorvalueMap.put("desc", "Cannot calculate due to insufficient data");
+				errorList.add(errorvalueMap);
+				combinedResponse.put("errorlist", errorList);
+			}
+
+			combinedResponse.put("srclist", srcparsedList);
+			combinedResponse.put("destlist", destparsedList);
+		} else {
+			Map<String, String> errorvalueMap = new HashMap<>();
+			errorvalueMap.put("desc", "No Data Found");
+			errorList.add(errorvalueMap);
+			combinedResponse.put("errorlist", errorList);
+		}
+		return ResponseEntity.ok(combinedResponse);
+	}
 	@RequestMapping(value = "CustomerDetailEditBrf102", method = RequestMethod.POST)
 	@ResponseBody
 	public String CustomerDetailEditBrf102(@ModelAttribute("singledetail") BRF102_DETAIL_ENTITY detail,

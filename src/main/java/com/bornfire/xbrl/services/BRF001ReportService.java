@@ -92,7 +92,7 @@ public class BRF001ReportService {
 
 	@Autowired
 	BRF1_DetaiRep BRF1_DetaiRep1;
-
+	
 	@Autowired
 	MANUAL_Service_Rep mANUAL_Service_Rep;
 
@@ -194,11 +194,12 @@ public class BRF001ReportService {
 	}
 
 	public ModelAndView getBRF001currentDtl(String reportId, String fromdate, String todate, String currency,
-			String dtltype, Pageable pageable, String filter) {
+			String dtltype, Pageable pageable, String filter,String searchVal) {
 
 		int pageSize = pageable.getPageSize();
 		int currentPage = pageable.getPageNumber();
-		int startItem = currentPage * pageSize;
+		//int startItem = currentPage * pageSize;
+		int startItem = (int) pageable.getOffset();
 
 		ModelAndView mv = new ModelAndView();
 
@@ -206,30 +207,54 @@ public class BRF001ReportService {
 		List<Object> T1Dt1 = new ArrayList<Object>();
 
 		Query<Object[]> qr;
+		Query<Number> countQr;
+		
+		String searchCondition = "";
+		if (searchVal != null && !searchVal.trim().isEmpty()) {
+			String safeSearch = searchVal.replace("'", "''").toUpperCase();
+			searchCondition = " and (CUST_ID like '%" + safeSearch + "%' or FORACID like '%"
+					+ safeSearch + "%' or ACCT_NAME like '%" + safeSearch + "%' or ACT_BALANCE_AMT_LC like '%"
+					+ safeSearch + "%' or REPORT_NAME_1 like '%" + safeSearch + "%' or REPORT_LABEL_1 like '%"
+					+ safeSearch + "%' or REPORT_ADDL_CRITERIA_1 like '%" + safeSearch + "%' or REPORT_DATE like '%"
+					+ safeSearch + "%') ";
+		}
 
-		if (dtltype.equals("report")) {
+		if (dtltype.equals("report") || dtltype.equals("ARCH")) {
 			if (!filter.equals("null")) {
 				qr = hs.createNativeQuery(
-						"select * from BRF1_DETAILTABLE  a where report_date = ?1 and report_label_1 =?2");
+						"select * from BRF1_DETAILTABLE  a where report_date = ?1 and report_label_1 =?2" + searchCondition);
+				countQr = hs.createNativeQuery("select count(*) from BRF1_DETAILTABLE a where report_date = ?1 and report_label_1 = ?2" + searchCondition);
 
 				qr.setParameter(2, filter);
+				countQr.setParameter(2, filter);
 
 			} else {
-				qr = hs.createNativeQuery("select * from BRF1_DETAILTABLE a where report_date = ?1");
-
+				qr = hs.createNativeQuery("select * from BRF1_DETAILTABLE a where report_date = ?1" + searchCondition);
+				countQr = hs.createNativeQuery("select count(*) from BRF1_DETAILTABLE a where report_date = ?1" + searchCondition);
 			}
 		} else {
-			qr = hs.createNativeQuery("select * from BRF1_DETAILTABLE  where report_date = ?1");
+			qr = hs.createNativeQuery("select * from BRF1_DETAILTABLE  where report_date = ?1" + searchCondition);
+			countQr = hs.createNativeQuery("select count(*) from BRF1_DETAILTABLE where report_date = ?1" + searchCondition);
 		}
 
 		try {
 			qr.setParameter(1, df.parse(todate));
+			countQr.setParameter(1, df.parse(todate));
 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		List<BRF1_DETAIL_ENTITY> T1Master = new ArrayList<BRF1_DETAIL_ENTITY>();
+		
+		long totalRecords = countQr.getSingleResult().longValue();
+		
+		logger.info("REQUESTED PAGE SIZE: " + pageSize);
+		logger.info("REQUESTED OFFSET: " + startItem);
 
+	    qr.setFirstResult(startItem);
+	    qr.setMaxResults(pageSize);
+	    
+		List<BRF1_DETAIL_ENTITY> T1Master = new ArrayList<BRF1_DETAIL_ENTITY>();
+/*
 		try {
 			T1Master = hs.createQuery("from BRF1_DETAIL_ENTITY a where a.report_date = ?1", BRF1_DETAIL_ENTITY.class)
 					.setParameter(1, df.parse(todate)).getResultList();
@@ -237,7 +262,7 @@ public class BRF001ReportService {
 
 			e.printStackTrace();
 		}
-
+*/
 		logger.info("Getting Report Detail for : " + reportId + "," + fromdate + "," + todate + "," + currency);
 		List<Object[]> result = qr.getResultList();
 		for (Object[] a : result) {
@@ -328,16 +353,21 @@ public class BRF001ReportService {
 		}
 
 		logger.info("Converting to Page");
-		Page<Object> T1Dt1Page = new PageImpl<Object>(pagedlist, PageRequest.of(currentPage, pageSize), T1Dt1.size());
+		//Page<Object> T1Dt1Page = new PageImpl<Object>(pagedlist, PageRequest.of(currentPage, pageSize), T1Dt1.size());
+		Page<Object> T1Dt1Page = new PageImpl<>(T1Dt1, pageable, totalRecords);
 
+		System.out.println("Size of the list "+T1Dt1.size());
+		System.out.println("Size of the list from DB "+T1Dt1Page.getTotalElements());
 		mv.setViewName("RR" + "/" + "BRF1::reportcontent");
 		mv.addObject("reportdetails", T1Dt1Page.getContent());
+		mv.addObject("reportdetailsPage", T1Dt1Page);
 		mv.addObject("reportmaster", T1Master);
 		mv.addObject("reportmaster12", T1Dt1);
 		mv.addObject("reportmaster1", qr);
 		mv.addObject("singledetail", new T1CurProdDetail());
 		mv.addObject("reportsflag", "reportsflag");
 		mv.addObject("menu", reportId);
+		mv.addObject("dtltype", dtltype);
 		return mv;
 	}
 
@@ -2299,139 +2329,133 @@ public class BRF001ReportService {
 		return outputFile;
 
 	}
-
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
 	public String detailChanges1(BRF1_DETAIL_ENTITY detail, String foracid, String report_addl_criteria_1,
-			BigDecimal act_balance_amt_lc, String report_label_1, String report_name_1) {
+	        BigDecimal act_balance_amt_lc, String report_label_1, String report_name_1,String report_date) {
 
-		String msg = "";
+	    String msg = "";
 
-		try {
-			Session hs = sessionFactory.getCurrentSession();
-			Optional<BRF1_DETAIL_ENTITY> Brf1detail = BRF1_DetaiRep1.findById(foracid);
+	    try {
+	        Session hs = sessionFactory.getCurrentSession();
+	        //Optional<BRF1_DETAIL_ENTITY> Brf1detail = BRF1_DetaiRep1.findById(foracid);
+	        BRF1_DETAIL_ENTITY Brf1detail = BRF1_DetaiRep1.getbyaccnoanddate(foracid, report_date);
 
-			if (Brf1detail.isPresent()) {
-				BRF1_DETAIL_ENTITY BRFdetail = Brf1detail.get();
+	        if (!Brf1detail.equals(null) && Brf1detail!=null) {
+	            BRF1_DETAIL_ENTITY BRFdetail =Brf1detail;
 
-				List<String> oldValues = new ArrayList<>();
-				List<String> newValues = new ArrayList<>();
-				List<String> fieldNames = new ArrayList<>();
+	            List<String> oldValues = new ArrayList<>();
+	            List<String> newValues = new ArrayList<>();
+	            List<String> fieldNames = new ArrayList<>();
 
-				if (!Objects.equals(BRFdetail.getReport_label_1(), report_label_1)) {
-					oldValues.add(BRFdetail.getReport_label_1());
-					newValues.add(report_label_1);
-					fieldNames.add("report_label_1");
-					BRFdetail.setReport_label_1(report_label_1);
-				}
-				if (!Objects.equals(BRFdetail.getReport_name_1(), report_name_1)) {
-					oldValues.add(BRFdetail.getReport_name_1());
-					newValues.add(report_name_1);
-					fieldNames.add("report_name_1");
-					BRFdetail.setReport_name_1(report_name_1);
-				}
-				if (!Objects.equals(BRFdetail.getAct_balance_amt_lc(), act_balance_amt_lc)) {
-					oldValues.add(
-							BRFdetail.getAct_balance_amt_lc() != null ? BRFdetail.getAct_balance_amt_lc().toString()
-									: "null");
-					newValues.add(act_balance_amt_lc != null ? act_balance_amt_lc.toString() : "null");
-					fieldNames.add("act_balance_amt_lc");
-					BRFdetail.setAct_balance_amt_lc(act_balance_amt_lc);
-				}
-				if (!Objects.equals(BRFdetail.getReport_addl_criteria_1(), report_addl_criteria_1)) {
-					oldValues.add(BRFdetail.getReport_addl_criteria_1());
-					newValues.add(report_addl_criteria_1);
-					fieldNames.add("report_addl_criteria_1");
-					BRFdetail.setReport_addl_criteria_1(report_addl_criteria_1);
-				}
+	            if (!Objects.equals(BRFdetail.getReport_label_1(), report_label_1)) {
+	                oldValues.add(BRFdetail.getReport_label_1());
+	                newValues.add(report_label_1);
+	                fieldNames.add("report_label_1");
+	                BRFdetail.setReport_label_1(report_label_1);
+	            }
+	            if (!Objects.equals(BRFdetail.getReport_name_1(), report_name_1)) {
+	                oldValues.add(BRFdetail.getReport_name_1());
+	                newValues.add(report_name_1);
+	                fieldNames.add("report_name_1");
+	                BRFdetail.setReport_name_1(report_name_1);
+	            }
+	            if (!Objects.equals(BRFdetail.getAct_balance_amt_lc(), act_balance_amt_lc)) {
+	                oldValues.add(BRFdetail.getAct_balance_amt_lc() != null ? BRFdetail.getAct_balance_amt_lc().toString() : "null");
+	                newValues.add(act_balance_amt_lc != null ? act_balance_amt_lc.toString() : "null");
+	                fieldNames.add("act_balance_amt_lc");
+	                BRFdetail.setAct_balance_amt_lc(act_balance_amt_lc);
+	            }
+	            if (!Objects.equals(BRFdetail.getReport_addl_criteria_1(), report_addl_criteria_1)) {
+	                oldValues.add(BRFdetail.getReport_addl_criteria_1());
+	                newValues.add(report_addl_criteria_1);
+	                fieldNames.add("report_addl_criteria_1");
+	                BRFdetail.setReport_addl_criteria_1(report_addl_criteria_1);
+	            }
 
-				if (fieldNames.isEmpty()) {
-					msg = "No modification done";
-				} else {
-					BRF1_DetaiRep1.save(BRFdetail);
-					logger.info("Edited Record");
+	            if (fieldNames.isEmpty()) {
+	                msg = "No modification done";
+	            } else {
+	                BRF1_DetaiRep1.save(BRFdetail);
+	                logger.info("Edited Record");
 
-					HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-							.getRequestAttributes()).getRequest();
-					String user1 = (String) request.getSession().getAttribute("USERID");
-					String username = (String) request.getSession().getAttribute("USERNAME");
+	                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+	                        .getRequestAttributes()).getRequest();
+	                String user1 = (String) request.getSession().getAttribute("USERID");
+	                String username = (String) request.getSession().getAttribute("USERNAME");
 
-					String auditID = sequence.generateRequestUUId();
+	                String auditID = sequence.generateRequestUUId();
+/*
+	                MANUAL_Service_Entity audit = new MANUAL_Service_Entity();
+	                audit.setAudit_date(new Date());
+	                audit.setEntry_time(new Date());
+	                audit.setEntry_user(user1);
+	                audit.setFunc_code("EDIT");
+	                audit.setAudit_table("BRF1_DETAILTABLE");
+	                audit.setAudit_screen("Edit");
+	                audit.setEvent_id(user1);
+	                audit.setEvent_name(username);
+	                audit.setRemarks("Edit Successfully");
+	                audit.setField_name(String.join("; ", fieldNames));
+	                audit.setOld_value(String.join("; ", oldValues));
+	                audit.setNew_value(String.join("; ", newValues));
 
-					MANUAL_Service_Entity audit = new MANUAL_Service_Entity();
-					audit.setAudit_date(new Date());
-					audit.setEntry_time(new Date());
-					audit.setEntry_user(user1);
-					audit.setFunc_code("EDIT");
-					audit.setAudit_table("BRF1_DETAILTABLE");
-					audit.setAudit_screen("Edit");
-					audit.setEvent_id(user1);
-					audit.setEvent_name(username);
-					audit.setRemarks("Edit Successfully");
-					audit.setField_name(String.join("; ", fieldNames));
-					audit.setOld_value(String.join("; ", oldValues));
-					audit.setNew_value(String.join("; ", newValues));
+	                UserProfile values1 = userProfileRep.getRole(user1);
+	                audit.setAuth_user(values1.getAuth_user());
+	                audit.setAuth_time(values1.getAuth_time());
+	                audit.setAudit_ref_no(auditID);
 
-					UserProfile values1 = userProfileRep.getRole(user1);
-					audit.setAuth_user(values1.getAuth_user());
-					audit.setAuth_time(values1.getAuth_time());
-					audit.setAudit_ref_no(auditID);
+	                mANUAL_Service_Rep.save(audit);
+*/
+	                // =========================================================================
+	                // PROCEDURE EXECUTION LOGIC (Added without changing method arguments)
+	                // =========================================================================
+	                try {
+	                    // Assuming the entity has a getReport_date() method returning a Date object
+	                    Date entityDate = BRFdetail.getReport_date(); 
+	                    
+	                    if (entityDate != null) {
+	                        String formattedDate = new SimpleDateFormat("dd-MM-yyyy").format(entityDate);
+	        
+	                        // Run summary procedure after commit
+	                        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+	                            @Override
+	                            public void afterCommit() {
+	                                try {
+	                                    logger.info("Transaction committed — calling BRF1_SUMMARY_PROCEDURE({})", formattedDate);
+	                                    // Make sure 'jdbcTemplate' is available in this class
+	                                    jdbcTemplate.update("BEGIN BRF1_SUMMARY_PROCEDURE(?); END;", formattedDate);
+	                                    logger.info("Procedure executed successfully after commit.");
+	                                } catch (Exception e) {
+	                                    logger.error("Error executing procedure after commit", e);
+	                                }
+	                            }
+	                        });
+	                    } else {
+	                        logger.warn("Report Date is null in entity, skipping summary procedure.");
+	                    }
+	                } catch (Exception e) {
+	                    logger.error("Error preparing procedure call", e);
+	                }
+	                // =========================================================================
 
-					mANUAL_Service_Rep.save(audit);
+	                msg = "Edited Successfully";
+	            }
+	        } else {
+	            msg = "No data Found";
+	        }
+	    } catch (Exception e) {
+	        msg = "error occured. Please contact Administrator";
+	        e.printStackTrace();
+	    }
 
-					// =========================================================================
-					// PROCEDURE EXECUTION LOGIC (Added without changing method arguments)
-					// =========================================================================
-					try {
-						// Assuming the entity has a getReport_date() method returning a Date object
-						Date entityDate = BRFdetail.getReport_date();
-
-						if (entityDate != null) {
-							String formattedDate = new SimpleDateFormat("dd-MM-yyyy").format(entityDate);
-
-							// Run summary procedure after commit
-							TransactionSynchronizationManager
-									.registerSynchronization(new TransactionSynchronizationAdapter() {
-										@Override
-										public void afterCommit() {
-											try {
-												logger.info(
-														"Transaction committed — calling BRF1_SUMMARY_PROCEDURE({})",
-														formattedDate);
-												// Make sure 'jdbcTemplate' is available in this class
-												jdbcTemplate.update("BEGIN BRF1_SUMMARY_PROCEDURE(?); END;",
-														formattedDate);
-												logger.info("Procedure executed successfully after commit.");
-											} catch (Exception e) {
-												logger.error("Error executing procedure after commit", e);
-											}
-										}
-									});
-						} else {
-							logger.warn("Report Date is null in entity, skipping summary procedure.");
-						}
-					} catch (Exception e) {
-						logger.error("Error preparing procedure call", e);
-					}
-					// =========================================================================
-
-					msg = "Edited Successfully";
-				}
-			} else {
-				msg = "No data Found";
-			}
-		} catch (Exception e) {
-			msg = "error occured. Please contact Administrator";
-			e.printStackTrace();
-		}
-
-		return msg;
+	    return msg;
 	}
 
 	// TO show thw Archieve values
 	public ModelAndView getArchieveBRF001View(String reportId, String fromdate, String todate, String currency,
-			String dtltype, Pageable pageable) {
+			String dtltype, Pageable pageable,String type) {
 
 		ModelAndView mv = new ModelAndView();
 		Session hs = sessionFactory.getCurrentSession();
@@ -2472,7 +2496,10 @@ public class BRF001ReportService {
 		mv.addObject("displaymode", "summary");
 		mv.addObject("reportsflag", "reportsflag");
 		mv.addObject("menu", reportId);
+		mv.addObject("type", type);
+		
 		System.out.println("scv" + mv.getViewName());
+		
 
 		return mv;
 

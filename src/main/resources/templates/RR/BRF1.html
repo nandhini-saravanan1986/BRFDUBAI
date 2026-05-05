@@ -5,661 +5,702 @@ CREATED ON	: 8.1.23
 PURPOSE		: BRF1 Reports-development
 
  -->
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
 <head>
-	<link rel="stylesheet" type="text/css" href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
-		th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
-	<link rel="stylesheet" type="text/css" href="/webjars/font-awesome/5.9.0/css/all.min.css"
-		th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
-	<link rel="stylesheet" type="text/css" href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css"
-		th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
-	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
-	<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
+	th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/font-awesome/5.9.0/css/all.min.css"
+	th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css"
+	th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
+<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
 
 
 
-	<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
-		th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
-	<script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
-		th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
-	<script src="/webjars/jquery/3.4.1/jquery.min.js" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
-	<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js"
-		th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
+<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
+	th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+<script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
+	th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+<script src="/webjars/jquery/3.4.1/jquery.min.js"
+	th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js"
+	th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
 
-	<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js"
-		th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
+<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js"
+	th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
 
-	<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js"
-		th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
+<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js"
+	th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
 
-	<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js"
-		th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
-	<script src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
-		th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
-
-
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-
-		var subreportid = /*[[${subreportid}]]*/null;
-
-		var secid = /*[[${secid}]]*/null;
-
-		var permission = /*[[${session.PERMISSIONS}]]*/null;
-
-		var dtltype = /*[[${dtltype}]]*/null;
-
-		$(function () {
-
-			//to make the summary button active on load
-			$("#summarybtn").addClass("active");
-
-		});
-
-		//When report type change: set subreportid and secid and show summary.
-		function changeReptype() {
-
-			subreportid = $("#reporttype").find(':selected').val();
-
-			secid = "1";
-
-			showsummary();
-
-		};
-
-		/*to show details page - 3 parameters
-			mode - valid values are : nextpage, prevpage, givenpage, firstpage
-			num - page number to show to the user
-			maxpage - maximum number of pages avaialble in the data
-		 */
+<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
+<script
+	src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
 
 
-		//to fetch summary from the database - called from the summary button
-		function showdetails(mode, num, maxpage) {
-			var filter = $("#filters").val();
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-			var Callurl;
+<script th:inline="javascript">
+	/*<![CDATA[*/
 
-			if (filter != null) {
-				Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					Callurl += "&filter=" + filter;
-			} else {
-				filter = null;
-				Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					Callurl += "&filter=" + filter;
-			}
+	var subreportid = /*[[${subreportid}]]*/null;
 
-			switch (mode) {
-				case "nextpage":
-					n += 1;
-					if (n > max) return;
-					Callurl += "&page=" + n;
-					break;
-				case "prevpage":
-					n -= 1;
-					if (n < 0) return;
-					Callurl += "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) return;
-					Callurl += "&page=" + n;
-					break;
-			}
+	var secid = /*[[${secid}]]*/null;
 
-			$.ajax({
-				type: 'get',
-				url: Callurl,
-				beforeSend: function () {
-				},
-				success: function (data) {
-					$('.content').html(data);
-					$("#detailsbtn").addClass("active");
-					tablepagination();
-				},
-				complete: function () {
-				},
-				error: function () {
-					alert("Something went wrong. Please try again.");
+	var permission = /*[[${session.PERMISSIONS}]]*/null;
+
+	var dtltype = /*[[${dtltype}]]*/null;
+
+	$(function() {
+
+		//to make the summary button active on load
+		$("#summarybtn").addClass("active");
+
+	});
+
+	//When report type change: set subreportid and secid and show summary.
+	function changeReptype() {
+
+		subreportid = $("#reporttype").find(':selected').val();
+
+		secid = "1";
+
+		showsummary();
+
+	};
+
+	/*to show details page - 3 parameters
+		mode - valid values are : nextpage, prevpage, givenpage, firstpage
+		num - page number to show to the user
+		maxpage - maximum number of pages avaialble in the data
+	 */
+	
+
+	//to fetch summary from the database - called from the summary button
+	function showdetails(mode, num, maxpage) {
+    var filter = $("#filters").val();
+    var n = parseInt(num);
+    var max = parseInt(maxpage);
+    var Callurl;
+    var searchKeyword = $("#globalSearch").val();
+
+    if (filter != null) {
+        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/ 
+        Callurl += "&filter=" + filter;
+    } else {
+        filter = null;
+        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/ 
+        Callurl += "&filter=" + filter;
+    }
+    
+    if (searchKeyword != null && searchKeyword.trim() !== "") {
+        Callurl += "&searchVal=" + encodeURIComponent(searchKeyword.trim());
+    }
+
+    switch (mode) {
+        case "nextpage":
+            n += 1;
+            if (n > max) return;
+            Callurl += "&page=" + n;
+            break;
+        case "prevpage":
+            n -= 1;
+            if (n < 0) return;
+            Callurl += "&page=" + n;
+            break;
+        case "givenpage":
+            n = parseInt($("#pageno").val()) - 1;
+            if (n > max || n < 0) return;
+            Callurl += "&page=" + n;
+            break;
+        case "directpage":
+            n = parseInt(num);
+            if (n > max || n < 0) return;
+            Callurl += "&page=" + n;
+            break;
+        case "search": 
+            n = 0;
+            Callurl += "&page=" + n;
+            break;
+    }
+
+    $.ajax({
+        type: 'get',
+        url: Callurl,
+        beforeSend: function () {
+            $('#loader1').modal('show'); // 🔄 Show loader
+        },
+        success: function (data) {
+            $('.content').html(data);
+            $("#detailsbtn").addClass("active");
+            $('#loader1').modal('hide');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+           	tablepagination();
+        },
+        complete: function () {
+            $('#loader1').modal('hide'); // ✅ Hide loader
+        },
+        error: function () {
+            $('#loader1').modal('hide'); // ❌ Hide even if error
+            alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+	function showsummary(mode, num, maxpage) {
+		var n = parseInt(num);
+		var max = parseInt(maxpage);
+		var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
+		Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
+
+		switch (mode) {
+			case "nextpage":
+				n = n + 1;
+				if (n > max) {
+					console.log("Next page exceeded max, exiting");
+					$('#loader1').modal('hide');
+					return;
 				}
-			});
+				Callurl = Callurl + "&page=" + n;
+				break;
+			case "prevpage":
+				n = n - 1;
+				if (n < 0) {
+					console.log("Previous page below 0, exiting");
+					$('#loader1').modal('hide');
+					return;
+				}
+				Callurl = Callurl + "&page=" + n;
+				break;
+			case "givenpage":
+				n = parseInt($("#pageno").val()) - 1;
+				if (n > max || n < 0) {
+					console.log("Given page out of range, exiting");
+					$('#loader1').modal('hide');
+					return;
+				}
+				Callurl = Callurl + "&page=" + n;
+				break;
 		}
 
-		function showsummary(mode, num, maxpage) {
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-				Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
+		console.log("Calling URL: ", Callurl);
+		$('#loader1').modal('show');
 
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) {
-						console.log("Next page exceeded max, exiting");
-						return;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) {
-						console.log("Previous page below 0, exiting");
-						return;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) {
-						console.log("Given page out of range, exiting");
-						return;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
+		$.ajax({
+			type: 'get',
+			url: Callurl,
+			success: function(data) {
+				console.log("AJAX success");
+				$('#loader1').modal('hide');
+				$('body').removeClass('modal-open');
+				$('.modal-backdrop').remove();
+				$('.content').html(data);
+				$("#summarybtn").addClass("active");
+				
+			},
+			 complete: function () {
+		            $('#loader1').modal('hide'); // ✅ Hide loader
+		        },
+			error: function(xhr) {
+				console.log("AJAX error", xhr);
+				$('#loader1').modal('hide');
+				alert("Failed to load summary.");
 			}
+		});
+	}
 
-			console.log("Calling URL: ", Callurl);
 
+	function sectionChange(a) {
+
+		secid = a;
+
+		showsummary();
+
+	};
+
+	function home() {
+
+        $('#loader1').modal('show');
+		location.href = "/BRBS/monthly1";
+
+
+	}
+
+function back() {
+    $('#loader1').modal('show');
+		 window.history.back(); 
+	}
+
+	function back1() {
+		  var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
 			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
-					console.log("AJAX success");
+				type : 'get',
+				url : Callurl,
+				success : function(data) {
+
+					/*<![CDATA[*/
+
 					$('.content').html(data);
 					$("#summarybtn").addClass("active");
-				},
-				error: function (xhr) {
-					console.log("AJAX error", xhr);
-					alert("Failed to load summary.");
+
+					/*]]>*/
 				}
-			});
+			})
 		}
+	/*]]>*/
+</script>
 
+<style>
+.nav-buttons {
+	float: right;
+}
 
-		function sectionChange(a) {
+.reptitle {
+	float: left;
+}
 
-			secid = a;
+.reptitle>p {
+	margin-top: 0px;
+}
 
-			showsummary();
+.customcol {
+	padding-left: 0px;
+	padding-right: 0px;
+	min-width: 1450px;
+}
 
-		};
+.btn-primary {
+	background-color: #E77400;
+	border-color: #0c0c0c;
+}
 
-		function home() {
-			location.href = "/BRBS/monthly1";
+.btn-primary:not(:disabled ):not(.disabled ).active, .btn-primary:not(:disabled ):not(.disabled ):active, .show>.btn-primary.dropdown-toggle
+	{
+	color: #fff;
+	background-color: #cc000000;
+	border-color: #161617;
+}
 
+.table .thead-light th {
+	border-color: #b3b6b9;
+}
 
-		}
+.error {
+	color: red;
+	padding-left: 10px;
+}
 
-		function back() {
-			window.history.back();
-		}
+.first_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 0;
+	width: 30px;
+	margin-top: -2px;
+}
 
-		function back1() {
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-				$.ajax({
-					type: 'get',
-					url: Callurl,
-					success: function (data) {
+.second_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 30px;
+	width: 30px;
+	margin-top: -2px;
+}
 
-						/*<![CDATA[*/
+.third_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 60px;
+	width: 150px;
+	margin-top: -2px;
+}
 
-						$('.content').html(data);
-						$("#summarybtn").addClass("active");
+.inner {
+	overflow-x: scroll;
+	overflow-y: visible;
+	/* margin-left: 60px; */
+}
 
-						/*]]>*/
-					}
-				})
-		}
-		/*]]>*/
-	</script>
+.table-bordered thead td, .table-bordered thead th {
+	border-bottom-width: 0px;
+}
 
-	<style>
-		.nav-buttons {
-			float: right;
-		}
+.table-bordered {
+	border: 0px;
+}
 
-		.reptitle {
-			float: left;
-		}
+.addedit {
+	color: #007bff;
+}
 
-		.reptitle>p {
-			margin-top: 0px;
-		}
+.addedit:hover {
+	color: #0056b3;
+}
+</style>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var currlist = /*[[${currlist}]]*/null;
+	function editsum(a) {
 
-		.customcol {
-			padding-left: 0px;
-			padding-right: 0px;
-			min-width: 1450px;
-		}
+		if (permission == 'W' && dtltype == 'report') {
+			//Assign action url for the edit/add form
+			var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
+			$("#dataedit").attr('action', url);
+			//Reset form if any data present
+			document.getElementById("dataedit").reset();
 
-		.btn-primary {
-			background-color: #E77400;
-			border-color: #0c0c0c;
-		}
+			/* //make readonly false to unique fields
+			//Make readonly fields
+			$("#cntprty_code").attr("readonly",false);
+			$("#report_date").attr("readonly",false); */
 
-		.btn-primary:not (:disabled):not (.disabled).active,
-		.btn-primary:not (:disabled):not (.disabled):active,
-		.show>.btn-primary.dropdown-toggle {
-			color: #fff;
-			background-color: #cc000000;
-			border-color: #161617;
-		}
+			//Reset errors
+			var validator = $("#dataedit").validate();
+			validator.resetForm();
 
-		.table .thead-light th {
-			border-color: #b3b6b9;
-		}
-
-		.error {
-			color: red;
-			padding-left: 10px;
-		}
-
-		.first_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 0;
-			width: 30px;
-			margin-top: -2px;
-		}
-
-		.second_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 30px;
-			width: 30px;
-			margin-top: -2px;
-		}
-
-		.third_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 60px;
-			width: 150px;
-			margin-top: -2px;
-		}
-
-		.inner {
-			overflow-x: scroll;
-			overflow-y: visible;
-			/* margin-left: 60px; */
-		}
-
-		.table-bordered thead td,
-		.table-bordered thead th {
-			border-bottom-width: 0px;
-		}
-
-		.table-bordered {
-			border: 0px;
-		}
-
-		.addedit {
-			color: #007bff;
-		}
-
-		.addedit:hover {
-			color: #0056b3;
-		}
-	</style>
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var currlist = /*[[${currlist}]]*/null;
-		function editsum(a) {
-
-			if (permission == 'W' && dtltype == 'report') {
-				//Assign action url for the edit/add form
-				var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
-					$("#dataedit").attr('action', url);
-				//Reset form if any data present
-				document.getElementById("dataedit").reset();
-
-				/* //make readonly false to unique fields
-				//Make readonly fields
-				$("#cntprty_code").attr("readonly",false);
-				$("#report_date").attr("readonly",false); */
-
-				//Reset errors
-				var validator = $("#dataedit").validate();
-				validator.resetForm();
-
-				$("#addedit").modal("toggle");
-
-			}
-		};
-
-		function editsubmitform() {
-
-			var reportdate = $("#report_date").val();
-			//	alert(reportdate);
-
-			if ($("#dataedit").valid()) {
-
-				var url = "./T1Edit?";
-
-				$("#dataedit").attr('action', url);
-
-				var options = {
-					success: showResponse
-					// post-submit callback 
-				};
-
-				$("#dataedit").ajaxSubmit(options);
-
-				function showResponse(responseText, statusText, xhr, $form) {
-
-					$("#alertmsg").text(responseText);
-
-					$('#alert').modal("toggle");
-
-				}
-				;
-			}
-		};
-		function verifyscreen(a) {
-
-			if (permission == 'W' && dtltype == 'report') {
-				//Assign action url for the edit/add form
-				var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
-					$("#dataedit").attr('action', url);
-				//Reset form if any data present
-				document.getElementById("dataedit").reset();
-
-				/* //make readonly false to unique fields
-				//Make readonly fields
-				$("#cntprty_code").attr("readonly",false);
-				$("#report_date").attr("readonly",false); */
-
-				//Reset errors
-				var validator = $("#dataedit").validate();
-				validator.resetForm();
-
-				$("#verify").modal("toggle");
-
-			}
-		};
-
-		function resident(a) {
-			var filter = a.id;
-			var cellValue = a.textContent || a.innerText;
-			if (cellValue != '0') {
-				//alert("rwo"+cellValue)
-				if (confirm('Do you want to open details : ' + filter)) {
-					var Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
-					Callurl = Callurl + "&filter=" + filter;
-					$.ajax({
-						type: 'get',
-						url: Callurl,
-						success: function (data) {
-
-							/*<![CDATA[*/
-							$('.content').html(data);
-							$("#detailsbtn").addClass("active");
-							/*]]>*/
-						}
-					})
-				}
-			} else {
-				alert("No Records available for this selected Criteria")
-			}
+			$("#addedit").modal("toggle");
 
 		}
-		function verifysubmitform(a) {
+	};
 
-			if ($("#dataverify").valid()) {
-				var entry = $("#ENTRY_USER").val();
-				var modify = $("#MODIFY_USER").val();
-				var verify = $("#VERIFY_USER").val();
+	function editsubmitform() {
 
-				//var formmode = a.getAttribute("data-formmode");
-				var url = "./T1Verify?";
+		var reportdate = $("#report_date").val();
+		//	alert(reportdate);
 
-				$("#dataverify").attr('action', url);
+		if ($("#dataedit").valid()) {
 
-				var options = {
-					success: showResponse
-					// post-submit callback 
-				};
+			var url = "./T1Edit?";
 
-				$("#dataverify").ajaxSubmit(options);
+			$("#dataedit").attr('action', url);
 
-				function showResponse(responseText, statusText, xhr, $form) {
+			var options = {
+				success : showResponse
+			// post-submit callback 
+			};
 
-					$("#alertmsg").text(responseText);
+			$("#dataedit").ajaxSubmit(options);
 
-					$('#alert').modal("toggle");
+			function showResponse(responseText, statusText, xhr, $form) {
 
-				}
-				;
-			} else {
-				$("#alertmsg").text("Same User Cannot Verify!");
+				$("#alertmsg").text(responseText);
+
 				$('#alert').modal("toggle");
 
 			}
-
-		};
-		function refreshPage() {
-			window.location.reload();
+			;
 		}
+	};
+	function verifyscreen(a) {
 
+		if (permission == 'W' && dtltype == 'report') {
+			//Assign action url for the edit/add form
+			var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
+			$("#dataedit").attr('action', url);
+			//Reset form if any data present
+			document.getElementById("dataedit").reset();
 
-		function editRecord(a) {
+			/* //make readonly false to unique fields
+			//Make readonly fields
+			$("#cntprty_code").attr("readonly",false);
+			$("#report_date").attr("readonly",false); */
 
-			if (permission == 'W') {
+			//Reset errors
+			var validator = $("#dataedit").validate();
+			validator.resetForm();
 
-				var url2 = "./customeredit?";
-				$("#dataedit").attr('action', url2);
-				//Assign selected values to the model box fields
-				$("#cust_id").val(a.getAttribute("data-cust_id"));
-				$("#foracid").val(a.getAttribute("data-foracid"));
-				$("#acct_name").val(a.getAttribute("data-acct_name"));
-				$("#act_balance_amt_lc").val(a.getAttribute("data-act_balance_amt_lc"));
-				$("#report_name_1").val(a.getAttribute("data-report_name_1"));
-				$("#report_label_1").val(a.getAttribute("data-report_label_1"));
-				$("#report_addl_criteria_1").val(a.getAttribute("data-report_addl_criteria_1"));
-				$("#report_date").val(a.getAttribute("data-report_date"));
+			$("#verify").modal("toggle");
 
-				$("#addedit").modal("toggle");
+		}
+	};
+	
+	function resident(a){	
+		var filter = a.id;
+		var cellValue = a.textContent || a.innerText;
+		if(cellValue != '0'){
+		//alert("rwo"+cellValue)
+		if(confirm('Do you want to open details : '+filter)){
+			$("#loader1").modal("toggle");
+		var Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
+		Callurl = Callurl+"&filter="+filter;	
+		$.ajax({		
+			type : 'get',
+			url : Callurl,
+			success : function(data) {
+ 
+				/*<![CDATA[*/
+                 $('.content').html(data);
+				$("#detailsbtn").addClass("active");
+				$("#loader1").modal("hide");
+				/*]]>*/
+			}
+		})
+		}
+		}else{
+			alert("No Records available for this selected Criteria")
+		}
+ 
+	}
+	function verifysubmitform(a) {
+
+		if ($("#dataverify").valid()) {
+			var entry = $("#ENTRY_USER").val();
+			var modify = $("#MODIFY_USER").val();
+			var verify = $("#VERIFY_USER").val();
+
+			//var formmode = a.getAttribute("data-formmode");
+			var url = "./T1Verify?";
+
+			$("#dataverify").attr('action', url);
+
+			var options = {
+				success : showResponse
+			// post-submit callback 
+			};
+
+			$("#dataverify").ajaxSubmit(options);
+
+			function showResponse(responseText, statusText, xhr, $form) {
+
+				$("#alertmsg").text(responseText);
+
+				$('#alert').modal("toggle");
 
 			}
+			;
+		} else {
+			$("#alertmsg").text("Same User Cannot Verify!");
+			$('#alert').modal("toggle");
 
-		};
-
-
-		function submitdataformedit() {
-			var foracid = document.getElementById('foracid').value;
-			var report_label_1 = document.getElementById('report_label_1').value;
-			var act_balance_amt_lc = document.getElementById('act_balance_amt_lc').value;
-			var report_name_1 = document.getElementById('report_name_1').value;
-			var report_addl_criteria_1 = document.getElementById('report_addl_criteria_1').value;
-
-			$.ajax({
-				url: './CustomerDetailEditBrf1',
-				type: 'POST',
-				data: {
-					foracid: foracid,
-					report_label_1: report_label_1,
-					act_balance_amt_lc: act_balance_amt_lc,
-					report_name_1: report_name_1,
-					report_addl_criteria_1: report_addl_criteria_1
-				},
-				success: function (data) {
-					// Handle the response data as needed
-					alert(data);
-
-					// Reload the page
-					location.reload();
-				},
-				error: function (error) {
-					// Handle any errors that occur during the AJAX request
-					console.error("Error: " + JSON.stringify(error));
-				}
-			});
 		}
 
-	</script>
+	};
+	function refreshPage() {
+		window.location.reload();
+	}
+
+	
+	function editRecord(a) {
+
+		if (permission == 'W') {
+
+			var url2 = "./customeredit?";
+			$("#dataedit").attr('action', url2);
+			//Assign selected values to the model box fields
+			$("#cust_id").val(a.getAttribute("data-cust_id"));
+			$("#foracid").val(a.getAttribute("data-foracid"));
+			$("#acct_name").val(a.getAttribute("data-acct_name"));
+			$("#act_balance_amt_lc").val(a.getAttribute("data-act_balance_amt_lc"));		
+			$("#report_name_1").val(a.getAttribute("data-report_name_1"));	
+			$("#report_label_1").val(a.getAttribute("data-report_label_1"));
+	     	$("#report_addl_criteria_1").val(a.getAttribute("data-report_addl_criteria_1")); 
+			$("#report_date").val(a.getAttribute("data-report_date"));
+			
+			$("#addedit").modal("toggle");
+
+		}
+
+	};
+
+		
+	function submitdataformedit() {
+		    var foracid = document.getElementById('foracid').value;	    
+		    var report_label_1 = document.getElementById('report_label_1').value;  
+		    var act_balance_amt_lc = document.getElementById('act_balance_amt_lc').value;
+		    var report_name_1 = document.getElementById('report_name_1').value;
+		    var report_addl_criteria_1 = document.getElementById('report_addl_criteria_1').value;
+		    var report_date = document.getElementById('report_date').value;
+		    var reason = document.getElementById('reason').value;
+		    if(reason===null || reason.trim()===""){
+		    	alert("Reason is required for editing the record");
+		    	return;
+		    }
+
+	    $.ajax({
+	        url: './CustomerDetailEditBrf1',
+	        type: 'POST',
+	        data: {
+	        	foracid: foracid,
+	        	report_label_1: report_label_1,
+	        	act_balance_amt_lc: act_balance_amt_lc,
+	        	report_name_1: report_name_1,
+	        	report_addl_criteria_1: report_addl_criteria_1,
+	        	report_date:report_date,reason: reason
+	        },
+	        success: function (data) {
+	            // Handle the response data as needed
+	            alert(data);
+
+	            // Reload the page
+	            location.reload();
+	        },
+	        error: function (error) {
+	            // Handle any errors that occur during the AJAX request
+	            console.error("Error: " + JSON.stringify(error));
+	        }
+	    });
+	}
+	 
+</script>
 
 
 
 
-	<script>
-		function downloadexcel(button) {
-			var reportid = button.getAttribute('data-reportid');
-			var asondate = button.getAttribute('data-asondate');
-			var fromdate = button.getAttribute('data-fromdate');
-			var todate = button.getAttribute('data-todate');
-			var currency = button.getAttribute('data-currency');
-			var subreportid = button.getAttribute('data-subreportid');
-			var secid = button.getAttribute('data-secid');
-			var dtltype = button.getAttribute('data-dtltype');
-			var filetype = button.getAttribute('data-filetype');
+<script>
+function downloadexcel(button) {
+	var reportid = button.getAttribute('data-reportid');
+	var asondate = button.getAttribute('data-asondate');
+	var fromdate = button.getAttribute('data-fromdate');
+	var todate = button.getAttribute('data-todate');
+	var currency = button.getAttribute('data-currency');
+	var subreportid = button.getAttribute('data-subreportid');
+	var secid = button.getAttribute('data-secid');
+	var dtltype = button.getAttribute('data-dtltype');
+	var filetype = button.getAttribute('data-filetype');
+	
+	console.log(filetype);
 
-			console.log(filetype);
+	$('#downloadProcessingModal').modal('show');
 
-			$('#downloadProcessingModal').modal('show');
-
-			$.ajax({
-				url: './' + reportid + '/Download',
-				data: {
-					asondate: asondate,
-					fromdate: fromdate,
-					todate: todate,
-					currency: currency,
-					subreportid: subreportid,
-					secid: secid,
-					dtltype: dtltype,
-					filetype: filetype
-				},
-				type: 'POST',
-				xhrFields: {
-					responseType: 'blob'
-				},
-				success: function (data) {
-					$('#downloadProcessingModal').modal('hide');
-					var blob = new Blob([data], {
-						type: 'application/octet-stream'
-					});
-					var url = window.URL.createObjectURL(blob);
-					var a = document.createElement('a');
-					a.href = url;
+	$.ajax({
+		url : './' + reportid + '/Download',
+		data : {
+			asondate : asondate,
+			fromdate : fromdate,
+			todate : todate,
+			currency : currency,
+			subreportid : subreportid,
+			secid : secid,
+			dtltype : dtltype,
+			filetype : filetype
+		},
+		type : 'POST',
+		xhrFields : {
+			responseType : 'blob'
+		},
+		success : function(data) {
+			$('#downloadProcessingModal').modal('hide');
+			var blob = new Blob([ data ], {
+				type : 'application/octet-stream'
+			});
+			var url = window.URL.createObjectURL(blob);
+			var a = document.createElement('a');
+			a.href = url;
 					if (filetype == "excel" || filetype == "detailexcel") {
-						a.download = '011-BRF-001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
-					} else if (filetype == "BRF") {
-						a.download = '011-BRF-001-A' + ".xls"; // assuming .pdf extension for PDF files
-					} else {
-						a.download = '011-BRF-001-A' + ".pdf";
-					}
-
-					document.body.appendChild(a);
-					a.click();
-					window.URL.revokeObjectURL(url);
-
-					// Set the appropriate message based on the downloaded filetype
-					if (filetype == "excel") {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".xlsx");
-					} else if (filetype == "detailexcel") {
-						$('#customAlertBody').text('Downloaded BRF-001 Detail Excel' + ".xlsx");
-					} else if (filetype == "BRF") {
-						$('#customAlertBody').text('Downloaded BRF 001 ' + ".xls"); // assuming .pdf extension for PDF files
-					} else {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".pdf");
-					}
-					$('#customAlertModal').modal('show');
+		                a.download = '011-BRF-001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
+		            } else if(filetype == "BRF"){
+		                a.download = '011-BRF-001-A' + ".xls"; // assuming .pdf extension for PDF files
+		            }else{
+		            	a.download = '011-BRF-001-A' + ".pdf";
+		            }
+		            
+		            document.body.appendChild(a);
+		            a.click();
+		            window.URL.revokeObjectURL(url);
+		            
+		            // Set the appropriate message based on the downloaded filetype
+		            if (filetype == "excel") {
+		                $('#customAlertBody').text('Downloaded BRF-001 ' + ".xlsx");
+		            } else if (filetype == "detailexcel") {
+		                $('#customAlertBody').text('Downloaded BRF-001 Detail Excel' + ".xlsx");
+		            }else if(filetype == "BRF"){
+		            	$('#customAlertBody').text('Downloaded BRF 001 ' + ".xls"); // assuming .pdf extension for PDF files
+		            } else {
+		                $('#customAlertBody').text('Downloaded BRF-001 ' + ".pdf");
+		            }
+		            $('#customAlertModal').modal('show');
 				}
 			});
 		}
+ 
+ 
+</script>
 
+<style>
+    .dropdown-menu li a:hover {
+        background-color: orange; /* Orange color for hover */
+        color: white; /* White text for better contrast */
+    }
+</style>
+<style>
+/* Your existing CSS - this is the correct approach */
+.scrollable-table-container {
+    /* This is the key: it creates the scroll context */
+    max-height: 620px; /* Or a suitable height like 80vh for responsive design */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+}
 
-	</script>
+/* Your existing sticky header CSS, targeting the tr elements within the thead */
+.scrollable-table-container thead tr:nth-child(1) {
+    position: sticky;
+    top: 0;
+    background-color: #b3b6b9;
+    z-index: 4;
+}
 
-	<style>
-		.dropdown-menu li a:hover {
-			background-color: orange;
-			/* Orange color for hover */
-			color: white;
-			/* White text for better contrast */
-		}
-	</style>
-	<style>
-		/* Your existing CSS - this is the correct approach */
-		.scrollable-table-container {
-			/* This is the key: it creates the scroll context */
-			max-height: 620px;
-			/* Or a suitable height like 80vh for responsive design */
-			overflow-y: auto;
-			border: 1px solid #ccc;
-		}
-
-		/* Your existing sticky header CSS, targeting the tr elements within the thead */
-		.scrollable-table-container thead tr:nth-child(1) {
-			position: sticky;
-			top: 0;
-			background-color: #b3b6b9;
-			z-index: 4;
-		}
-
-		.scrollable-table-container thead tr:nth-child(2) {
-			position: sticky;
-			top: 36px;
-			/* adjust based on row height */
-			background-color: #b3b6b9;
-			z-index: 3;
-		}
+.scrollable-table-container thead tr:nth-child(2) {
+    position: sticky;
+    top: 36px; /* adjust based on row height */
+    background-color: #b3b6b9;
+    z-index: 3;
+}
 
 
 
-		.scrollable-table-container thead tr:nth-child(3) {
-			position: sticky;
-			top: 72px;
-			/* Adjust based on row height */
-			background-color: #b3b6b9;
-			z-index: 2;
-		}
+.scrollable-table-container thead tr:nth-child(3) {
+    position: sticky;
+    top: 72px; /* Adjust based on row height */
+    background-color: #b3b6b9;
+    z-index: 2;
+}
 
-		.scrollable-table-container thead tr:nth-child(4) {
-			position: sticky;
-			top: 108px;
-			/* Adjust based on row height */
-			background-color: #b3b6b9;
-			z-index: 1;
-		}
-	</style>
-	<script type="text/javascript">
-		$(document).ready(function () {
-
-		});
+.scrollable-table-container thead tr:nth-child(4) {
+    position: sticky;
+    top: 108px; /* Adjust based on row height */
+    background-color: #b3b6b9;
+    z-index: 1;
+}
 
 
-		function tablepagination() {
-			$('#detailtable').DataTable({
-				"pageLength": 100,           // Show 10 rows per page
-				"lengthChange": false,      // Hide "Show X entries"
-				"ordering": false,          // Disable sorting on columns
-				"info": true,               // Show "Showing X to Y of Z entries"
-				"autoWidth": false,         // Disable automatic column sizing
-				"searching": true,
-				"language": {
-					"emptyTable": "No records available"
-				}
-			});
-		}
-	</script>
+</style>
+ <script type="text/javascript">
+  $(document).ready(function () {
+	 
+  });
+  
+  
+  function tablepagination(){
+	  $('#loader1').modal("hide");
+	  $('#detailtable').DataTable({
+		  "paging": false,
+	     // "pageLength": 100,           // Show 10 rows per page
+	      "lengthChange": false,      // Hide "Show X entries"
+	      "ordering": false,          // Disable sorting on columns
+	      "info": false,               // Show "Showing X to Y of Z entries"
+	      "autoWidth": false,         // Disable automatic column sizing
+	      "searching": false,
+	      "language": {
+	        "emptyTable": "No records available"
+	      }
+	    });
+  }
+</script> 
 
 
 
-	<title>BCDRS</title>
+<title>BCDRS</title>
 </head>
-
 <body>
 	<!----------------------------------------------------- Header Section starts ----------------------------------------------------->
 	<div th:insert="XBRLHeaderMenu :: header"></div>
 
 	<!----------------------------------------------------- Header Section Ends ------------------------------------------------------->
-	<div class="container content" th:fragment="reportcontent">
+	<div class="container content" th:fragment="reportcontent" >
 		<!--------------------------------------------------------------- Report title starts -------------------------------------------->
 		<div class="row">
 			<div class="col-sm-12 customcol"
@@ -669,19 +710,21 @@ PURPOSE		: BRF1 Reports-development
 					STATISTICS - ASSETS </b>
 				<th id="date"><b style="color: white; margin-left: 35%;">Report
 						Date: <span th:text="${todate}"></span>
-					</b></th>
+				</b></th>
 				<div class="btn-group nav-buttons">
-					<button type="button" class="btn btn-primary" onclick="showdetails('firstpage','1','0');"
-						id="detailsbtn">Details</button>
-					<button type="button" class="btn btn-primary" onclick="showsummary();"
-						id="summarybtn">Summary</button>
+					<button type="button" class="btn btn-primary"
+						onclick="showdetails('firstpage','1','0');" id="detailsbtn">Details</button>
+					<button type="button" class="btn btn-primary"
+						onclick="showsummary();" id="summarybtn">Summary</button>
 					<div class="btn-group">
-						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						<button type="button" class="btn btn-primary dropdown-toggle"
+							data-toggle="dropdown">
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
 							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
-								<a class="text-primary" style="font-family: verdana;" th:attr="data-reportid=${reportid}, 
+								<a class="text-primary" style="font-family: verdana;"
+								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -689,10 +732,12 @@ PURPOSE		: BRF1 Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='pdf'" onclick="downloadexcel(this)">Pdf</a>
+							            data-filetype='pdf'"
+								onclick="downloadexcel(this)">Pdf</a>
 							</li>
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
-								<a class="text-primary" th:attr="data-reportid=${reportid}, 
+								<a class="text-primary"
+								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -700,10 +745,12 @@ PURPOSE		: BRF1 Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='excel'" onclick="downloadexcel(this)">Excel</a>
+							            data-filetype='excel'"
+								onclick="downloadexcel(this)">Excel</a>
 							</li>
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
-								<a class="text-primary" th:attr="data-reportid=${reportid}, 
+								<a class="text-primary"
+								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -711,9 +758,11 @@ PURPOSE		: BRF1 Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='BRF'" onclick="downloadexcel(this)">BRF FINAL</a>
+							            data-filetype='BRF'"
+								onclick="downloadexcel(this)">BRF FINAL</a>
 							</li>
-							<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a th:attr="data-reportid=${reportid}, 
+							<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a
+								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -721,7 +770,8 @@ PURPOSE		: BRF1 Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='detailexcel'" onclick="downloadexcel(this)">Excel</a></li>
+							            data-filetype='detailexcel'"
+								onclick="downloadexcel(this)">Excel</a></li>
 						</ul>
 					</div>
 
@@ -729,9 +779,12 @@ PURPOSE		: BRF1 Reports-development
 					<span id="downloadMessage"></span>
 
 					<!-- Download Processing Modal -->
-					<div class="modal fade" id="downloadProcessingModal" tabindex="-1" role="dialog"
-						aria-labelledby="downloadProcessingModalLabel" aria-hidden="true">
-						<div class="modal-dialog modal-dialog-centered d-flex align-items-center" role="document">
+					<div class="modal fade" id="downloadProcessingModal" tabindex="-1"
+						role="dialog" aria-labelledby="downloadProcessingModalLabel"
+						aria-hidden="true">
+						<div
+							class="modal-dialog modal-dialog-centered d-flex align-items-center"
+							role="document">
 							<div class="modal-content">
 								<div class="modal-header">
 									<h5 class="modal-title" id="downloadProcessingModalLabel">Download
@@ -741,8 +794,9 @@ PURPOSE		: BRF1 Reports-development
 						</div>
 					</div>
 					<!-- Download Message -->
-					<div class="modal fade" id="customAlertModal" tabindex="-1" role="dialog"
-						aria-labelledby="customAlertModalLabel" aria-hidden="true">
+					<div class="modal fade" id="customAlertModal" tabindex="-1"
+						role="dialog" aria-labelledby="customAlertModalLabel"
+						aria-hidden="true">
 						<div class="modal-dialog modal-dialog-centered" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
@@ -750,7 +804,8 @@ PURPOSE		: BRF1 Reports-development
 								</div>
 								<div class="modal-body" id="customAlertBody"></div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+									<button type="button" class="btn btn-primary"
+										data-dismiss="modal">OK</button>
 								</div>
 							</div>
 						</div>
@@ -774,8 +829,10 @@ PURPOSE		: BRF1 Reports-development
 						style="margin-right: 0px; margin-top: -10px; padding: 3px; background-color: #4d8cb9;"
 						title="view the records" id="addRecord">Inquiry</button> -->
 					<button type="button" class="btn btn-primary"
-						th:if="${report?.entity_flg}=='N' AND  ${type} !='ARCHIVAL'" onclick="verifyscreen(this);"
-						style="margin-top: -10px; padding: 3px;" title="Click to EDIT Records"
+						th:if="${report?.entity_flg}=='N' AND  ${type} !='ARCHIVAL'"
+						onclick="verifyscreen(this);"
+						style="margin-top: -10px; padding: 3px;"
+						title="Click to EDIT Records"
 						th:classappend="${session.PERMISSIONS == 'W'} AND ${dtltype == 'report'} ? addedit "
 						id="addRecord">Verify</button>
 				</div>
@@ -786,18 +843,17 @@ PURPOSE		: BRF1 Reports-development
 
 
 		<div class="row">
-			<div class="col-sm-12 customcol" th:if="${displaymode}=='summary' or ${displaymode}==null">
+			<div class="col-sm-12 customcol"
+				th:if="${displaymode}=='summary' or ${displaymode}==null">
 				<div class="row">
 
 					<div class="col-sm-12">
 
-						<div class="table-responsive scrollable-table-container"
-							style="border-right: 1px solid #dee2e6">
-							<table
-								class="sticky-header-table table table-bordered table-hover table-sm table-condensed">
-
-								<thead class="thead-light">
-									<tr style="background-color: #b3b6b9">
+							<div class="table-responsive scrollable-table-container" style="border-right: 1px solid #dee2e6">
+    <table class="sticky-header-table table table-bordered table-hover table-sm table-condensed">
+     
+        <thead class="thead-light">
+  		<tr style="background-color: #b3b6b9">
 
 										<th colspan="14" style="text-align: center">UAE Operation</th>
 
@@ -882,8 +938,7 @@ PURPOSE		: BRF1 Reports-development
 											th:text="${#numbers.formatDecimal(report.r2_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW102">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
-											th:text="${#numbers.formatDecimal(report.r2_total_amount, 1, 'COMMA', 0, 'POINT')}">
-											CHENNAI</th>
+											th:text="${#numbers.formatDecimal(report.r2_total_amount, 1, 'COMMA', 0, 'POINT')}">CHENNAI</th>
 
 									</tr>
 									<tr>
@@ -1681,8 +1736,8 @@ PURPOSE		: BRF1 Reports-development
 											th:text="${#numbers.formatDecimal(report.r35_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW135">CHENNAI</th>
 										<td style="background-color: #b3b6b9"></td>
-										<th style="text-align: right; background-color: yellow" onclick="resident(this)"
-											id="ROW135"
+										<th style="text-align: right; background-color: yellow"
+											onclick="resident(this)" id="ROW135"
 											th:text="${#numbers.formatDecimal(report.r35_amount_fcy_non_resident,1,'COMMA',0,'POINT')}">
 											CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
@@ -1786,22 +1841,26 @@ PURPOSE		: BRF1 Reports-development
 										<td></td>
 										<td style="text-align: right">7.1.1</td>
 										<td th:text="${report.r39_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r39_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r39_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r39_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r39_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1817,22 +1876,26 @@ PURPOSE		: BRF1 Reports-development
 										<td></td>
 										<td style="text-align: right">7.1.2</td>
 										<td th:text="${report.r40_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r40_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r40_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r40_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r40_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1880,22 +1943,29 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">7.2.1</td>
 										<td th:text="${report.r42_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<td th:text="${#numbers.formatDecimal(report.r42_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<th th:text="${#numbers.formatDecimal(report.r42_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r42_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW142"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r42_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<th th:text="${#numbers.formatDecimal(report.r42_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r42_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
 										<th style="background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r42_total_amount,1,'COMMA',0,'POINT')}"
@@ -1905,21 +1975,29 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">7.2.2</td>
 										<td th:text="${report.r43_product}" style="text-align: left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
 										<th style="background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r43_total_amount,1,'COMMA',0,'POINT')}"
@@ -1930,21 +2008,29 @@ PURPOSE		: BRF1 Reports-development
 										<th style="text-align: right">8</th>
 										<th></th>
 										<td th:text="${report.r44_product}" align="left">CHENNAI</td>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r44_total_amount,1,'COMMA',0,'POINT')}"
@@ -1954,21 +2040,29 @@ PURPOSE		: BRF1 Reports-development
 										<th style="text-align: right">8.1</th>
 										<th></th>
 										<td th:text="${report.r45_product}" align="left">CHENNAI</td>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r45_total_amount,1,'COMMA',0,'POINT')}"
@@ -1978,22 +2072,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.1</td>
 										<td th:text="${report.r46_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" oonclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2006,22 +2104,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.2</td>
 										<td th:text="${report.r47_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2037,22 +2139,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.3</td>
 										<td th:text="${report.r48_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2065,22 +2171,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.4</td>
 										<td th:text="${report.r49_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2096,22 +2206,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.5</td>
 										<td th:text="${report.r50_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2225,22 +2339,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.2.3</td>
 										<td th:text="${report.r54_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2256,22 +2374,26 @@ PURPOSE		: BRF1 Reports-development
 										<th></th>
 										<td style="text-align: right">8.2.4</td>
 										<td th:text="${report.r55_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2285,24 +2407,28 @@ PURPOSE		: BRF1 Reports-development
 									<tr align="right">
 										<th style="background-color: #b3b6b9"></th>
 										<th style="background-color: #b3b6b9; text-align: right">8.3</th>
-										<td style="background-color: #b3b6b9" th:text="${report.r56_product}"
-											align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td style="background-color: #b3b6b9"
+											th:text="${report.r56_product}" align="left">CHENNAI</td>
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2515,24 +2641,28 @@ PURPOSE		: BRF1 Reports-development
 									<tr>
 										<th style="text-align: right; background-color: #b3b6b9">10</th>
 										<td style="background-color: #b3b6b9"></td>
-										<th style="background-color: #b3b6b9" th:text="${report.r63_product}">CHENNAI
-										</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th style="background-color: #b3b6b9"
+											th:text="${report.r63_product}">CHENNAI</th>
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r63_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r63_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r63_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r63_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -3118,8 +3248,9 @@ PURPOSE		: BRF1 Reports-development
 
 							</table>
 						</div>
-						<div class="card-footer text-center" th:if="${displaymode}=='summary' "
-							style="background-color: #386276" ;>
+						<div class="card-footer text-center"
+							th:if="${displaymode}=='summary' "
+							style="background-color: #386276";>
 							<button type="button" class="btn btn-xs btn-primary" id="btnHome"
 								onclick="home();">Home</button>
 							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
@@ -3133,27 +3264,85 @@ PURPOSE		: BRF1 Reports-development
 			<!------------------------------ Report summary section ends it will shown only if summary button clicked------------------------->
 			<!------------------------------ Report Details section starts it will shown only if Details button clicked------------------------->
 			<div class="col-sm-12 customcol" th:if="${displaymode}=='detail'" th:fragment="detail">
-				<div th:class="${searchmsg == null}?'inner'">
+    <div th:class="${searchmsg == null}?'inner'">
+					<div class="row m-3 align-items-center" th:if="${reportdetailsPage != null}">
+
+						<div class="col-sm-3">
+							<div class="input-group">
+								<input type="text" id="globalSearch" class="form-control"
+									placeholder="Search " th:value="${searchvalue}">
+								<div class="input-group-append">
+									<button class="btn btn-primary" type="button"
+										onclick="showdetails('search', 0, 0)">Search</button>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-9 d-flex justify-content-end" th:if="${reportdetailsPage.totalPages > 1}">
+							<div class="dataTables_paginate paging_simple_numbers">
+								<ul class="pagination mb-0">
+
+									<li class="paginate_button page-item previous"
+										th:classappend="${!reportdetailsPage.hasPrevious() ? 'disabled' : ''}">
+										<a href="javascript:void(0)"
+										th:onclick="'showdetails(\'prevpage\', ' + ${reportdetailsPage.number} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+										class="page-link">Previous</a>
+									</li>
+
+									<th:block
+										th:each="i : ${#numbers.sequence(0, reportdetailsPage.totalPages - 1)}">
+
+										<li class="paginate_button page-item"
+											th:if="${i == 0 or i == reportdetailsPage.totalPages - 1 or (i >= reportdetailsPage.number - 1 and i <= reportdetailsPage.number + 1) or (reportdetailsPage.number == 0 and i == 2) or   (reportdetailsPage.number == reportdetailsPage.totalPages - 1 and i == reportdetailsPage.totalPages - 3)}"
+											th:classappend="${i == reportdetailsPage.number ? 'active' : ''}">
+											<a href="javascript:void(0)"
+											th:onclick="'showdetails(\'directpage\', ' + ${i} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+											class="page-link" th:text="${i + 1}">1</a>
+										</li>
+
+										<li class="paginate_button page-item disabled"
+											th:if="${i == 1 and reportdetailsPage.number > 2}"><a
+											class="page-link" href="javascript:void(0)">…</a></li>
+
+										<li class="paginate_button page-item disabled"
+											th:if="${i == reportdetailsPage.totalPages - 2 and reportdetailsPage.number < reportdetailsPage.totalPages - 3}">
+											<a class="page-link" href="javascript:void(0)">…</a>
+										</li>
+
+									</th:block>
+
+									<li class="paginate_button page-item next"
+										th:classappend="${!reportdetailsPage.hasNext() ? 'disabled' : ''}">
+										<a href="javascript:void(0)"
+										th:onclick="'showdetails(\'nextpage\', ' + ${reportdetailsPage.number} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+										class="page-link">Next</a>
+									</li>
+
+								</ul>
+							</div>
+						</div>
+
+					</div>
 					<table id="detailtable" class="table table-bordered table-sm" style="width: 100%">
-						<thead class="thead-light">
-							<tr>
-								<th></th>
-								<th>CUST ID</th>
-								<th>ACCT NO</th>
-								<th>ACCT NAME</th>
-								<th>ACT BALANCE AMT LC</th>
-								<th>REPORT_NAME_1</th>
-								<th>REPORT_LABEL_1</th>
-								<th>REPORT_ADDL_CRITERIA_1</th>
-								<th>REPORT_DATE</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="report,iterator : ${reportdetails}">
-								<td>
-									<a data-toggle="tooltip" class="editrec" title="Click to Edit this Record">
-										<i th:classappend="${session.PERMISSIONS == 'W'} ? 'addedit'"
-											class="fas fa-edit" th:attr="data-cust_id=${report.cust_id},
+            <thead class="thead-light">
+                <tr>
+                    <th th:if="${dtltype!='ARCH'}"></th>
+                    <th>CUST ID</th>
+                    <th>ACCT NO</th>
+                    <th>ACCT NAME</th>
+                    <th>ACT BALANCE AMT LC</th>
+                    <th>REPORT_NAME_1</th>
+                    <th>REPORT_LABEL_1</th>
+                    <th>REPORT_ADDL_CRITERIA_1</th>
+                    <th>REPORT_DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="report,iterator : ${reportdetails}">
+                    <td th:if="${dtltype!='ARCH'}">
+                        <a data-toggle="tooltip" class="editrec" title="Click to Edit this Record">
+                            <i th:classappend="${session.PERMISSIONS == 'W'} ? 'addedit'" class="fas fa-edit"
+                               th:attr="data-cust_id=${report.cust_id},
                                         data-foracid=${report.foracid},
                                         data-acct_name=${report.acct_name},
                                         data-act_balance_amt_lc=${report.act_balance_amt_lc},
@@ -3161,118 +3350,126 @@ PURPOSE		: BRF1 Reports-development
                                         data-report_label_1=${report.report_label_1},
                                         data-report_addl_criteria_1=${report.report_addl_criteria_1},
                                         data-report_date=${#dates.format(report.report_date, 'dd-MM-yyyy')}"
-											onclick="editRecord(this)"></i>
-									</a>
-								</td>
-								<td th:text="${report.cust_id}"></td>
-								<td th:text="${report.foracid}"></td>
-								<td th:text="${report.acct_name}"></td>
-								<td style="text-align: right;"
-									th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 2, 'POINT')}">
-								</td>
-								<td th:text="${report.report_name_1}"></td>
-								<td th:text="${report.report_label_1}"></td>
-								<td th:text="${report.report_addl_criteria_1}"></td>
-								<td th:text="${#dates.format(report.report_date, 'dd-MM-yyyy')}"></td>
-							</tr>
-						</tbody>
-					</table>
+                               onclick="editRecord(this)"></i>
+                        </a>
+                    </td>
+                    <td th:text="${report.cust_id}"></td>
+                    <td th:text="${report.foracid}"></td>
+                    <td th:text="${report.acct_name}"></td>
+                    <td style="text-align: right;" 
+                        th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${report.report_name_1}"></td>
+                    <td th:text="${report.report_label_1}"></td>
+                    <td th:text="${report.report_addl_criteria_1}"></td>
+                    <td th:text="${#dates.format(report.report_date, 'dd-MM-yyyy')}"></td>
+                </tr>
+            </tbody>
+        </table>					
+
 				</div>
 
-				<div class="card-footer text-center" style="background-color: #386276;">
-					<button type="button" class="btn btn-xs btn-primary" id="btnHome" onclick="home();">Home</button>
-					<button type="button" class="btn btn-xs btn-primary" id="btnBack" onclick="back1();">Back</button>
-				</div>
-			</div>
+    <div class="card-footer text-center" style="background-color: #386276;">
+        <button type="button" class="btn btn-xs btn-primary" id="btnHome" onclick="home();">Home</button>
+        <button type="button" class="btn btn-xs btn-primary" id="btnBack" onclick="back1();">Back</button>
+    </div>
+</div>
 
+				
+				<!-- -----------------------------------Details edit modal form----------------------------------------------------->
+				<div class="modal fade" id="addedit" th:fragment="dataedit">
+					<div
+						class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+						<div class="modal-content">
 
-			<!-- -----------------------------------Details edit modal form----------------------------------------------------->
-			<div class="modal fade" id="addedit" th:fragment="dataedit">
-				<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-					<div class="modal-content">
+							<!-- Modal Header -->
+							<div class="modal-header">
+								<h4 class="modal-title">Add/Edit Records</h4>
+								<button type="button" class="close" data-dismiss="modal">×</button>
+							</div>
+							<div class="modal-body" style="text-align: center">
+								<form id="dataedit" method="post">
+									<div class="form-group">
 
-						<!-- Modal Header -->
-						<div class="modal-header">
-							<h4 class="modal-title">Add/Edit Records</h4>
-							<button type="button" class="close" data-dismiss="modal">×</button>
-						</div>
-						<div class="modal-body" style="text-align: center">
-							<form id="dataedit" method="post">
-								<div class="form-group">
-
-									<div class="row">
-										<label class="col-sm-5">Cust Id</label> <input class="form-control col-sm-5"
-											id="cust_id" readonly />
-									</div>
-									<div class="row">
-										<label class="col-sm-5">Acct No</label> <input class="form-control col-sm-5"
-											id="foracid" readonly />
-									</div>
-									<div class="row">
-										<label class="col-sm-5">Acct Name</label> <input class="form-control col-sm-5"
-											id="acct_name" readonly />
-									</div>
-									<div class="row">
-										<label class="col-sm-5">ACCR BALANCE LC</label> <input
-											class="form-control col-sm-5" id="act_balance_amt_lc" />
-									</div>
-									<!-- <div class="row">
+										<div class="row">
+											<label class="col-sm-5">Cust Id</label> <input
+												class="form-control col-sm-5" id="cust_id" readonly />
+										</div>
+										<div class="row">
+											<label class="col-sm-5">Acct No</label> <input
+												class="form-control col-sm-5" id="foracid" readonly />
+										</div>
+										<div class="row">
+											<label class="col-sm-5">Acct Name</label> <input
+												class="form-control col-sm-5" id="acct_name" readonly />
+										</div>
+										<div class="row">
+											<label class="col-sm-5">ACCR BALANCE LC</label> <input
+												class="form-control col-sm-5" id="act_balance_amt_lc" />
+										</div>
+										<!-- <div class="row">
 											<label class="col-sm-5">IND</label> <input
 												class="form-control col-sm-5" id="remarks"  />
 										</div> -->
 
 
-									<div class="row">
-										<label class="col-sm-5">Report Name_1</label> <input
-											class="form-control col-sm-5" id=report_name_1 name="report_name_1" />
-									</div>
-									<div class="row">
-										<label class="col-sm-5">Report Lanbel_1</label> <input
-											class="form-control col-sm-5" id="report_label_1" />
-									</div>
-									<div class="row">
-										<label class="col-sm-5">Report ADDL Criteria_1</label> <input
-											class="form-control col-sm-5" id="report_addl_criteria_1" />
-									</div>
+										<div class="row">
+											<label class="col-sm-5">Report Name_1</label> <input
+												class="form-control col-sm-5" id=report_name_1
+												name="report_name_1" readonly/>
+										</div>
+										<div class="row">
+											<label class="col-sm-5">Report Lanbel_1</label> <input
+												class="form-control col-sm-5" id="report_label_1" readonly/>
+										</div>
+										<div class="row">
+											<label class="col-sm-5">Report ADDL Criteria_1</label> <input
+												class="form-control col-sm-5" id="report_addl_criteria_1" readonly/>
+										</div>
 
-									<div class="row">
-										<label class="col-sm-5">Report Date</label> <input class="form-control col-sm-5"
-											id="report_date" readonly />
+										<div class="row">
+											<label class="col-sm-5">Report Date</label> <input
+												class="form-control col-sm-5" id="report_date" readonly />
+										</div>
+										<div class="row">
+											<label class="col-sm-5">Reason for editing</label> <input
+												class="form-control col-sm-5" id="reason" />
+										</div>
 									</div>
+								</form>
+								<div class="modal-footer">
+
+									<button type="button" class="btn btn-primary"
+										onclick="submitdataformedit(this);" id="edit">Submit</button>
+
 								</div>
-							</form>
-							<div class="modal-footer">
+							</div>
+						</div>
+					</div>
 
-								<button type="button" class="btn btn-primary" onclick="submitdataformedit(this);"
-									id="edit">Submit</button>
 
+					<!-------------------------------------Details edit modal form----------------------------------------------------->
+					<div class="modal fade" id="datadelete">
+						<div
+							class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+							<div class="modal-content">
+								<div class="modal-body" style="text-align: center">
+									<button type="button" class="close" data-dismiss="modal">×</button>
+									Are you Sure want to delete?
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-primary"
+										onclick="submitdataformdelete(this);">Submit</button>
+									<button type="button" class="btn btn-primary"
+										data-dismiss="modal">Cancel</button>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-
-				<!-------------------------------------Details edit modal form----------------------------------------------------->
-				<div class="modal fade" id="datadelete">
-					<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-						<div class="modal-content">
-							<div class="modal-body" style="text-align: center">
-								<button type="button" class="close" data-dismiss="modal">×</button>
-								Are you Sure want to delete?
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-primary"
-									onclick="submitdataformdelete(this);">Submit</button>
-								<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- -----------------------------------Search modal form----------------------------------------------------->
-			<!------------------------------ Report Details pagination - shown if paginated -------------------------------------------------->
-			<!-- <div class="float-right" th:if="${reportdetails.totalPages} gt 1">
+				<!-- -----------------------------------Search modal form----------------------------------------------------->
+				<!------------------------------ Report Details pagination - shown if paginated -------------------------------------------------->
+				<!-- <div class="float-right" th:if="${reportdetails.totalPages} gt 1">
 					<a href="#"><i class="fas fa-caret-left fa-2x"
 						th:onclick="|showdetails('prevpage',${reportdetails.number},${reportdetails.totalPages});|"></i></a>
 					<input type="text" id="pageno" style="width: 30px"
@@ -3282,15 +3479,16 @@ PURPOSE		: BRF1 Reports-development
 						class="fas fa-caret-right fa-2x"
 						th:onclick="|showdetails('nextpage',${reportdetails.number},${reportdetails.totalPages});|"></i></a>
 				</div> -->
-			<!------------------------------ Report Details pagination - shown if paginated -------------------------------------------------->
+				<!------------------------------ Report Details pagination - shown if paginated -------------------------------------------------->
+			</div>
+			<!------------------------------ Report Details section ends it will shown only if Details button clicked------------------------->
 		</div>
-		<!------------------------------ Report Details section ends it will shown only if Details button clicked------------------------->
-	</div>
 	</div>
 
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 	<div class="modal fade" id="alert">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+		<div
+			class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-body" style="text-align: center">
 					<p id="alertmsg"></p>
@@ -3301,20 +3499,24 @@ PURPOSE		: BRF1 Reports-development
 		</div>
 	</div>
 	</div>
-
-	<div class="modal fade" id="loader1" data-backdrop="static" data-keyboard="false">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-			<div class="modal-content" style="background: transparent;">
-				<div class="modal-body" style="text-align: center">
-					<div>
-						<img th:src=@{/images/loader.gif} id="bfirelogo" style="width: 153px; height: auto; margin-left: 18px; background-color: transparent;
-								border-color: transparent;" alt="Bornfire">
+	
+	<div class="modal" id="loader1" data-backdrop="static"
+			data-keyboard="false">
+			<div
+				class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+				<div class="modal-content" style="background: transparent;">
+					<div class="modal-body" style="text-align: center">
+						<div>
+							<img th:src=@{/images/loader.gif} id="bfirelogo"
+								style="width: 153px; height: auto; margin-left: 18px; background-color: transparent;
+								border-color: transparent;"
+								alt="Bornfire">
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-
+	
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 
 
@@ -3323,56 +3525,52 @@ PURPOSE		: BRF1 Reports-development
 
 </body>
 <style>
-	.inner {
-		max-height: 600px;
-		/* Adjust height as needed */
-		overflow: auto;
-		border: 1px solid #dee2e6;
-	}
+.inner {
+    max-height: 600px; /* Adjust height as needed */
+    overflow: auto;
+    border: 1px solid #dee2e6;
+}
 
-	/* Sticky thead */
-	#detailtable thead th {
-		position: sticky;
-		top: 0;
-		background-color: #f8f9fa;
-		/* Match Bootstrap thead-light */
-		z-index: 2;
-	}
+/* Sticky thead */
+#detailtable thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa; /* Match Bootstrap thead-light */
+    z-index: 2;
+}
 
-	div.dataTables_wrapper div.dataTables_paginate {
-		text-align: right !important;
-		float: right !important;
-		width: auto;
-		margin-top: 10px;
-	}
+div.dataTables_wrapper div.dataTables_paginate {
+    text-align: right !important;
+    float: right !important;
+    width: auto;
+    margin-top: 10px;
+}
 
-	/* Ensure info text (e.g., "Showing 1 to X") stays on the left */
-	div.dataTables_wrapper div.dataTables_info {
-		float: left !important;
-		margin-top: 10px;
-	}
+/* Ensure info text (e.g., "Showing 1 to X") stays on the left */
+div.dataTables_wrapper div.dataTables_info {
+    float: left !important;
+    margin-top: 10px;
+}
+.pagination {
+    margin: 0;
+}
 
-	.pagination {
-		margin: 0;
-	}
+.page-item.active .page-link {
+    background-color: #386276;
+    border-color: #386276;
+}
 
-	.page-item.active .page-link {
-		background-color: #386276;
-		border-color: #386276;
-	}
+.page-link {
+    color: #386276;
+}
 
-	.page-link {
-		color: #386276;
-	}
+.page-link:hover {
+    color: #2a4a5c;
+}
 
-	.page-link:hover {
-		color: #2a4a5c;
-	}
-
-	.form-select {
-		display: inline-block;
-		width: auto;
-	}
+.form-select {
+    display: inline-block;
+    width: auto;
+}
 </style>
-
 </html>

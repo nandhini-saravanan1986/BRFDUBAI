@@ -3,9 +3,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.bornfire.xbrl.entities.BRFDETAILID;
 @Entity
+@IdClass(BRFDETAILID.class)
 @Table(name ="BRF1_DETAILTABLE")
 public class BRF1_DETAIL_ENTITY {
  
@@ -54,6 +58,7 @@ public class BRF1_DETAIL_ENTITY {
 	private Character	modify_flg;
 	private Character	del_flg;
 	private Character	nre_status;
+	@Id
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date	report_date;
 	@DateTimeFormat(pattern = "dd-MM-yyyy")

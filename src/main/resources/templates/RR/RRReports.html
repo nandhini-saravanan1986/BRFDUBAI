@@ -49,13 +49,16 @@
 	border-color: #0c0c0c;
 }
 
-.btn-primary:not (:disabled ):not (.disabled ).active, .btn-primary:not
-	 (:disabled ):not (.disabled ):active, .show>.btn-primary.dropdown-toggle
+.btn-primary:not(:disabled ):not(.disabled ).active, .btn-primary:not(:disabled ):not(.disabled ):active, .show>.btn-primary.dropdown-toggle
 	{
 	color: #fff;
 	background-color: #cc000000;
 	border-color: #161617;
 }
+.modal {
+	z-index: 1000;
+}
+
 </style>
 <script th:inline="javascript">
 
@@ -392,22 +395,36 @@ function back() {
 
 	}
 </script>
-<script>
+<script th:inline="javascript">
+var reportDate = /*[[${reportDate}]]*/null;
 document.addEventListener("DOMContentLoaded", function () {
-    const statusCells = document.querySelectorAll(".rpt-status");
-
+    const statusCells = document.querySelectorAll(".rpt-status");  
+    
+    if(reportDate === null){
     statusCells.forEach(cell => {
         const rptCode = cell.getAttribute("data-rptcode");
 
         fetch('/BRBS/checkDomainFlag?rptcode=' + rptCode)
             .then(response => response.text())
             .then(result => {
+                let tdElement = cell.closest('tr').querySelector(".reportcode");
                 if (result === 'ENABLED') {
                     cell.textContent = 'Enabled';
-                    cell.style.color = 'green';
+                    cell.style.color = 'green';                    
+                    
+                    tdElement.classList.add("underline");
+                    tdElement.setAttribute("onclick", "getVali(this);");
+                    tdElement.style.cursor = "pointer";
+                    
                 } else if (result === 'DISABLED') {
                     cell.textContent = 'Disabled';
                     cell.style.color = 'red';
+                    
+
+                    tdElement.classList.remove("underline");
+                    tdElement.removeAttribute("onclick");
+                    tdElement.style.cursor = "default"; 
+                    
                 } else {
                     cell.textContent = 'Unknown';
                     cell.style.color = 'gray';
@@ -419,7 +436,231 @@ document.addEventListener("DOMContentLoaded", function () {
                 cell.style.color = 'orange';
             });
     });
+    }
+    
 });
+</script>
+<script>
+ function checkdate() {
+	 const selectedDate = document.getElementById("dateinput").value;
+	 //alert(selectedDate);
+    const statusCells = document.querySelectorAll(".rpt-status");
+
+    statusCells.forEach(cell => {
+        const rptCode = cell.getAttribute("data-rptcode");
+
+        fetch('/BRBS/checkDomainFlagwithdate?rptcode=' + rptCode + '&date=' + selectedDate )
+            .then(response => response.text())
+            .then(result => {
+
+                let tdElement = cell.closest('tr').querySelector(".reportcode");
+                if (result === 'ENABLED') {
+                    cell.textContent = 'Enabled';
+                    cell.style.color = 'green';
+                    
+                    tdElement.classList.add("underline");
+                    tdElement.setAttribute("onclick", "getVali(this);");
+                    tdElement.style.cursor = "pointer";
+                    
+                    
+                } else if (result === 'DISABLED') {
+                    cell.textContent = 'Disabled';
+                    cell.style.color = 'red';
+                    $('#generatebtn').show();
+
+                    tdElement.classList.remove("underline");
+                    tdElement.removeAttribute("onclick");
+                    tdElement.style.cursor = "default"; 
+                    
+                } else {
+                    cell.textContent = 'Unknown';
+                    cell.style.color = 'gray';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching status for', rptCode, error);
+                cell.textContent = 'Error';
+                cell.style.color = 'orange';
+            });
+    });
+    
+}
+
+ function generatepopup(){
+ 	let selectedDate = document.getElementById("dateinput").value;
+	 //alert(selectedDate);
+
+   	let dateObject = new Date(selectedDate);
+   	let day = String(dateObject.getDate()).padStart(2, '0');
+   	let month = String(dateObject.getMonth() + 1).padStart(2, '0');
+   	let year = dateObject.getFullYear();
+   	let formattedDate = `${day}-${month}-${year}`;
+    
+   	document.getElementById('reportdatedisplay').textContent = formattedDate;
+	 const myModal = document.getElementById('generateModal');
+		myModal.classList.add('show');
+		myModal.style.display = 'block';
+		document.body.classList.add('modal-open'); 
+		
+
+	    const tableBody = document.getElementById('modalTableBody');
+	    tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Loading...</td></tr>';
+	    fetch(`./datavalidationdetails?report_date=${selectedDate}`)
+	        .then(response => {
+	            if (!response.ok) throw new Error("Network response was not ok");
+	            return response.json(); 
+	        })
+	        .then(data => {
+	            tableBody.innerHTML = '';
+	            
+	            if (!data || data.length === 0) {
+	                tableBody.innerHTML = '<tr><td colspan="3" class="text-center p-4">No modifications found.</td></tr>';
+	                document.getElementById('popupgeneratebtn').style.display = 'none';
+	                return;
+	            }
+
+	            const allStatusOk = data.every(item => 
+	            item.status && item.status.trim().toUpperCase() === 'OK'
+	        	);
+
+	        	const genBtn = document.getElementById('popupgeneratebtn');
+	        	if (allStatusOk) {
+	            	genBtn.style.display = 'block';
+	        	} else {
+	            	genBtn.style.display = 'none';
+	        	}
+	        	//genBtn.style.display = 'block';
+	            data.forEach(item => {
+	                const tr = document.createElement('tr');
+	                tr.innerHTML = `
+	                    <td >${item.tableName}</td>
+	                    <td >${item.dataValidation}</td>
+	                    <td >${item.logicValidation}</td>
+	                    <td >${item.status}</td>
+	                `;
+	                tableBody.appendChild(tr);
+	            });
+	        })
+	        .catch(error => {
+	            console.error('Error fetching details:', error);
+	            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger p-4">Failed to load data.</td></tr>';
+	        });
+	    
+	    
+	    
+ }
+ $(document).ready(function() {
+	    $('#closebtn').on('click', function() { 
+	        $('#generateModal').removeClass('show').css('display', 'none');			        
+	        $('.modal-backdrop').remove();
+	        $('body').removeClass('modal-open').css('padding-right', '');
+	    });
+	});
+ $(document).ready(function() {
+	 const selectedDate = document.getElementById("dateinput").value;
+	 if (window.location.pathname.includes("monthly1")) {				
+	 if(selectedDate){
+		 checkdate();
+	 }}
+ });
+
+ function executeprocedureAll(){
+	    const selectedDate = document.getElementById("dateinput").value;
+	    
+	    const generateBtn = this;
+	    const originalText = generateBtn.innerText;
+	    generateBtn.disabled = true;
+	    generateBtn.innerText = 'Generating...';
+
+	    $('#loader1').modal('show');
+	    fetch(`./executeProcedure?reportDate=${encodeURIComponent(selectedDate)}`, {
+	        method: 'POST'
+	    })
+	    .then(response => {
+	        if (!response.ok) {
+	        	 $('#loader1').modal('hide');
+	            throw new Error('Network response was not ok');
+	        }
+	        return response.json(); 
+	    })
+	    .then(data => {
+	    	 $('#loader1').modal('hide');
+	        alert('Procedure executed successfully!');	 
+	        window.location.reload();
+	    })
+	    .catch(error => {
+	    	 $('#loader1').modal('hide');
+	        console.error('Error executing procedure:', error);
+	        alert('Failed to execute procedure. Please try again.');
+	    })
+	    .finally(() => {
+	    	 $('#loader1').modal('hide');
+	        generateBtn.disabled = false;
+	        generateBtn.innerText = originalText;
+	    });
+	}
+ 
+ function executeprocedurePerRow(a){
+	 
+	 if (window.location.pathname.includes("monthly1")) {			
+	 const selectedDate = document.getElementById("dateinput").value;
+	 
+	 var srl_no = a.getAttribute("data-srl_no");
+	    
+	    const generateBtn = this;
+	    const originalText = generateBtn.innerText;
+	    generateBtn.disabled = true;
+	    generateBtn.innerText = 'Generating...';
+	    //alert(srl_no);
+
+	    $('#loader1').modal('show');
+	    fetch(`./executeProcedure?reportDate=${encodeURIComponent(selectedDate)}&srl_no=${srl_no}`, {
+	        method: 'POST'
+	    })
+	    .then(response => {
+	        if (!response.ok) {
+	        	 $('#loader1').modal('hide');
+	            throw new Error('Network response was not ok');
+	        }
+	        return response.json(); 
+	    })
+	    .then(data => {
+	    	 $('#loader1').modal('hide');
+	        alert('Procedure executed successfully!');	 
+	        window.location.reload();
+	    })
+	    .catch(error => {
+	    	 $('#loader1').modal('hide');
+	        console.error('Error executing procedure:', error);
+	        alert('Failed to execute procedure. Please try again.');
+	    })
+	    .finally(() => {
+	    	 $('#loader1').modal('hide');
+	        generateBtn.disabled = false;
+	        generateBtn.innerText = originalText;
+	    });
+	 }
+	 else{
+		 alert("Currently only available for Monthly 1 ")
+	 }
+ }
+ 
+ 
+
+ function fetchdata(){	 
+	 const value = document.getElementById("dateinput").value;
+	  if (!value) {
+	    alert("Please select a date");
+	    return;
+	  }
+	  if (value.length === 10) {
+	    window.location.href = "./monthly1?report_date=" + value;
+	  } else {
+	    alert("Invalid date");
+	  }
+ }
+ 
+ 
 </script>
 
 </head>
@@ -436,10 +677,26 @@ document.addEventListener("DOMContentLoaded", function () {
 				<div class="float-left">
 					<h5 th:text="${menu}" style="color: white;"></h5>
 				</div>
-				
-				
-				
-			</div>
+
+					<div class="float-right">
+						<div class="row formline" th:if="${menu} == 'Monthly 1 - BRF Report'">
+							<button type="button" class="btn btn-xs btn-primary"
+								id="generatebtn" style="display: none;"
+								onclick="generatepopup()">Data Validation</button>
+							<label
+								style="color: white; padding-left: 20px; padding-right: 20px;margin-top:5px; font-size: medium; font-weight: bolder;">Report
+								Date : </label>
+							<div style="margin-top: 5px;">
+								<input type="date" id="dateinput"
+									th:value="${#dates.format(reportDate, 'yyyy-MM-dd')}"
+									style="margin-top: -3px; font-size: medium; font-weight: bolder;"
+									class="form-control form-control-sm" autocomplete="off" />
+							</div>
+							<button type="button" onclick="fetchdata()" class="btn btn-sm btn-primary"><i class='fa fa-play'></i></button>
+						</div>
+					</div>
+
+				</div>
 
 				<div class="row">
 					<div class="col-sm-12">
@@ -457,6 +714,7 @@ document.addEventListener("DOMContentLoaded", function () {
 										<!-- <th style="width: 10%;">Report Type</th>
 										<th style="width: 8%;">Detail Flag</th> -->
 										<th style="width: 10%;">Status</th>
+										<th style="width: 10%;">Action</th>
 
 
 									</tr>
@@ -472,7 +730,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	th:attr="data-cust_id=${userProfile.srl_no}"
 	th:id="${userProfile.srl_no}" class="userlist">
 
-	<td class="underline" onclick="getVali(this);"
+	<td class="reportcode"
 		th:attr="data-rptcode=${userProfile.rpt_code},data-fromdate=${#dates.format(userProfile.start_date, 'dd/MM/yyyy')},data-todate=${#dates.format(userProfile.end_date, 'dd/MM/yyyy')}"
 		th:text="${userProfile.rpt_code}"></td>
 
@@ -482,6 +740,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	<!-- Add an empty status column with rpt_code as data attr -->
 	<td class="rpt-status" th:attr="data-rptcode=${userProfile.rpt_code}">Loading...</td>
+	
+	<td> <i class="fas fa-play-circle" th:attr="data-srl_no=${userProfile.srl_no}" th:onclick="executeprocedurePerRow(this);" style="cursor:pointer"></i> </td>
+									
+									
 </tr>
 
 
@@ -535,7 +797,56 @@ document.addEventListener("DOMContentLoaded", function () {
 			</div>
 		</div>
 
+<div class="modal fade" id="generateModal" tabindex="-1" role="dialog" >
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="width: 850px;">
 
+				<div class="menu-title-header"
+					style="padding: 5px; background-color: #386276;">
+					<div class="modal-title" id="exampleModalLabel"
+						style="text-align: center; color: white; font-weight: bold; background-color: #386276;">
+						 BANK OF BARODA</div>
+				</div>
+
+				<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px;">
+					<h5 style="margin-top: 2px;margin: 0; color: #495057;">
+						Data Validation</h5>
+					<div style="display: flex; align-items: center;">
+						<label
+							style="color: #495057; font-size: medium; margin: 0; padding-right: 8px;">
+							Report Date: </label>
+						<div id="reportdatedisplay"
+							style="color: black; font-weight: bold;"></div>
+					</div>
+
+				</div>
+
+				<div class="modal-body"
+					style="text-align: center; padding: 20px; max-height: 500px">
+					<p id="alertpopupmsg1" class="text-wrap text-break"
+						style="display: none;"></p>
+
+					<table
+						class="table table-bordered table-hover w-100 mb-4 text-left">
+						<thead class="thead-light">
+							<tr>
+								<th>Source Data</th>
+								<th>Data Validation</th>
+								<th>Logic Validation</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody id="modalTableBody">
+						</tbody>
+					</table>
+					<div style="display:flex; gap:15px;justify-content:center" >
+					<button type="button" class="btn btn-xs btn-primary" id="popupgeneratebtn" onclick="executeprocedureAll()" style="display:none" title="execute procedure">Generate</button> 
+					<button type="button" class="btn btn-xs btn-primary" id="closebtn">Close</button>
+					</div>
+				</div>
+			</div>
+    </div>
+</div>
 </body>
 </body>
 </html>

@@ -45,14 +45,14 @@
 	color: #08a6f1;
 	cursor: pointer;
 }
+
 .btn-primary {
 	background-color: #E77400;
 	border-color: #0c0c0c;
 }
 
-.btn-primary:not (:disabled ):not (.disabled ).active, .btn-primary:not
-	 (:disabled ):not (.disabled ):active, .show>.btn-primary.dropdown-toggle
-	{
+.btn-primary:not(:disabled ):not(.disabled ).active, .btn-primary:not(:disabled ):not(.disabled ):active,
+	.show>.btn-primary.dropdown-toggle {
 	color: #fff;
 	background-color: #cc000000;
 	border-color: #161617;
@@ -97,9 +97,9 @@
 			} else {
 				alert(responseText.status);
 
-				//	location.href="/BRBS/ReportCodeMapping?rptcode=" + reportid;
+				//	location.href="/BRF/ReportCodeMapping?rptcode=" + reportid;
 
-				//location.reload = '/BRBS/BRFValidations?rptcode=' + reportid+'&todate=' + todate;
+				//location.reload = '/BRF/BRFValidations?rptcode=' + reportid+'&todate=' + todate;
 			}
 
 		}
@@ -114,8 +114,8 @@
 	function back(a) {
 	    var remarks = a.getAttribute("data-remarks");
 	    var roleid = a.getAttribute("data-roleId");
-	    /* alert(roleid); */
-	    if (roleid === "ADM" || roleid === "GEN") {
+	    //alert("Role ID : "+roleid+" Reamrks 4 : "+remarks); 
+	    if (roleid === "ADM" || roleid === "GEN" || roleid === "Superadmin") {
 	        if (remarks) {
 	            var rest = remarks.replace(/\s/g, "");
 	            var res = rest.toLowerCase();
@@ -147,12 +147,12 @@
 	    if (remarks) {
 	        var rest = remarks.replace(/\s/g, "");
 	        var res = rest.toLowerCase();
-	        location.href = "/BRBS/" + res;
+	        location.href = "/BRF/" + res;
 	    } else {
 	        var reportcode = a.getAttribute("data-reportcode");
 	        var todate = a.getAttribute("data-todate");
 	        if (reportcode && todate) {
-	            location.href = "/BRBS/BRFValidations?rptcode=" + reportcode + "&todate=" + todate;
+	            location.href = "/BRF/BRFValidations?rptcode=" + reportcode + "&todate=" + todate;
 	        } else {
 	            window.history.back();
 	        }
@@ -191,70 +191,68 @@
 	 } */
 
 	 function getReport(a) {
-		    // Show loader
-		    $('#loader1').modal('show');
+	 		    // Show loader
+	 		    $('#loader1').modal('show');
 
-		    // Retrieve data attributes
-		    var fromdate = a.getAttribute("data-fromdate");
-		    var todate = a.getAttribute("data-todate");
-		    var asondate = a.getAttribute("data-todate");
-		    var reportid = a.getAttribute("data-rptcode");
+	 		    // Retrieve data attributes
+	 		    var fromdate = a.getAttribute("data-fromdate");
+	 		    var todate = a.getAttribute("data-todate");
+	 		    var asondate = a.getAttribute("data-todate");
+	 		    var reportid = a.getAttribute("data-rptcode");
 
-		    var form = $('#reportform')[0];
-		    $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&asondate=${asondate}`);
+	 		    var form = $('#reportform')[0];
+	 		    $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&asondate=${asondate}`);
 
-		    let showModal = false;
-		    $('tbody .userlist').each(function () {
-		        var cur_status = $(this).find('td').eq(4).text().trim();
-		        if (cur_status === 'Not ok') {
-		            showModal = true;
-		        }
-		    });
+	 		    let showModal = false;
+	 		    $('tbody .userlist').each(function () {
+	 		        var cur_status = $(this).find('td').eq(4).text().trim();
+	 		        if (cur_status === 'Not ok') {
+	 		            showModal = true;
+	 		        }
+	 		    });
 
-		    if (showModal) {
-		        // Hide loader before showing the modal
-		        $('#loader1').modal('hide');
+	 		    if (showModal) {
+	 		        // Hide loader before showing the modal
+	 		        $('#loader1').modal('hide');
 
-		        $('#validationModal').modal('show');
-		        $('#confirmGenerateReport').off('click').one('click', function () {
-		            if (confirm("Do you want to open report?")) {
-		                $('#loader1').modal('show'); // Show again before submission
-		                const type = 'RBS';
-		                $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&type=${type}&asondate=${asondate}`);
-		                form.submit();
-		            }
-		        });
-		    } else {
-		        const callUrl = `./Reports/${reportid}/PrecheckRR?fromdate=${fromdate}&todate=${todate}`;
+	 		        $('#validationModal').modal('show');
+	 		        $('#confirmGenerateReport').off('click').one('click', function () {
+	 		            if (confirm("Do you want to open report?")) {
+	 		                $('#loader1').modal('show'); // Show again before submission
+	 		                const type = 'RBS';
+	 		                $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&type=${type}&asondate=${asondate}`);
+	 		                form.submit();
+	 		            }
+	 		        });
+	 		    } else {
+	 		        const callUrl = `./Reports/${reportid}/PrecheckRR?fromdate=${fromdate}&todate=${todate}`;
 
-		        $.ajax({
-		            type: 'GET',
-		            url: callUrl,
-		            success: function (data) {
-		                if (data === 'success') {
-		                    if (confirm("Do you want to open report?")) {
-		                        const type = 'RBS';
-		                        $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&type=${type}&asondate=${asondate}`);
-		                        form.submit();
-		                    }
-		                    $('#loader1').modal('hide');
-		                } else {
-		                    $('#loader1').modal('hide');
-		                    $("#alertmsg").text(data);
-		                    $("#alert").modal("toggle");
-		                }
-		            },
-		            error: function (xhr, status, error) {
-		                console.error("Error occurred:", error);
-		                $('#loader1').modal('hide');
-		                $("#alertmsg").text("Error occurred while processing the request.");
-		                $("#alert").modal("toggle");
-		            }
-		        });
-		    }
-		}
-
-
+	 		        $.ajax({
+	 		            type: 'GET',
+	 		            url: callUrl,
+	 		            success: function (data) {
+	 		                if (data === 'success') {
+	 		                    if (confirm("Do you want to open report?")) {
+	 		                        const type = 'RBS';
+	 		                        $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&type=${type}&asondate=${asondate}`);
+	 		                        form.submit();
+	 		                    }
+	 		                    $('#loader1').modal('hide');
+	 		                } else {
+	 		                    $('#loader1').modal('hide');
+	 		                    $("#alertmsg").text(data);
+	 		                    $("#alert").modal("toggle");
+	 		                }
+	 		            },
+	 		            error: function (xhr, status, error) {
+	 		                console.error("Error occurred:", error);
+	 		                $('#loader1').modal('hide');
+	 		                $("#alertmsg").text("Error occurred while processing the request.");
+	 		                $("#alert").modal("toggle");
+	 		            }
+	 		        });
+	 		    }
+	 		}
 
 	 $(document).ready(function () {
 		    // Hide loader when validation modal is shown
@@ -275,6 +273,155 @@
 				+ fromdate + '&todate=' + todate + '&asondate=' + todate;
 	}
 	/*]]>*/
+	
+	function runsummaryprocedure(a){
+		
+		 var rptcode = a.getAttribute("data-rptcode");
+		 var todate = a.getAttribute("data-todate");
+		 
+		alert("Report code :"+rptcode+" Date : "+todate)			    
+
+		$('#loader1').modal('show');
+			    fetch(`./executeSummaryProcedure?reportDate=${todate}&rpt_code=${rptcode}`, {
+			        method: 'POST'
+			    })
+			    .then(response => {
+			        if (!response.ok) {
+			        	 $('#loader1').modal('hide');
+			            throw new Error('Network response was not ok');
+			        }
+			        return response.json(); 
+			    })
+			    .then(data => {
+			    	 $('#loader1').modal('hide');
+			        alert('Procedure executed successfully!');	 
+			        window.location.reload();
+			    })
+			    .catch(error => {
+			    	 $('#loader1').modal('hide');
+			        console.error('Error executing procedure:', error);
+			        alert('Failed to execute procedure. Please try again.');
+			    })
+			    .finally(() => {
+			    	 $('#loader1').modal('hide');
+			        
+			    });
+			
+		 
+	}
+	
+	
+	function generatepopup(a){
+	 	let selectedDate = document.getElementById("disableDate1").value;
+		//alert(selectedDate);
+		
+		 var srlno = a.getAttribute("data-srlno");
+/*
+	   	let dateObject = new Date(selectedDate);
+	   	let day = String(dateObject.getDate()).padStart(2, '0');
+	   	let month = String(dateObject.getMonth() + 1).padStart(2, '0');
+	   	let year = dateObject.getFullYear();
+	   	let formattedDate = `${day}-${month}-${year}`;*/
+	    
+	   	//document.getElementById('reportdatedisplay').textContent = formattedDate;
+		 const myModal = document.getElementById('generateModal');
+			myModal.classList.add('show');
+			myModal.style.display = 'block';
+			document.body.classList.add('modal-open'); 
+			
+
+		    const tableBody = document.getElementById('modalTableBody');
+		    tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Loading...</td></tr>';
+		    fetch(`./brfvalidationdetails?reportdate=${selectedDate}&srlno=${srlno}`)
+		        .then(response => {
+		            if (!response.ok) throw new Error("Network response was not ok");
+		            return response.json(); 
+		        })
+		        .then(data => {
+		            tableBody.innerHTML = '';
+		            
+		            if (!data || data.length === 0) {
+		                tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">No modifications found.</td></tr>';
+		                document.getElementById('popupgeneratebtn').style.display = 'none';
+		                return;
+		            }
+/*
+		            const allStatusOk = data.every(item => 
+		            item.status && item.status.trim().toUpperCase() === 'OK'
+		        	);
+		        	
+
+		        	const genBtn = document.getElementById('popupgeneratebtn');
+		        	if (allStatusOk) {
+		            	genBtn.style.display = 'block';
+		        	} else {
+		            	genBtn.style.display = 'none';
+		        	}*/
+		        	const srclistArray = data?.srclist || [];
+		        	
+					srclistArray.forEach(item => {
+	                const tr = document.createElement('tr');
+	                tr.innerHTML = `
+	                	 <td >${item.reportname}</td>
+	                    <td >${item.srlno}</td>
+	                    <td >${item.desc}</td>
+	                    <td >${item.value}</td>
+	                `;
+	                tableBody.appendChild(tr);
+	          		});
+					
+					const errorlistArray = data?.errorlist || [];
+		        	
+					errorlistArray.forEach(item => {
+		                const tr = document.createElement('tr');
+		                tr.innerHTML = `
+		                	 <td colspan="4" >${item.desc}</td>
+		                `;
+		                tableBody.appendChild(tr);
+		            });
+		        	
+		        	
+					const calclistArray = data?.calclist || [];
+		        	
+					calclistArray.forEach(item => {
+		                const tr = document.createElement('tr');
+		                tr.innerHTML = `		                	
+		                    <td colspan="3" >${item.desc}</td>
+		                    <td >${item.value}</td>
+		                `;
+		                tableBody.appendChild(tr);
+		            });
+		        						
+		        	const destlistArray = data?.destlist || [];
+		        	
+		        	destlistArray.forEach(item => {
+		                const tr = document.createElement('tr');
+		                tr.innerHTML = `
+		                    <td >${item.reportname}</td>
+		                    <td >${item.srlno}</td>
+		                    <td >${item.desc}</td>
+		                    <td >${item.value}</td>
+		                `;
+		                tableBody.appendChild(tr);
+		            });
+		        	
+
+
+		        	
+		        })
+		        .catch(error => {
+		            console.error('Error fetching details:', error);
+		            tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger p-4">Failed to load data.</td></tr>';
+		        });		    
+	 }
+	$(document).ready(function() {
+	    $('#closebtn').on('click', function() { 
+	        $('#generateModal').removeClass('show').css('display', 'none');			        
+	        $('.modal-backdrop').remove();
+	        $('body').removeClass('modal-open').css('padding-right', '');
+	    });
+	});
+	
 </script>
 </head>
 <title>BCDRS</title>
@@ -284,18 +431,24 @@
 		onclick="docEmb('Report')" id="ques"></i> -->
 	<div class="container content">
 		<div class="card" style="width: 1325px">
-			<div class="card-header " id="modheadtitle" style="width: 1325px;background-color:#376275;">
-				<b STYLE="color:white;"> BRF Report Validations </b>
+			<div class="card-header " id="modheadtitle"
+				style="width: 1325px; background-color: #376275;">
+				<b STYLE="color: white;"> BRF Report Validations </b>
 
 				<div class="float-right">
 
 					<div class="row formline">
-
-						<label style="color: white; padding-right: 20px;font-size: medium;font-weight: bolder;">Report
+						<button type="button" class="btn btn-xs btn-primary"
+							th:attr="data-rptcode=${rptcode},data-todate=${rpt_date}"
+							id="runprocedurebtn" th:onclick="runsummaryprocedure(this);"
+							th:if="${reportlist1.remarks_5 == 'M1'}">Resubmission</button>
+						<label
+							style="color: white; padding-right: 20px; font-size: medium; font-weight: bolder; padding-top: 5px; padding-left: 5px;">Report
 							Date : </label>
-						<div>
-							<input type="text" style="margin-top: -3px;font-size: medium;font-weight: bolder;" readonly 
-								th:value="${rpt_date}" id="disableDate1" value=""
+						<div style="padding-top: 5px;">
+							<input type="text"
+								style="margin-top: -3px; font-size: medium; font-weight: bolder;"
+								readonly th:value="${rpt_date}" id="disableDate1" value=""
 								class="form-control form-control-sm" autocomplete="off" />
 						</div>
 					</div>
@@ -308,16 +461,22 @@
 					<form action="#" th:object="${reportform}" method="post"
 						autocomplete="off" id="reportform">
 						<input type="hidden" th:value="${reportDate1}" id="reportdates">
+						<div th:if="${reportlist == null or #lists.isEmpty(reportlist)}"
+							class="text-center m-4">
+							<strong>No validations found for this report</strong>
+						</div>
 						<table class="table table-bordered  table-hover table-sm"
-							style="width: 100%" id="usertable">
+							style="width: 100%" id="usertable"
+							th:unless="${reportlist == null or #lists.isEmpty(reportlist)}">
 							<thead class="thead-light">
 
 								<tr>
 									<th>Validation Details</th>
-									<th>Tables</th>
-									<th>Check</th>
+									<th>Report Code</th>
+									<!-- 	<th>Check</th> -->
 									<th>Validation</th>
 									<th>Description</th>
+									<th class="text-center">View</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -334,9 +493,9 @@
 									<!-- <td th:text="${userProfile.srl_no}"></td> -->
 									<td th:text="${userProfile.val_det}"></td>
 									<td th:text="${userProfile.val_tables}"></td>
-									<td><button class="btn-primary" type="button"
+									<!-- <td><button class="btn-primary" type="button"
 											th:attr="data-srl_no=${userProfile.srl_no},data-todate=${rpt_date}"
-											form="reportform" onclick="check(this);">Check</button></td>
+											form="reportform" onclick="check(this);">Check</button></td> -->
 									<th:block th:switch="${userProfile?.cur_status}">
 										<td th:case="'Y'" style="color: green;">Ok</td>
 										<td th:case="'N'" style="color: red;">Not ok</td>
@@ -350,11 +509,14 @@
 													<td th:case="'N'" style="color: red;">Not ok</td>
 													<td th:case="*" style="color: red;"></td>
 												</th:block> -->
-
+									<td class="text-center"><button class="btn-primary"
+											type="button" th:attr="data-srlno=${userProfile.srl_no}"
+											th:onclick="generatepopup(this);">View</button></td>
 								</tr>
 							</tbody>
 						</table>
-						<div class="card-footer text-center" style="background-color:#376275">
+						<div class="card-footer text-center"
+							style="background-color: #376275">
 
 							<button type="button" class="btn btn-xs btn-primary"
 								id="btnDownload"
@@ -378,24 +540,30 @@
 
 
 
-	<div class="modal fade" id="validationModal" tabindex="-1" role="dialog" aria-labelledby="validationModalLabel" aria-hidden="true">
-	    <div class="modal-dialog" role="document">
-	        <div class="modal-content">
-	            <div class="modal-header">
-	                <h5 class="modal-title" id="validationModalLabel">Validation Failed</h5>
-	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-	                    <span aria-hidden="true">&times;</span>
-	                </button>
-	            </div>
-	            <div class="modal-body">
-	                <p>Validation failed: Do you still want to generate the report?</p>
-	            </div>
-	            <div class="modal-footer">
-	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-	                <button type="button" class="btn btn-primary" id="confirmGenerateReport">Generate Report</button>
-	            </div>
-	        </div>
-	    </div>
+	<div class="modal fade" id="validationModal" tabindex="-1"
+		role="dialog" aria-labelledby="validationModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="validationModalLabel">Validation
+						Failed</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Validation failed: Do you still want to generate the report?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary"
+						id="confirmGenerateReport">Generate Report</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 
@@ -414,27 +582,80 @@
 		</div>
 	</div>
 
-<div class="modal fade" id="loader1" data-backdrop="static"
-			data-keyboard="false">
-			<div
-				class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-				<div class="modal-content" style="background: transparent;">
-					<div class="modal-body" style="text-align: center">
-						<div>
-							<img th:src=@{/images/loader.gif} id="bfirelogo"
-								style="width: 153px; height: auto; margin-left: 18px; background-color: transparent;
-								border-color: transparent;"
-								alt="Bornfire">
-						</div>
+	<div class="modal fade" id="loader1" data-backdrop="static"
+		data-keyboard="false">
+		<div
+			class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content" style="background: transparent;">
+				<div class="modal-body" style="text-align: center">
+					<div>
+						<img th:src=@{/images/loader.gif} id="bfirelogo"
+							style="width: 153px; height: auto; margin-left: 18px; background-color: transparent; border-color: transparent;"
+							alt="Bornfire">
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 
-	</div>	
+	</div>
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 
 
+	<div class="modal fade" id="generateModal" tabindex="-1" role="dialog">
+		<div
+			class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content" style="width: 850px;">
+
+				<div class="menu-title-header"
+					style="padding: 5px; background-color: #386276;">
+					<div class="modal-title" id="exampleModalLabel"
+						style="text-align: center; color: white; font-weight: bold; background-color: #386276;">
+						BANK OF BARODA</div>
+				</div>
+
+				<div
+					style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px;">
+					<h5 style="margin-top: 2px; margin: 0; color: #495057;">
+						Validation</h5>
+					<!-- <div style="display: flex; align-items: center;">
+						<label
+							style="color: #495057; font-size: medium; margin: 0; padding-right: 8px;">
+							Report Date: </label>
+						<div id="reportdatedisplay"
+							style="color: black; font-weight: bold;"></div>
+					</div> -->
+
+				</div>
+
+				<div class="modal-body"
+					style="text-align: center; padding: 20px; max-height: 500px">
+					<p id="alertpopupmsg1" class="text-wrap text-break"
+						style="display: none;"></p>
+
+					<table
+						class="table table-bordered table-hover w-100 mb-4 text-left">
+						<thead class="thead-light">
+							<tr>
+								<th>Table Name</th>
+								<th>Serial No</th>
+								<th>Description</th>
+								<th>Value</th>
+							</tr>
+						</thead>
+						<tbody id="modalTableBody">
+						</tbody>
+					</table>
+					<div style="display: flex; gap: 15px; justify-content: center">
+						<button type="button" class="btn btn-xs btn-primary"
+							id="popupgeneratebtn" onclick="executeprocedureAll()"
+							style="display: none" title="execute procedure">Generate</button>
+						<button type="button" class="btn btn-xs btn-primary" id="closebtn">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </body>
 
