@@ -510,10 +510,10 @@
 
 
 
-						<li class="nav-item" th:if="${session.ROLEID == 'Superadmin'}">
+						<!-- <li class="nav-item" th:if="${session.ROLEID == 'Superadmin'}">
 							<a class="nav-link" id="GlSubHead" href="#" style="padding-left: 30px;"
 								onclick="contentLoad(this)">GL Parameter</a>
-						</li>
+						</li> -->
 						
 						<li class="nav-item" th:if="${session.ROLEID == 'Superadmin'}">
 							<a class="nav-link" id="GLBalanceRecon" href="#" style="padding-left: 30px;" onclick="contentLoad(this)">
@@ -565,6 +565,12 @@
 									<!--<li class="nav-item"><a class="nav-link" id="ReportReferencecode"
 											style="padding-left: 30px;" href="#" onclick="contentLoad(this)">Report
 											Reference Code</a></li>-->
+									<!-- <li class="nav-item"><a class="nav-link" id="ReportCodeMapping"
+											style="padding-left: 30px;" href="#" onclick="contentLoad(this)">Report Code
+											Mapping</a></li> -->
+									<li class="nav-item"><a class="nav-link" id="GLMapping"
+											style="padding-left: 30px;" href="#" onclick="contentLoad(this)">GL Configuration</a></li>
+											
 									<li class="nav-item"><a class="nav-link" id="ReportCodeMapping"
 											style="padding-left: 30px;" href="#" onclick="contentLoad(this)">Report Code
 											Mapping</a></li>

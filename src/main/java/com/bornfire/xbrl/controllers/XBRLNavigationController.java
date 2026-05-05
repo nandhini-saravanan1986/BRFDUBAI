@@ -23,11 +23,11 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-
 import java.util.Base64;
 
 import java.util.Arrays;
 import java.util.Calendar;
+
 
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.servlet.RequestDispatcher;
@@ -50,6 +51,8 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -58,6 +61,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Session;
@@ -66,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
@@ -76,12 +81,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -90,7 +97,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+
 import com.bornfire.xbrl.services.CalculationService;
+
+import com.bornfire.xbrl.services.MappingAccountService;
+import com.bornfire.xbrl.entities.BrfBaseMappingRepository;
+import com.bornfire.xbrl.entities.ReportTemplateConfig;
+import com.bornfire.xbrl.entities.ReportTemplateConfigRepository;
+import com.bornfire.xbrl.entities.BrfBaseMapping;
+import com.bornfire.xbrl.entities.BrfCommonMappingRepository;
+import com.bornfire.xbrl.entities.BrfCommonMapping;
+import com.bornfire.xbrl.entities.BrfCommonMappingId;
+
 import com.bornfire.xbrl.config.PasswordEncryption;
 import com.bornfire.xbrl.config.SequenceGenerator;
 import com.bornfire.xbrl.entities.AccessAndRoles;
@@ -786,6 +804,12 @@ public class XBRLNavigationController {
 
 	@Autowired
 	Ecdd_profile_report_repo Ecdd_profile_report_repo;
+	
+	@Autowired
+    private BrfBaseMappingRepository baseMappingRepo;
+	
+	@Autowired
+    private BrfCommonMappingRepository commonMappingRepo;
 
 	private String auditRefNo;
 
@@ -798,6 +822,1237 @@ public class XBRLNavigationController {
 	public void setPagesize(String pagesize) {
 		this.pagesize = pagesize;
 	}
+	
+	@GetMapping("/reportTemplate")
+	@ResponseBody
+	public Map<String,Object> getTemplate(@RequestParam String code) throws Exception {
+
+	    return reportService.readTemplate(code);
+
+	}
+	
+	@GetMapping("/GLMapping")
+	public String glConfig() {
+		return "Basemappingparameter";
+	}
+	
+	@GetMapping("/ReportCodeMapping")
+	public String reportCodeMapping() {
+        return "ReportCodeMapping";
+    }
+	
+	private final MappingAccountService mappingAccountService;
+	private final ReportServices reportService;
+	
+	public XBRLNavigationController(MappingAccountService mappingAccountService, ReportServices reportService) {
+		this.mappingAccountService = mappingAccountService;
+		this.reportService = reportService;
+	}
+	
+	@GetMapping("/BaseMappingParam/list")
+	@ResponseBody
+    public ResponseEntity<Map<String, Object>> list(
+            @RequestParam(defaultValue = "")   String search,
+            @RequestParam(defaultValue = "1")  int    page,
+            @RequestParam(defaultValue = "20") int    size) {
+
+        // guard: page must be >= 1
+        if (page < 1) page = 1;
+        if (size < 1) size = 20;
+
+        Map<String, Object> result = mappingAccountService.getBaseMappingParamList(search, page, size);
+        return ResponseEntity.ok(result);
+    }
+	
+	@PostMapping("/BaseMappingParam/save")
+	@ResponseBody
+	public ResponseEntity<String> save(@RequestBody Map<String, String> body) {
+
+	    String result = mappingAccountService.saveBaseMappingParam(body);
+
+	    // Duplicate check
+	    if (result.startsWith("Account ID already exists")) {
+	        return ResponseEntity.badRequest().body(result);   // 400
+	    }
+
+	    // Validation check
+	    if (result.contains("required")) {
+	        return ResponseEntity.badRequest().body(result);   // 400
+	    }
+
+	    // Insert failure (optional but good)
+	    if (result.startsWith("Insert failed")) {
+	        return ResponseEntity.status(500).body(result);    // 500
+	    }
+
+	    // Success
+	    return ResponseEntity.ok(result);
+	}
+	 
+		@PutMapping("/BaseMappingParam/update")
+		@ResponseBody
+	    public ResponseEntity<String> update(@RequestBody Map<String, String> body) {
+	        String result = mappingAccountService.updateBaseMappingParam(body);
+	        if ("SUCCESS".equals(result)) {
+	            return ResponseEntity.ok(result);
+	        }
+	        return ResponseEntity.badRequest().body(result);
+	    }
+	
+		@DeleteMapping("/BaseMappingParam/delete/{id}")
+		@ResponseBody
+	    public ResponseEntity<String> delete(@PathVariable("id") String accountId) {
+	        String result = mappingAccountService.deleteBaseMappingParam(accountId);
+	        if ("SUCCESS".equals(result)) {
+	            return ResponseEntity.ok(result);
+	        }
+	        return ResponseEntity.badRequest().body(result);
+	    }
+		
+		@Autowired
+		BrfBaseMappingRepository BrfBaseMappingRepository;
+		
+		@GetMapping("/allGlMapping")
+	    @ResponseBody
+	    public ResponseEntity<List<Map<String, Object>>> getAllGlMappings() {
+	        try {
+	            List<Map<String, Object>> mappings = BrfBaseMappingRepository.findAllDistinctGlMappings();
+	            return ResponseEntity.ok(mappings);
+	        } catch (Exception e) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	        }
+	    }
+		
+		@GetMapping("/glHeads")
+		@ResponseBody
+		public List<String> getGLHeads(@RequestParam String dataType) {
+		    return reportService.getGLHeads(dataType);
+		}
+		
+		@GetMapping("/glSubHeads")
+		@ResponseBody
+		public List<Map<String, String>> getGLSubHeads(@RequestParam String dataType,
+		                                                @RequestParam String glHead) {
+		    return reportService.getGLSubHeads(dataType, glHead);
+		}
+		
+		@GetMapping("/mappedAccounts")
+	    @ResponseBody
+	    public List<Map<String, String>> getMappedAccounts(
+	            @RequestParam String reportCode) {
+	 
+	        return mappingAccountService.getMappedAccounts(reportCode);
+	    }
+		
+		@GetMapping("/unmappedAccounts")
+	    @ResponseBody
+	    public List<Map<String, String>> getUnmappedAccounts(
+	            @RequestParam String reportCode) {
+	 
+	        return mappingAccountService.getUnmappedAccounts(reportCode);
+	    }
+		
+		@GetMapping("/BRFBaseTable/showAccounts")
+	    @ResponseBody
+	    public List<Map<String, Object>> showAccounts(
+	            @RequestParam(required = false, defaultValue = "") String reportCode,
+	            @RequestParam(required = false, defaultValue = "") String source,
+	            @RequestParam(required = false, defaultValue = "") String glHead,
+	            @RequestParam(required = false, defaultValue = "") String glSubHead) {
+
+	        List<Map<String, Object>> result = new ArrayList<>();
+
+	        String trimmedSource = source.trim();
+	        String trimmedGlHead = glHead.trim();
+	        String trimmedGlSubHead = glSubHead.trim();
+
+	        String dataTypeParam = null;
+	        if ("TREASURY".equalsIgnoreCase(trimmedSource)) {
+	            dataTypeParam = "TREASURY";
+	        } else if ("GL".equalsIgnoreCase(trimmedSource)) {           
+	            dataTypeParam = "GL"; 
+	        }
+
+	        String glHeadParam    = trimmedGlHead.isEmpty()    ? null : "%" + trimmedGlHead + "%";
+	        String glSubHeadParam = trimmedGlSubHead.isEmpty() ? null : "%" + trimmedGlSubHead + "%";
+
+	        try {
+	            List<BrfBaseMapping> filtered =
+	                baseMappingRepo.findByFilters(dataTypeParam, glHeadParam, glSubHeadParam);
+
+	            for (BrfBaseMapping r : filtered) {
+	                Map<String, Object> row = new LinkedHashMap<>();
+	                row.put("GL_HEAD",             r.getGlHead());
+	                row.put("GL_SUBHEAD_CODE",     r.getGlSubheadCode());
+	                row.put("ACCOUNT_ID_BACID",    r.getAccountIdBacid());
+	                row.put("ACCOUNT_DESCRIPTION", r.getAccountDescription());
+	                row.put("CURRENCY",            r.getCurrency());
+	                row.put("ACCOUNT_BALANCE_LC",  r.getAccountBalanceLc());
+	                row.put("DATA_TYPE",           r.getDataType());
+	                result.add(row);
+	            }
+	        } catch (Exception e) {
+	            System.err.println("BRFBaseTable ERROR: " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	        // ─────────────────────────────────────────────────────────────────────
+
+	        System.out.println("BRFBaseTable rows returned for Report " + reportCode + ": " + result.size());
+	        return result;
+	    }
+		
+		
+		
+		@Autowired
+	    ReportTemplateConfigRepository configRepo;
+		
+		 @PostMapping("/saveTemplateConfig")
+		    @ResponseBody
+		    public ResponseEntity<String> saveTemplateConfig(@RequestBody ReportTemplateConfig config) {
+		        configRepo.save(config);
+		        return ResponseEntity.ok("Template layout saved successfully!");
+		    }
+		
+		 @PostMapping("/BRFCommonTable/submit")
+		    @ResponseBody
+		    public Map<String, Object> submitAccounts(@RequestBody List<Map<String, String>> selectedRows) {
+		        Map<String, Object> response = new LinkedHashMap<>();
+
+		        if (selectedRows == null || selectedRows.isEmpty()) {
+		            response.put("inserted", 0);
+		            response.put("updated",  0);
+		            response.put("blocked",  new ArrayList<>());
+		            return response;
+		        }
+
+		        int totalInserted = 0;
+		        int totalUpdated  = 0;
+		        List<Map<String, String>> blockedList = new ArrayList<>();
+
+		        try {
+		            for (Map<String, String> row : selectedRows) {
+
+		                // 1. Extract fields
+		                String accountId     = row.get("accountId");
+		                String balanceLc     = row.get("balanceLc");
+		                String reportCode    = row.get("reportCode");
+		                String rowId         = row.get("rowId");
+		                String columnId      = row.get("columnId");
+		                String solId         = row.get("solId");
+		                String constCode     = row.get("constitutionCode");
+		                String legalEntity   = row.get("legalEntityType");
+		                String hniNetworth   = row.get("hniNetworth");
+		                String turnover      = row.get("turnover");
+		                String filterColumns = row.get("filterColumns");
+		                String schemeType    = row.get("schemeType");
+		                
+		                if (accountId == null || accountId.trim().isEmpty()) continue;
+
+		                // 2. Handle nulls
+		                if (reportCode   == null) reportCode   = "";
+		                if (rowId        == null) rowId        = "";
+		                if (columnId     == null) columnId     = "";
+		                if (solId        == null) solId        = "";
+		                if (constCode    == null) constCode    = "";
+		                if (legalEntity  == null) legalEntity  = "";
+		                if (hniNetworth  == null) hniNetworth  = "";
+		                if (turnover     == null) turnover     = "";
+		                if (filterColumns == null) filterColumns = "";
+		                if (schemeType   == null) schemeType   = "";
+		                
+		                // 3. Trim and finalize
+		                final String fAccountId    = accountId.trim();
+		                final String fReportCode   = reportCode.trim();
+		                final String fRowId        = rowId.trim();
+		                final String fColumnId     = columnId.trim();
+		                final String fSolId        = solId.trim();
+		                final String fBalanceLc    = balanceLc;
+		                final String fConstCode    = constCode.trim();
+		                final String fLegalEntity  = legalEntity.trim();
+		                final String fHniNetworth  = hniNetworth.trim();
+		                final String fTurnover     = turnover.trim();
+		                final String fFilterColumns = filterColumns.trim();
+		                final String fSchemeType    = schemeType.trim();
+		                
+		                // 4. Block cross-report duplicates
+		                Optional<BrfCommonMapping> conflicting =
+		                    commonMappingRepo.findConflictingMapping(
+		                        fAccountId, fRowId, fColumnId, fReportCode);
+
+		                if (conflicting.isPresent()) {
+		                    Map<String, String> blocked = new LinkedHashMap<>();
+		                    blocked.put("accountId", fAccountId);
+		                    blocked.put("savedIn",   conflicting.get().getReportCode());
+		                    blockedList.add(blocked);
+		                    System.out.println("BLOCKED: accountId=" + fAccountId
+		                        + " already in " + conflicting.get().getReportCode());
+		                    continue;
+		                }
+
+		                // 5. Find existing record by composite key (ACCOUNT_ID_BACID + ROW_ID + REPORT_CODE)
+		                //    If not found, build a fresh record from BRF_BASE_MAPPING_TABLE
+		                boolean isNew = !commonMappingRepo
+		                    .findByAccountIdBacidAndRowIdAndReportCode(fAccountId, fRowId, fReportCode)
+		                    .isPresent();
+
+		                BrfCommonMapping record = commonMappingRepo
+		                    .findByAccountIdBacidAndRowIdAndReportCode(fAccountId, fRowId, fReportCode)
+		                    .orElseGet(() -> {
+
+		                        BrfBaseMapping base = baseMappingRepo
+		                            .findByAccountIdBacid(fAccountId)
+		                            .orElse(null);
+
+		                        if (base == null) {
+		                            System.out.println("WARN: No base record for accountId=" 
+		                                + fAccountId + " — skipped.");
+		                            return null;
+		                        }
+
+		                        BrfCommonMapping newRecord = new BrfCommonMapping();
+
+		                        // Composite key
+		                        newRecord.setAccountIdBacid(fAccountId);
+		                        newRecord.setReportCode(fReportCode);
+		                        newRecord.setRowId(fRowId);
+
+		                        // Copy from base table
+		                        newRecord.setGlHead(base.getGlHead());
+		                        newRecord.setGlSubheadCode(base.getGlSubheadCode());
+		                        newRecord.setAccountDescription(base.getAccountDescription());
+		                        newRecord.setCurrency(base.getCurrency());
+		                        newRecord.setDataType(base.getDataType());
+		                        newRecord.setEntityFlg(base.getEntityFlg());
+		                        newRecord.setAuthFlg(base.getAuthFlg());
+		                        newRecord.setModifyFlg(base.getModifyFlg());
+		                        newRecord.setDelFlg(base.getDelFlg());
+		                        newRecord.setEntryUser(base.getEntryUser());
+		                        newRecord.setModifyUser(base.getModifyUser());
+		                        newRecord.setAuthUser(base.getAuthUser());
+		                        newRecord.setEntryTime(base.getEntryTime());
+		                        newRecord.setModifyTime(base.getModifyTime());
+		                        newRecord.setAuthTime(base.getAuthTime());
+		                        newRecord.setReportDate(base.getReportDate());
+		                        newRecord.setReportVersion(base.getReportVersion());
+		                        newRecord.setReportFrequency(base.getReportFrequency());
+		                        newRecord.setReportDesc(base.getReportDesc());
+		                        newRecord.setReportAddlCriteria1(base.getReportAddlCriteria1());
+		                        newRecord.setReportAddlCriteria2(base.getReportAddlCriteria2());
+		                        newRecord.setReportAddlCriteria3(base.getReportAddlCriteria3());
+
+		                        return newRecord;
+		                    });
+
+		                // 6. Skip if base record was missing
+		                if (record == null) continue;
+
+		                // 7. Apply override fields — same for both INSERT and UPDATE
+		                record.setColumnId(fColumnId);
+		                record.setAccountBalanceLc(fBalanceLc);
+		                record.setSolId(fSolId);
+		                record.setConstitutionCode(fConstCode);
+		                record.setLegalEntityType(fLegalEntity);
+		                record.setHniNetworth(fHniNetworth);
+		                record.setTurnover(fTurnover);
+		                record.setFilterColumns(fFilterColumns);
+		                record.setSchemeType(fSchemeType);
+		                
+		                // 8. Single save — JPA decides INSERT or UPDATE via composite key
+		                commonMappingRepo.save(record);
+
+		                if (isNew) {
+		                    totalInserted++;
+		                    System.out.println("INSERT: accountId=" + fAccountId
+		                        + " reportCode=" + fReportCode + " rowId=" + fRowId);
+		                } else {
+		                    totalUpdated++;
+		                    System.out.println("UPDATE: accountId=" + fAccountId
+		                        + " reportCode=" + fReportCode + " rowId=" + fRowId);
+		                }
+		            }
+
+		        } catch (Exception e) {
+		            System.err.println("SUBMIT ERROR: " + e.getMessage());
+		            e.printStackTrace();
+		            response.put("inserted", 0);
+		            response.put("updated",  0);
+		            response.put("blocked",  new ArrayList<>());
+		            response.put("message",  "Error: " + e.getMessage());
+		            return response;
+		        }
+
+		        System.out.println("SUBMIT DONE → inserted: " + totalInserted
+		            + ", updated: " + totalUpdated
+		            + ", blocked: " + blockedList.size());
+
+		        response.put("inserted", totalInserted);
+		        response.put("updated",  totalUpdated);
+		        response.put("blocked",  blockedList);
+		        return response;
+		    }
+		 
+		// Removes a single row from BRF_COMMON_MAPPING_TABLE by composite key.
+		    @GetMapping("/BRFCommonTable/deleteMapping")
+		    @ResponseBody
+		    public Map<String, Object> deleteMapping(
+		            @RequestParam String accountId,
+		            @RequestParam String reportCode,
+		            @RequestParam String rowId) {
+
+		        Map<String, Object> response = new LinkedHashMap<>();
+
+		        try {
+		            BrfCommonMappingId pk =
+		                new BrfCommonMappingId(
+		                    accountId.trim(), reportCode.trim(), rowId.trim());
+
+		            if (!commonMappingRepo.existsById(pk)) {
+		                response.put("status",  "NOT_FOUND");
+		                response.put("message", "No mapping found for accountId=" + accountId
+		                    + ", reportCode=" + reportCode + ", rowId=" + rowId);
+		                return response;
+		            }
+
+		            commonMappingRepo.deleteById(pk);
+
+		            System.out.println("DELETE MAPPING: accountId=" + accountId
+		                + " reportCode=" + reportCode + " rowId=" + rowId);
+
+		            response.put("status",  "SUCCESS");
+		            response.put("message", "Mapping deleted successfully.");
+
+		        } catch (Exception e) {
+		            System.err.println("DELETE MAPPING ERROR: " + e.getMessage());
+		            e.printStackTrace();
+		            response.put("status",  "ERROR");
+		            response.put("message", "Error: " + e.getMessage());
+		        }
+
+		        return response;
+		    }
+		    
+		    @PostMapping("/BRFCommonTable/updateMapping")
+		    @ResponseBody
+		    @Transactional
+		    public Map<String, Object> updateMapping(@RequestBody Map<String, String> row) {
+		        Map<String, Object> response = new LinkedHashMap<>();
+
+		        try {
+		            String accountId    = nvl(row.get("accountId")).trim();
+		            String reportCode   = nvl(row.get("reportCode")).trim();
+		            String oldRowId     = nvl(row.get("oldRowId")).trim();   // original key
+		            String newRowId     = nvl(row.get("rowId")).trim();      // possibly changed
+		            String columnId     = nvl(row.get("columnId")).trim();
+		            String balanceLc    = nvl(row.get("balanceLc"));
+		            String solId        = nvl(row.get("solId")).trim();
+		            String constCode    = nvl(row.get("constitutionCode")).trim();
+		            String legalEntity  = nvl(row.get("legalEntityType")).trim();
+		            String hniNetworth  = nvl(row.get("hniNetworth")).trim();
+		            String turnover     = nvl(row.get("turnover")).trim();
+		            String filterCols   = nvl(row.get("filterColumns")).trim();
+		            String schemeType   = nvl(row.get("schemeType")).trim(); 
+
+		            if (accountId.isEmpty() || reportCode.isEmpty() || oldRowId.isEmpty()) {
+		                response.put("status",  "ERROR");
+		                response.put("message", "accountId, reportCode and oldRowId are required.");
+		                return response;
+		            }
+
+		            // 1. Find the ORIGINAL record by the old composite key
+		            BrfCommonMappingId oldPk = new BrfCommonMappingId(accountId, reportCode, oldRowId);
+		            BrfCommonMapping existing = commonMappingRepo.findById(oldPk).orElse(null);
+
+		            if (existing == null) {
+		                response.put("status",  "NOT_FOUND");
+		                response.put("message", "No record found for accountId=" + accountId
+		                    + ", reportCode=" + reportCode + ", rowId=" + oldRowId);
+		                return response;
+		            }
+
+		            boolean rowIdChanged = !oldRowId.equals(newRowId);
+
+		            if (rowIdChanged) {
+		                // ROW_ID is part of the PK — we must delete old + insert new
+		                // 2a. Check if the new composite key already exists (avoid duplicate PK)
+		                BrfCommonMappingId newPk = new BrfCommonMappingId(accountId, reportCode, newRowId);
+		                if (commonMappingRepo.existsById(newPk)) {
+		                    response.put("status",  "DUPLICATE");
+		                    response.put("message", "A record already exists for rowId=" + newRowId
+		                        + ". Cannot overwrite another row's data.");
+		                    return response;
+		                }
+
+		                // 2b. Delete the old record
+		                commonMappingRepo.deleteById(oldPk);
+		                commonMappingRepo.flush(); // ensure delete hits DB before insert
+
+		                // 2c. Build new record — copy all fields from existing, apply new key + overrides
+		                BrfCommonMapping newRecord = new BrfCommonMapping();
+		                newRecord.setAccountIdBacid(accountId);
+		                newRecord.setReportCode(reportCode);
+		                newRecord.setRowId(newRowId);                    // ← new PK value
+
+		                // Copy non-key fields from old record
+		                newRecord.setGlHead(existing.getGlHead());
+		                newRecord.setGlSubheadCode(existing.getGlSubheadCode());
+		                newRecord.setAccountDescription(existing.getAccountDescription());
+		                newRecord.setCurrency(existing.getCurrency());
+		                newRecord.setDataType(existing.getDataType());
+		                newRecord.setReportDesc(existing.getReportDesc());
+		                newRecord.setReportVersion(existing.getReportVersion());
+		                newRecord.setReportFrequency(existing.getReportFrequency());
+		                newRecord.setReportAddlCriteria1(existing.getReportAddlCriteria1());
+		                newRecord.setReportAddlCriteria2(existing.getReportAddlCriteria2());
+		                newRecord.setReportAddlCriteria3(existing.getReportAddlCriteria3());
+		                newRecord.setEntityFlg(existing.getEntityFlg());
+		                newRecord.setAuthFlg(existing.getAuthFlg());
+		                newRecord.setModifyFlg(existing.getModifyFlg());
+		                newRecord.setDelFlg(existing.getDelFlg());
+		                newRecord.setEntryUser(existing.getEntryUser());
+		                newRecord.setModifyUser(existing.getModifyUser());
+		                newRecord.setAuthUser(existing.getAuthUser());
+		                newRecord.setEntryTime(existing.getEntryTime());
+		                newRecord.setModifyTime(existing.getModifyTime());
+		                newRecord.setAuthTime(existing.getAuthTime());
+		                newRecord.setReportDate(existing.getReportDate());
+
+		                // Apply user-edited override fields
+		                newRecord.setColumnId(columnId);
+		                newRecord.setAccountBalanceLc(balanceLc);
+		                newRecord.setSolId(solId);
+		                newRecord.setConstitutionCode(constCode);
+		                newRecord.setLegalEntityType(legalEntity);
+		                newRecord.setHniNetworth(hniNetworth);
+		                newRecord.setTurnover(turnover);
+		                newRecord.setFilterColumns(filterCols);
+		                newRecord.setSchemeType(schemeType);
+
+		                commonMappingRepo.save(newRecord);
+
+		                System.out.println("UPDATE (key change): " + accountId
+		                    + " rowId " + oldRowId + " → " + newRowId);
+
+		            } else {
+		                // ROW_ID unchanged — simple field update on the existing record
+		                existing.setColumnId(columnId);
+		                existing.setAccountBalanceLc(balanceLc);
+		                existing.setSolId(solId);
+		                existing.setConstitutionCode(constCode);
+		                existing.setLegalEntityType(legalEntity);
+		                existing.setHniNetworth(hniNetworth);
+		                existing.setTurnover(turnover);
+		                existing.setFilterColumns(filterCols);
+		                existing.setSchemeType(schemeType);
+		                commonMappingRepo.save(existing);
+
+		                System.out.println("UPDATE (fields only): " + accountId
+		                    + " reportCode=" + reportCode + " rowId=" + oldRowId);
+		            }
+
+		            response.put("status",  "SUCCESS");
+		            response.put("updated", 1);
+
+		        } catch (Exception e) {
+		            System.err.println("UPDATE MAPPING ERROR: " + e.getMessage());
+		            e.printStackTrace();
+		            response.put("status",  "ERROR");
+		            response.put("message", "Error: " + e.getMessage());
+		        }
+
+		        return response;
+		    }
+
+		    private String nvl(String v) {
+		        return v != null ? v : "";
+		    }
+		 
+		 	@Value("${output.exportpathtemp}")
+			private String templateFolder;
+			
+			private static final DataFormatter DATA_FORMATTER = new DataFormatter();
+		    private static final Pattern STARTS_WITH_DIGIT = Pattern.compile("^\\d.*");
+		    private static final List<String> HEADER_LABELS = Arrays.asList("no", "s.n.", "s.no", "s. no.", "sr. no.", "sr.no");
+		 
+		 @GetMapping(value = "/previewExcel", produces = MediaType.TEXT_HTML_VALUE)
+		    @ResponseBody
+		    public String previewExcelTemplate(
+		            @RequestParam("code") String reportCode,
+		            @RequestParam(value = "sheet", required = false) Integer uiSheet,
+		            @RequestParam(value = "hdr", required = false) Integer uiHdr,
+		            @RequestParam(value = "data", required = false) Integer uiData,
+		            @RequestParam(value = "stop", required = false) Integer uiStop,
+		            @RequestParam(value = "col", required = false) Integer uiCol) {
+		        
+		        try {
+		            File templateFile = reportServices.findTemplate(reportCode);
+		            if (templateFile == null || !templateFile.exists()) {
+						return "<div class='alert alert-danger p-3'>Template file not found for code: " + reportCode + "</div>";
+					}
+
+					try (Workbook workbook = WorkbookFactory.create(templateFile)) {
+
+						// ── 1. DETERMINE WHICH SHEET TO LOAD ──
+						int activeSheetIndex = 0;
+						Optional<ReportTemplateConfig> savedConfig = configRepo.findById(reportCode);
+
+						if (uiSheet != null) {
+		                    activeSheetIndex = uiSheet; // User clicked a tab
+		                } else if (savedConfig.isPresent() && savedConfig.get().getSheetIndex() != null) {
+		                    activeSheetIndex = savedConfig.get().getSheetIndex(); // Loaded from DB
+		                }
+		                
+		                // Safety fallback
+		                if (activeSheetIndex >= workbook.getNumberOfSheets()) activeSheetIndex = 0;
+		                Sheet sheet = workbook.getSheetAt(activeSheetIndex);
+
+		                StringBuilder html = new StringBuilder();
+		                
+		                // ── 1. HARD CAP: Prevent Java OutOfMemory on massive formatted sheets ──
+		                int absoluteMaxRow = sheet.getLastRowNum();
+		                if (absoluteMaxRow > 2000) absoluteMaxRow = 2000; // Safety limit for preview
+
+		                // ── 2. RUN SCANNER EARLY: Find where the data actually stops ──
+		                int firstDataRow, firstStopRow, headerStart, dataStartCol;
+		                boolean isFromDB = false;
+		                Map<Integer, String> rowLabelsMap; 
+		                
+		                if (uiHdr != null && uiData != null && uiStop != null && uiCol != null) {
+		                    headerStart = uiHdr;
+		                    firstDataRow = uiData;
+		                    firstStopRow = uiStop;
+		                    dataStartCol = uiCol;
+		                    rowLabelsMap = generateRowLabels(sheet, absoluteMaxRow, firstDataRow, firstStopRow, dataStartCol);
+		                } else {
+		                    //Optional<ReportTemplateConfig> savedConfig = configRepo.findById(reportCode);
+		                    if (savedConfig.isPresent()) {
+		                        headerStart  = savedConfig.get().getHeaderStartRow();
+		                        firstDataRow = savedConfig.get().getFirstDataRow();
+		                        firstStopRow = savedConfig.get().getFirstStopRow();
+		                        dataStartCol = savedConfig.get().getDataStartCol();
+		                        isFromDB = true;
+		                        rowLabelsMap = generateRowLabels(sheet, absoluteMaxRow, firstDataRow, firstStopRow, dataStartCol);
+		                    } else {
+		                        rowLabelsMap = new HashMap<>();
+		                        int[] boundaries = executeStructuralScan(sheet, absoluteMaxRow, rowLabelsMap);
+		                        firstDataRow = boundaries[0];
+		                        firstStopRow = boundaries[1]; 
+		                        headerStart  = boundaries[2];
+		                        dataStartCol = (boundaries[3] == 0) ? 2 : 4; 
+		                    }
+		                }
+
+		                // ── 3. SMART RENDER LIMITS: Only render what we need to see ──
+		                // Render up to the stop row + 5 blank rows for breathing room
+		                int renderMaxRow = firstStopRow + 5; 
+		                if (renderMaxRow > absoluteMaxRow) renderMaxRow = absoluteMaxRow;
+
+		                // Calculate max columns ONLY for the rows we are actually rendering
+		                int renderMaxCol = 0;
+		                for (int i = 0; i <= renderMaxRow; i++) {
+		                    Row r = sheet.getRow(i);
+		                    if (r != null && r.getLastCellNum() > renderMaxCol) {
+		                        renderMaxCol = r.getLastCellNum();
+		                    }
+		                }
+		                // Cap columns to prevent horizontal bloat (usually mapping is within first 30 cols)
+		                if (renderMaxCol > 50) renderMaxCol = 50; 
+
+		                // ── 3.5 NEW: GENERATE CONTINUOUS COLUMN LABELS ──
+		                Map<Integer, String> colLabelsMap = new HashMap<>();
+		                int logicalColIndex = 0; // Always start at 0 so the first data column is 'A'
+		                
+		                for (int c = dataStartCol; c < renderMaxCol; c++) {
+		                    // Convert our relative counter (0, 1, 2) into letters (A, B, C)
+		                    String colLetter = getColumnLetter(logicalColIndex++); 
+		                    colLabelsMap.put(c, "COL" + colLetter); 
+		                }
+		                // ── 4. MERGED REGIONS (Optimized to render boundaries) ──
+		                boolean[][] skipCells = new boolean[renderMaxRow + 1][renderMaxCol];
+		                Map<String, String> spanMap = new HashMap<>();
+
+		                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+		                    CellRangeAddress region = sheet.getMergedRegion(i);
+		                    int r1 = region.getFirstRow(), r2 = region.getLastRow();
+		                    int c1 = region.getFirstColumn(), c2 = region.getLastColumn();
+
+		                    // If the merged region is entirely outside our render window, ignore it!
+		                    if (r1 > renderMaxRow || c1 >= renderMaxCol) continue;
+		                    
+		                    // Cap the spans so they don't break our HTML table width/height
+		                    int safeR2 = Math.min(r2, renderMaxRow);
+		                    int safeC2 = Math.min(c2, renderMaxCol - 1);
+
+		                    int rowspan = safeR2 - r1 + 1;
+		                    int colspan = safeC2 - c1 + 1;
+		                    spanMap.put(r1 + "," + c1, " rowspan='" + rowspan + "' colspan='" + colspan + "' ");
+
+		                    for (int r = r1; r <= safeR2; r++) {
+		                        for (int c = c1; c <= safeC2; c++) {
+		                            if (r != r1 || c != c1) skipCells[r][c] = true;
+		                        }
+		                    }
+		                }
+
+		             // ── 5. BUILD THE TUNING TOOLBAR ──
+		                String statusBadge = isFromDB 
+		                    ? "<span class='badge badge-success'>Loaded from DB</span>" 
+		                    : "<span class='badge badge-warning text-dark'>Auto-Predicted</span>";
+
+		                html.append("<div style='padding: 10px 15px; background: #fff; border-bottom: 2px solid #dcdcdc; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; left: 0; z-index: 11;'>")
+		                    .append("<div><b>Layout Tuner</b> ").append(statusBadge).append("</div>")
+		                    .append("<div style='display: flex; gap: 15px; align-items: center; font-size: 12px;'>")       
+		                    .append("<input type='hidden' id='tuneSheet' value='").append(activeSheetIndex).append("'>")
+		                    .append("Header Starts (Row): <input type='number' id='tuneHdr' value='").append(headerStart + 1).append("' style='width: 60px; border: 1px solid #ccc; padding: 2px 5px;'>")
+		                    .append("Data Starts (Row): <input type='number' id='tuneData' value='").append(firstDataRow + 1).append("' style='width: 60px; border: 1px solid #ccc; padding: 2px 5px;'>")
+		                    .append("Last Data (Row): <input type='number' id='tuneStop' value='").append(firstStopRow).append("' style='width: 60px; border: 1px solid #ccc; padding: 2px 5px;'>")
+		                    .append("Data Col (Index): <input type='number' id='tuneCol' value='").append(dataStartCol + 1).append("' style='width: 60px; border: 1px solid #ccc; padding: 2px 5px;' title='A=1, B=2, C=3...'>")
+		                    .append("<button class='btn btn-sm btn-secondary' onclick='testLayout()'>Test Layout</button>")
+		                    .append("<button class='btn btn-sm' style='background-color:#E77400; color:white; font-weight:bold;' onclick='saveLayout()'>Save to DB</button>")
+		                    .append("</div></div>");              
+
+		                // ── 7. BUILD THE HTML TABLE (Using SMART boundaries) ──
+		                // The outer container must be position: relative for sticky elements inside to anchor correctly.
+		                html.append("<div class='table-responsive' style='width: 100%; height: calc(100vh - 420px); min-height: 400px; overflow: auto; position: relative;'>");
+		                html.append("<table class='table table-bordered table-sm' style='font-family: Calibri, verdana, sans-serif; font-size: 13px; width: max-content; background: white; margin-bottom: 0; border-collapse: separate; border-spacing: 0;'>");
+
+		                // ── STRICT STICKY HEADERS (Top Row) ──
+		                html.append("<thead><tr>");
+		                
+		                // z-index: 10 ensures the top-left corners stay above everything else when scrolling down AND right.
+		                html.append("<th style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background-color: #376275; color: white; text-align: center; position: sticky; top: 0; left: 0; z-index: 10; box-shadow: inset -1px -1px 0 #ccc;'>ROW LABEL</th>");
+		                html.append("<th style='box-sizing: border-box; width: 55px; min-width: 55px; max-width: 55px; background-color: #376275; color: white; text-align: center; position: sticky; top: 0; left: 85px; z-index: 10; box-shadow: inset -1px -1px 0 #ccc;'>ROW</th>");
+		                
+		                // ── RENDER EXCEL LETTERS + ORANGE COLUMN BADGES (Sticky Top) ──
+		                for (int c = 0; c < renderMaxCol; c++) {
+		                    String colLetter = (c < 26)
+		                        ? String.valueOf((char)('A' + c))
+		                        : String.valueOf((char)('A' + (c / 26) - 1)) + (char)('A' + (c % 26));
+		                        
+		                    String colId = colLabelsMap.get(c);
+
+		                    // z-index: 5 ensures these column headers stay above the scrolling data rows.
+		                    html.append("<th style='background-color: #e9ecf0; color: #333; text-align: center; position: sticky; top: 0; z-index: 5; box-shadow: inset 0 -1px 0 #ccc; white-space: nowrap; vertical-align: bottom;'>");
+		                    
+		                    if (colId != null) {
+		                        html.append("<div style='background:#E77400; color:white; border-radius:3px; padding:1px 5px; font-size:10px; margin-bottom:2px; font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.2);'>")
+		                            .append(colId).append("</div>");
+		                    }
+		                    
+		                    html.append(colLetter).append("</th>");
+		                }
+		                html.append("</tr></thead><tbody>");
+
+		                // LOOP USING renderMaxRow INSTEAD OF absoluteMaxRow
+		                for (int r = 0; r <= renderMaxRow; r++) {
+		                    Row row = sheet.getRow(r);
+		                    html.append("<tr>");
+
+		                    // ── STRICT STICKY DATA CELLS (Left Columns) ──
+		                    String label = rowLabelsMap.get(r);
+		                    
+		                    // z-index: 4 ensures the left columns stay above the scrolling data cells (which are z-index: 1 or auto)
+		                    if (label != null) {
+		                        html.append("<td style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background-color: #E77400; color: white; font-weight: bold; text-align: center; position: sticky; left: 0; z-index: 4; box-shadow: inset -1px 0 0 #ccc;'>")
+		                            .append(label).append("</td>");
+		                    } else {
+		                        html.append("<td style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background-color: #f8f9fa; position: sticky; left: 0; z-index: 4; box-shadow: inset -1px 0 0 #ccc;'></td>");
+		                    }
+
+		                    // Notice left is exactly 85px so it docks perfectly next to the label!
+		                    html.append("<td style='box-sizing: border-box; width: 55px; min-width: 55px; max-width: 55px; background-color: #e9ecf0; font-weight: bold; text-align: center; color: #555; position: sticky; left: 85px; z-index: 4; box-shadow: inset -2px 0 0 #ccc;'>")
+		                        .append(r + 1).append("</td>");
+
+		                    // Data Cell Loop
+		                    for (int c = 0; c < renderMaxCol; c++) {
+		                        if (skipCells[r][c]) continue; 
+
+		                        Cell cell = (row == null) ? null : row.getCell(c);
+		                        String val = (cell == null) ? "" : DATA_FORMATTER.formatCellValue(cell).trim();
+		                        String spans = spanMap.getOrDefault(r + "," + c, "");
+		                        
+		                        String styleStr = "border: 1px solid #dcdcdc; padding: 4px 8px; vertical-align: middle; z-index: 1; "; // Default z-index for data cells
+		                        
+		                        // ── THE SEMANTIC ENGINE ──
+		                        boolean isColHeaderArea = (r >= headerStart && r < firstDataRow && c >= dataStartCol);
+		                        boolean isDataZone = (r >= firstDataRow && r < firstStopRow);
+		                        boolean isCellNumeric = (cell != null && (cell.getCellTypeEnum() == CellType.NUMERIC || cell.getCellTypeEnum() == CellType.FORMULA));
+		                        
+		                        // Area Logic
+		                        if (isColHeaderArea) {
+		                            styleStr += "background-color: #376275; color: white; font-weight: bold; text-align: center; ";
+		                        } 
+		                        else if (isDataZone) {
+		                            if (c < dataStartCol) {
+		                                styleStr += "background-color: #eef4fb; color: #376275; font-weight: bold; ";
+		                            } else {
+		                                if (isCellNumeric) {
+		                                    styleStr += "background-color: #ffffff; text-align: right; ";
+		                                } else {
+		                                    styleStr += "background-color: #fdfdfd; "; 
+		                                }
+		                            }
+		                        } else {
+		                            styleStr += "background-color: #ffffff; color: #666; font-style: italic; ";
+		                        }
+
+		                        if (cell != null && cell.getCellStyle() != null) {
+		                            CellStyle style = cell.getCellStyle();
+		                            if (style.getAlignmentEnum() == HorizontalAlignment.CENTER) styleStr += "text-align: center; ";
+		                        }
+
+		                        if (val.isEmpty()) val = "&nbsp;";
+		                        html.append("<td").append(spans).append(" style='").append(styleStr).append("'>").append(val.replace("\n", "<br>")).append("</td>");
+		                    }
+		                    html.append("</tr>");
+						}
+						html.append("</tbody></table></div>");
+
+		html.append("</tbody></table></div>");
+		                
+		                // ── 8. BUILD NATIVE EXCEL TABS & COMPACT LEGEND (Bottom Bar) ──
+		                html.append("<div style='display:flex; justify-content:space-between; align-items:stretch; background:#f3f2f1; border-top:1px solid #ccc; height:32px; position:sticky; bottom:0; left:0; z-index:11;'>");
+		                
+		                html.append("<div style='display:flex; flex:1; min-width:0; overflow:hidden;'>");
+		                
+		             // Left Arrow Button
+		                html.append("<button type='button' id='scrollLeftBtn' onclick='scrollTabs(-150)' style='display:none; border:none; background:#f3f2f1; border-right:1px solid #ccc; padding:0 12px; cursor:pointer; color:#555; font-size:10px;'>&#9664;</button>");
+		                
+		                // Scrollable Tabs Container
+		                html.append("<div id='sheetTabContainer' style='display:flex; overflow:hidden; scroll-behavior:smooth; white-space:nowrap;'>");
+		                for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+		                    String sName = workbook.getSheetName(i);
+		                    if (i == activeSheetIndex) {
+		                        html.append("<div style='padding:4px 15px; background:#fff; border-right:1px solid #ccc; border-bottom:none; border-top:3px solid #107c41; font-weight:bold; color:#107c41; cursor:default; font-family:verdana; font-size:12px; box-shadow: 0 -1px 3px rgba(0,0,0,0.05); display:flex; align-items:center;'>")
+		                            .append(sName).append("</div>");
+		                    } else {
+		                        html.append("<div style='padding:4px 15px; background:#e1dfdd; border-right:1px solid #ccc; border-bottom:none; color:#333; cursor:pointer; font-family:verdana; font-size:12px; display:flex; align-items:center;' ")
+		                            .append("onclick='switchExcelSheet(").append(i).append(")' ")
+		                            .append("onmouseover='this.style.background=\"#fff\"' onmouseout='this.style.background=\"#e1dfdd\"'>")
+		                            .append(sName).append("</div>");
+		                    }
+		                }
+		                html.append("</div>"); 
+		                
+		             // Right Arrow Button
+		                html.append("<button type='button' id='scrollRightBtn' onclick='scrollTabs(150)' style='display:none; border:none; background:#f3f2f1; border-left:1px solid #ccc; border-right:1px solid #ccc; padding:0 12px; cursor:pointer; color:#555; font-size:10px;'>&#9654;</button>");
+		                html.append("</div>"); 
+
+		                // --- RIGHT SIDE: Compact Legend ---
+		                html.append("<div style='display:flex; align-items:center; gap:12px; padding:0 15px; background:#fdfdfd; font-family:verdana; font-size:10px; white-space:nowrap;'>")
+		                    .append("<div style='display:flex; align-items:center; gap:4px;'><span style='width:10px; height:10px; background:#E77400; border:1px solid #c86400; display:inline-block;'></span> <b>ROW ID</b></div>")
+		                    .append("<div style='display:flex; align-items:center; gap:4px;'><span style='width:10px; height:10px; background:#376275; border:1px solid #2a4f5e; display:inline-block;'></span> <b>Col Headers</b></div>")
+		                    .append("<div style='display:flex; align-items:center; gap:4px;'><span style='width:10px; height:10px; background:#eef4fb; border:1px solid #cdd8e6; display:inline-block;'></span> <b>Row Desc</b></div>")
+		                    .append("<div style='display:flex; align-items:center; gap:4px;'><span style='width:10px; height:10px; background:#ffffff; border:1px solid #dcdcdc; display:inline-block;'></span> <b>Data</b></div>")
+		                    .append("</div>"); 
+
+		                html.append("</div>"); // End Bottom Bar
+
+		                html.append("<script>")
+		                    .append("function checkTabOverflow() {")
+		                    .append("  var c = document.getElementById('sheetTabContainer');")
+		                    .append("  var l = document.getElementById('scrollLeftBtn');")
+		                    .append("  var r = document.getElementById('scrollRightBtn');")
+		                    .append("  if (c && l && r) {")
+		                    .append("    var isOverflowing = c.scrollWidth > c.clientWidth;")
+		                    .append("    l.style.display = isOverflowing ? 'block' : 'none';")
+		                    .append("    r.style.display = isOverflowing ? 'block' : 'none';")
+		                    .append("  }")
+		                    .append("}")
+		                    .append("checkTabOverflow();") 
+		                    .append("window.addEventListener('resize', checkTabOverflow);") 
+		                    .append("</script>");
+
+		                return html.toString();
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return "<div class='alert alert-danger p-3'>Error generating preview: " + e.getMessage() + "</div>";
+				}
+			}
+		 
+		// New helper to generate labels purely based on the boundaries
+		    private Map<Integer, String> generateRowLabels(Sheet sheet, int maxRow, int firstDataRow, int firstStopRow, int dataStartCol) {
+		        Map<Integer, String> map = new HashMap<>();
+		        int rowLabel = 101;
+		        
+		        // Loop through every row index from start to stop
+		        for (int i = firstDataRow; i < firstStopRow; i++) {
+		            // We assign the label to the index 'i' regardless of whether the row object is null
+		            // or if the cells are empty. This ensures the 101, 102, 103 sequence is unbroken.
+		            map.put(i, "ROW" + rowLabel++);
+		        }
+		        return map;
+		    }
+		    private int[] executeStructuralScan(Sheet sheet, int maxRow, Map<Integer, String> rowLabelsMap) {
+		        int firstDataRow = -1;
+		        int lastBCNumRow = -1;
+		        int firstStopRow = maxRow + 1;
+		        boolean fileHasNumB = false;
+		        int lastAllStringRow = -1; 
+
+		        // 1. BOTTOM-UP SCAN: Safely find the absolute Last Data Row
+		        int bottomUpStopRow = -1;
+		        for (int i = maxRow; i >= 0; i--) {
+		            Row row = sheet.getRow(i);
+		            if (row == null) continue;
+
+		            boolean hasContentInDataArea = false;
+		            String fullRowText = "";
+		            for (int c = 0; c < row.getLastCellNum(); c++) {
+		                Cell cell = row.getCell(c);
+		                String val = getCellValue(cell);
+		                fullRowText += val + " ";
+		                if (c >= 2 && !val.isEmpty()) hasContentInDataArea = true;
+		            }
+
+		            if (isStopRowContent(fullRowText)) continue;
+
+		            if (hasContentInDataArea) {
+		                bottomUpStopRow = i + 1; 
+		                break;
+		            }
+		        }
+		        if (bottomUpStopRow != -1) {
+		            firstStopRow = bottomUpStopRow;
+		        }
+
+		        // 2. YOUR EXACT ORIGINAL LOGIC: Pre-Scan for Data Boundaries
+		        for (int i = 0; i < firstStopRow; i++) {
+		            Row row = sheet.getRow(i);
+		            if (row == null) continue;
+
+		            String b = getCellValue(row.getCell(1));
+		            String c = getCellValue(row.getCell(2));
+		            String d = getCellValue(row.getCell(3));
+
+		            if (isStopRow(b, c, d)) { 
+		                if (i < firstStopRow) firstStopRow = i; 
+		                break; 
+		            }
+
+		            boolean bNum = isNumericLabel(b);
+		            boolean cNum = isNumericLabel(c);
+		            if (bNum) fileHasNumB = true;
+
+		            if (firstDataRow == -1) {
+		                if (bNum) {
+		                    firstDataRow = i;
+		                } else if (!fileHasNumB) {
+		                    boolean hasAnyCol = false;
+		                    boolean allString = true;
+		                    int lastCol = row.getLastCellNum();
+		                    for (int col = 2; col < lastCol; col++) {
+		                        Cell dc = row.getCell(col);
+		                        if (dc == null || dc.getCellTypeEnum() == CellType.BLANK) continue;
+		                        hasAnyCol = true;
+		                        if (dc.getCellTypeEnum() != CellType.STRING) { allString = false; break; }
+		                    }
+		                    if (hasAnyCol && allString) lastAllStringRow = i;
+		                }
+		            }
+		            if (bNum || cNum) lastBCNumRow = i;
+		        }
+
+		        if (!fileHasNumB && firstDataRow == -1 && lastAllStringRow >= 0) {
+		            firstDataRow = lastAllStringRow + 1;
+		        }
+		        if (firstDataRow == -1) firstDataRow = 0;
+
+		        // 3. YOUR EXACT ORIGINAL LOGIC: Determine Structure & Data Start Column
+		        int structure;
+		        if (!fileHasNumB) {
+		            structure = 0;
+		        } else {
+		            boolean cHasDecimal = false;
+		            for (int i = firstDataRow; i <= Math.min(lastBCNumRow, firstStopRow - 1); i++) {
+		                Row r = sheet.getRow(i);
+		                if (r != null && isDecimalLabel(getCellValue(r.getCell(2)))) {
+		                    cHasDecimal = true; break;
+		                }
+		            }
+		            structure = cHasDecimal ? 3 : 2;
+		        }
+
+		        int dataStartCol = (structure == 0) ? 2 : 4; 
+
+		        // 4. YOUR EXACT ORIGINAL LOGIC: Accurately Calculate Header Start Row
+		        int headerStart = Math.max(0, firstDataRow - 1); 
+		        
+		        if (firstDataRow > 0) {
+		            for (int r = firstDataRow - 1; r >= 0; r--) {
+		                Row hr = sheet.getRow(r);
+		                boolean hasHeaderText = false;
+		                
+		                if (hr != null) {
+		                    int lastCol = hr.getLastCellNum();
+		                    for (int col = dataStartCol; col < lastCol; col++) {
+		                        Cell cell = hr.getCell(col);
+		                        if (cell != null && cell.getCellTypeEnum() == CellType.STRING) {
+		                            if (!cell.getStringCellValue().trim().isEmpty()) {
+		                                hasHeaderText = true;
+		                                break;
+		                            }
+		                        }
+		                    }
+		                }
+		                
+		                if (hasHeaderText) {
+		                    headerStart = r; 
+		                } else {
+		                    break; 
+		                }
+		            }
+		        }
+
+		        // 5. ASSIGN ROW LABELS
+		        int rowLabelCounter = 101;
+		        for (int i = firstDataRow; i < firstStopRow; i++) {
+		            rowLabelsMap.put(i, "ROW" + (rowLabelCounter++));
+		        }
+
+		        return new int[]{firstDataRow, firstStopRow, headerStart, dataStartCol};
+		    }
+		    // Helper to check row content for stop keywords
+		    private boolean isStopRowContent(String content) {
+		        String c = content.toUpperCase();
+		        return c.contains("NOTE") || c.contains("FORM NO") || c.contains("BSD/BRF") || c.contains("COMPILED BY");
+		    }
+
+		    // ─────────────────────────────────────────────────────────────────────────────
+		    // HELPER METHODS
+		    // ─────────────────────────────────────────────────────────────────────────────
+		    private String getCellValue(Cell cell) {
+		        if (cell == null) return "";
+		        CellType type = cell.getCellTypeEnum();
+		        switch (type) {
+		            case STRING:  return cell.getStringCellValue().trim();
+		            case NUMERIC: {
+		                String formatted = DATA_FORMATTER.formatCellValue(cell).trim();
+		                if (!formatted.isEmpty()) return formatted;
+		                double n = cell.getNumericCellValue();
+		                return (n == (long) n) ? String.valueOf((long) n) : String.valueOf(n);
+		            }
+		            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
+		            case FORMULA: return "";
+		            default:      return "";
+		        }
+		    }
+
+		    private boolean isNumericLabel(String s) {
+		        return s != null && STARTS_WITH_DIGIT.matcher(s.trim()).matches();
+		    }
+
+		    private boolean isStopRow(String b, String c, String d) {
+		        String bU = b.toUpperCase(), cU = c.toUpperCase(), dU = d.toUpperCase();
+		        if (bU.startsWith("NOTE") || cU.startsWith("NOTE") || dU.startsWith("NOTE")) return true;
+		        String all = bU + " " + cU + " " + dU;
+		        return all.contains("FORM NO") || all.contains("BSD/BRF");
+		    }
+
+		    private boolean isHeaderLabel(String level1) {
+		        return HEADER_LABELS.contains(level1.toLowerCase().trim());
+		    }
+
+		    private boolean isIntegerLabel(String s) {
+		        return s != null && !s.trim().isEmpty() && s.trim().matches("^\\d+$");
+		    }
+
+		    private boolean isDecimalLabel(String s) {
+		        return s != null && !s.trim().isEmpty() && s.trim().matches("^\\d+\\.\\d+.*");
+		    }
+		    
+		    private String getColumnLetter(int column) {
+		        StringBuilder result = new StringBuilder();
+		        while (column >= 0) {
+		            int remainder = column % 26;
+		            result.insert(0, (char) ('A' + remainder));
+		            column = (column / 26) - 1;
+		        }
+		        return result.toString();
+		    }
+		    
+		    @GetMapping(value = "/previewRawExcel", produces = MediaType.TEXT_HTML_VALUE)
+		    @ResponseBody
+		    public String previewRawExcel(@RequestParam("code") String reportCode) {
+		        try {
+		            File templateFile = reportServices.findTemplate(reportCode);
+		            if (templateFile == null || !templateFile.exists()) {
+		                return "<div class='alert alert-danger p-3'>Template file not found for code: " + reportCode + "</div>";
+		            }
+
+		            try (Workbook workbook = WorkbookFactory.create(templateFile)) {
+		                Sheet sheet = workbook.getSheetAt(0);
+
+		                // Safety cap
+		                int maxRow = Math.min(sheet.getLastRowNum(), 1999);
+
+		                // ── CHECK DATABASE FOR SAVED BOUNDARIES FIRST ──
+		                int firstDataRow, firstStopRow, headerStart, dataStartCol;
+		                boolean isFromDB = false;
+		                Map<Integer, String> rowLabelsMap = new HashMap<>();
+
+		                java.util.Optional<ReportTemplateConfig> savedConfig = configRepo.findById(reportCode);
+		                
+		                if (savedConfig.isPresent()) {
+		                    headerStart  = savedConfig.get().getHeaderStartRow();
+		                    firstDataRow = savedConfig.get().getFirstDataRow();
+		                    firstStopRow = savedConfig.get().getFirstStopRow();
+		                    dataStartCol = savedConfig.get().getDataStartCol();
+		                    isFromDB = true;
+		                    rowLabelsMap = generateRowLabels(sheet, maxRow, firstDataRow, firstStopRow, dataStartCol);
+		                } else {
+		                    int[] boundaries = executeStructuralScan(sheet, maxRow, rowLabelsMap);
+		                    firstDataRow = boundaries[0];
+		                    firstStopRow = boundaries[1];
+		                    headerStart  = boundaries[2];
+		                    dataStartCol = (boundaries[3] == 0) ? 2 : 4; 
+		                }
+
+		                // Find max columns across all rendered rows
+		                int maxCol = 0;
+		                for (int r = 0; r <= maxRow; r++) {
+		                    Row row = sheet.getRow(r);
+		                    if (row != null && row.getLastCellNum() > maxCol) {
+		                        maxCol = row.getLastCellNum();
+		                    }
+		                }
+		                if (maxCol > 50) maxCol = 50; // Cap columns
+
+		                // ── NEW: GENERATE CONTINUOUS COLUMN LABELS ──
+		                Map<Integer, String> colLabelsMap = new HashMap<>();
+		                int logicalColIndex = 0; // Always start at 0 so the first data column is 'A'
+		                
+		                for (int c = dataStartCol; c < maxCol; c++) {
+		                    String colLetter = getColumnLetter(logicalColIndex++); 
+		                    colLabelsMap.put(c, "COL" + colLetter); 
+		                }
+		                // Build merged region maps
+		                boolean[][] skipCells = new boolean[maxRow + 1][maxCol];
+		                Map<String, String> spanMap = new HashMap<>();
+
+		                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+		                    CellRangeAddress region = sheet.getMergedRegion(i);
+		                    int r1 = region.getFirstRow(), r2 = region.getLastRow();
+		                    int c1 = region.getFirstColumn(), c2 = region.getLastColumn();
+
+		                    if (r1 > maxRow || c1 >= maxCol) continue;
+
+		                    int safeR2 = Math.min(r2, maxRow);
+		                    int safeC2 = Math.min(c2, maxCol - 1);
+		                    int rowspan = safeR2 - r1 + 1;
+		                    int colspan = safeC2 - c1 + 1;
+		                    spanMap.put(r1 + "," + c1, " rowspan='" + rowspan + "' colspan='" + colspan + "'");
+
+		                    for (int r = r1; r <= safeR2; r++) {
+		                        for (int c = c1; c <= safeC2; c++) {
+		                            if (r != r1 || c != c1) skipCells[r][c] = true;
+		                        }
+		                    }
+		                }
+
+		                StringBuilder html = new StringBuilder();
+
+		                // ── UPDATED: Info bar with DB Status Badge ──
+		                String statusBadge = isFromDB 
+		                    ? "<span class='badge badge-success' style='margin-left: 15px;'>Loaded from DB</span>" 
+		                    : "<span class='badge badge-warning text-dark' style='margin-left: 15px;'>Auto-Predicted</span>";
+
+		                html.append("<div style='padding: 8px 14px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; "
+		                          + "font-family: verdana; font-size: 12px; color: #555; display: flex; align-items: center;'>")
+		                    .append("<div> Click any row with an orange label to quickly map it.</div>")
+		                    .append(statusBadge)
+		                    .append("</div>");
+
+		                // Table
+		                html.append("<div style='overflow: auto; width: 100%; height: calc(100vh - 380px); min-height: 400px; position: relative;'>")
+		                    .append("<table id='rawExcelTable' style='border-collapse: collapse; font-family: Calibri, verdana, sans-serif; "
+		                          + "font-size: 13px; width: max-content; background: white;'>")
+		                    .append("<thead><tr>")
+		                    // ── STRICT STICKY HEADERS (Notice the explicit widths) ──
+		                    .append("<th style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background:#376275; color:white; border:1px solid #c0c0c0; padding:4px 8px; text-align:center; position:sticky; top:0; left:0; z-index:5;'>ROW LABEL</th>")
+		                    .append("<th style='box-sizing: border-box; width: 55px; min-width: 55px; max-width: 55px; background:#e9ecf0; color:#333; border:1px solid #c0c0c0; padding:4px 8px; text-align:center; position:sticky; top:0; left:85px; z-index:5;'>#</th>");
+
+		                // ── RENDER EXCEL LETTERS + ORANGE COLUMN BADGES ──
+		                for (int c = 0; c < maxCol; c++) {
+		                    String colLetter = (c < 26)
+		                        ? String.valueOf((char)('A' + c))
+		                        : String.valueOf((char)('A' + (c / 26) - 1)) + (char)('A' + (c % 26));
+		                        
+		                    String colId = colLabelsMap.get(c);
+
+		                    html.append("<th style='background:#e9ecf0; color:#333; border:1px solid #c0c0c0; ")
+		                        .append("padding:4px 10px; text-align:center; position:sticky; top:0; z-index:2; ")
+		                        .append("white-space:nowrap; vertical-align:bottom;'>");
+		                        
+		                    if (colId != null) {
+		                        html.append("<div style='background:#E77400; color:white; border-radius:3px; padding:1px 5px; font-size:10px; margin-bottom:2px; font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.2);'>")
+		                            .append(colId).append("</div>");
+		                    }
+		                    
+		                    html.append(colLetter).append("</th>");
+		                }
+		                html.append("</tr></thead><tbody>");
+
+		                // Data rows
+		                for (int r = 0; r <= maxRow; r++) {
+		                    Row row = sheet.getRow(r);
+		                    
+		                    String label = rowLabelsMap.get(r);
+		                    boolean hasLabel = (label != null);
+
+		                    // Add OnClick Event to the Row
+		                    if (hasLabel) {
+		                        html.append("<tr class='mappable-row' style='cursor:pointer;' onclick='openRowMappingModal(\"").append(label).append("\")' title='Click to map ").append(label).append("'>");
+		                    } else {
+		                        html.append("<tr>");
+		                    }
+
+		                    // ── STRICT STICKY DATA CELLS ──
+		                    if (hasLabel) {
+		                        html.append("<td style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background:#E77400; color:white; font-weight:bold; border:1px solid #c0c0c0; padding:3px 8px; text-align:center; position:sticky; left:0; z-index:3; box-shadow: 2px 0 5px rgba(0,0,0,0.1);'>")
+		                            .append(label).append("</td>");
+		                    } else {
+		                        html.append("<td style='box-sizing: border-box; width: 85px; min-width: 85px; max-width: 85px; background:#f8f9fa; border:1px solid #c0c0c0; position:sticky; left:0; z-index:3;'></td>");
+		                    }
+
+		                    html.append("<td style='box-sizing: border-box; width: 55px; min-width: 55px; max-width: 55px; background:#e9ecf0; color:#555; border:1px solid #c0c0c0; padding:3px 8px; text-align:center; font-size:11px; position:sticky; left:85px; z-index:3;'>")
+		                        .append(r + 1).append("</td>");
+
+		                    for (int c = 0; c < maxCol; c++) {
+		                        if (skipCells[r][c]) continue;
+
+		                        Cell cell = (row == null) ? null : row.getCell(c);
+		                        String val = (cell == null) ? "" : DATA_FORMATTER.formatCellValue(cell).trim();
+		                        String spans = spanMap.getOrDefault(r + "," + c, "");
+
+		                        boolean isBold = false;
+		                        if (cell != null && cell.getCellStyle() != null) {
+		                            Font font = workbook.getFontAt(cell.getCellStyle().getFontIndex());
+		                            isBold = font != null && font.getBold();
+		                        }
+
+		                        String fontWeight = isBold ? "font-weight:bold;" : "";
+		                        String displayVal = val.isEmpty() ? "&nbsp;" : val.replace("\n", "<br>");
+
+		                        html.append("<td").append(spans)
+		                            .append(" style='border:1px solid #d0d0d0; padding:4px 8px; ")
+		                            .append("vertical-align:middle; white-space:nowrap; background:#ffffff; ")
+		                            .append(fontWeight).append("'>")
+		                            .append(displayVal).append("</td>");
+		                    }
+		                    html.append("</tr>");
+		                }
+
+		                html.append("</tbody></table></div>");
+		                return html.toString();
+		            }
+
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		            return "<div class='alert alert-danger p-3'>Error generating preview: " + e.getMessage() + "</div>";
+		        }
+		    }
 
 	@RequestMapping("/custom-error")
 	public String handleError(HttpServletRequest request, Model model) {
@@ -5111,7 +6366,7 @@ public class XBRLNavigationController {
 		}
 	}
 
-	@RequestMapping(value = "ReportCodeMapping", method = RequestMethod.GET)
+	@RequestMapping(value = "ReportCodeMappingOld", method = RequestMethod.GET)
 
 	public String ReportCodeMapping(@RequestParam(required = false) String formmode,
 			@RequestParam(required = false) String userid, @RequestParam(required = false) String foracid,

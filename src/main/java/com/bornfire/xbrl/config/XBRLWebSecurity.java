@@ -85,7 +85,7 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 	UserAuditRepo userAuditRepo;
 
 
-	//private static final Logger logger = LoggerFactory.getLogger(XBRLReportsController.class);
+//	private static final Logger logger = LoggerFactory.getLogger(XBRLReportsController.class);
 
 	private final Integer SESSION_TIMEOUT_IN_SECONDS = 650000;
 
@@ -225,7 +225,9 @@ public class XBRLWebSecurity extends WebSecurityConfigurerAdapter {
 					response.sendRedirect("resetPassword1");
 				} else {
 					response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
 					//logger.info(exception.getMessage());
+
 					response.sendRedirect("login?error=" + exception.getMessage());
 				}
 

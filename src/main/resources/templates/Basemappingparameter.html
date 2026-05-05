@@ -1,0 +1,836 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css"
+        href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
+        th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css"
+        href="/webjars/font-awesome/5.9.0/css/all.min.css"
+        th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
+    <link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+
+    <script src="/webjars/jquery/3.4.1/jquery.min.js"
+        th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+    <script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
+        th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+    <script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
+        th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+
+    <title>Base Mapping Parameter</title>
+
+    <style>
+        /* ── Brand colours ── */
+        :root {
+            --brand-primary : #E77400;
+            --brand-header  : #376275;
+            --brand-hover   : #cc6600;
+            --brand-dark    : #0c0c0c;
+        }
+
+        /* ── Page layout ── */
+        .page-content-wrapper {
+            margin-left: 240px;
+            margin-top: 100px;
+            padding: 20px;
+        }
+        .card {
+            margin: 0 auto;
+            max-width: 98%;
+        }
+        .card-body {
+            padding: 10px 10px 0 10px;
+        }
+
+        /* ── Card header ── */
+        .card-header {
+            background-color: var(--brand-header) !important;
+        }
+        .card-header label,
+        .card-header h5 {
+            color: #fff;
+            font-family: verdana;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+        .card-header h5 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* ── Card footer ── */
+        .card-footer {
+            background-color: var(--brand-header);
+            text-align: center;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background-color: var(--brand-primary);
+            border-color: var(--brand-dark);
+        }
+        .btn-primary:hover {
+            background-color: var(--brand-hover);
+            border-color: var(--brand-dark);
+        }
+        .btn-add-new {
+            background-color: var(--brand-primary);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 4px;
+            padding: 5px 16px;
+            font-family: verdana;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+        .btn-add-new:hover { background-color: var(--brand-hover); }
+
+        /* ── Search bar ── */
+        .search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .search-wrap input {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-family: verdana;
+            font-size: 13px;
+            color: #495057;
+            width: 260px;
+        }
+        .search-wrap button {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0 4px;
+        }
+
+        /* ── Table ── */
+        .table-outer {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 480px;
+        }
+        table.bmp-table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+        table.bmp-table thead th {
+            background-color: #e9ecf0;
+            font-family: verdana;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #dee2e6;
+            padding: 8px 10px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        table.bmp-table tbody td {
+            font-family: verdana;
+            font-size: 13px;
+            color: #444;
+            border: 1px solid #dee2e6;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+        table.bmp-table tbody tr:hover {
+            background-color: #eef4fb !important;
+        }
+        table.bmp-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* ── Action icons ── */
+        .action-icons { display: flex; gap: 6px; align-items: center; justify-content: center; }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 5px;
+            font-size: 15px;
+        }
+        .icon-btn.view   { color: #17a2b8; }
+        .icon-btn.edit   { color: #E77400; }
+        .icon-btn.del    { color: #dc3545; }
+        .icon-btn:hover  { opacity: 0.75; }
+
+        /* ── Pagination ── */
+        .pagination-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        .pagination-info {
+            font-family: verdana;
+            font-size: 12px;
+            color: #555;
+        }
+        .pagination { margin: 0; }
+        .page-item.active .page-link {
+            background-color: var(--brand-header);
+            border-color: var(--brand-header);
+        }
+        .page-link {
+            font-family: verdana;
+            font-size: 12px;
+            color: var(--brand-header);
+        }
+        .page-link:hover { color: var(--brand-primary); }
+
+        /* ── Toolbar row ── */
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* ── Loading spinner ── */
+        #tableSpinner {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            font-family: verdana;
+            font-size: 13px;
+            color: var(--brand-header);
+        }
+
+        /* ── Modal ── */
+        .modal-header {
+            background-color: var(--brand-header);
+            color: #fff;
+        }
+        .modal-header .close { color: #fff; opacity: 1; }
+        .modal-title {
+            font-family: verdana;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .modal-label {
+            font-family: verdana;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+        }
+        .modal-label .req { color: #dc3545; margin-left: 2px; }
+        .modal-input {
+            font-family: verdana;
+            font-size: 13px;
+        }
+        .modal-footer .btn-submit-modal {
+            background-color: var(--brand-primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 18px;
+            font-family: verdana;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .modal-footer .btn-submit-modal:hover { background-color: var(--brand-hover); }
+        .modal-footer .btn-cancel-modal {
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 16px;
+            font-family: verdana;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .modal-footer .btn-cancel-modal:hover { background-color: #5a6268; }
+
+        /* ── Delete modal ── */
+        .delete-modal-header {
+            background-color: #dc3545 !important;
+        }
+        .delete-field-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+            font-family: verdana;
+            font-size: 13px;
+        }
+        .delete-field-label {
+            font-weight: bold;
+            color: #333;
+            min-width: 170px;
+        }
+        .delete-field-value {
+            color: #444;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ─── Application Header ─── -->
+<div th:insert="XBRLHeaderMenu :: header"></div>
+
+<div class="page-content-wrapper">
+    <div class="card">
+
+        <!-- ─── Card Header ─── -->
+        <div class="card-header">
+            <div class="d-flex align-items-center justify-content-between" style="width:100%;">
+                <h5>BASE MAPPING PARAMETER</h5>
+                <button class="btn-add-new" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>&nbsp; Add New
+                </button>
+            </div>
+        </div>
+
+        <!-- ─── Card Body ─── -->
+        <div class="card-body">
+
+            <!-- Toolbar -->
+            <div class="toolbar-row" style="margin-top:8px;">
+                <div class="pagination-info" id="recordInfo">Loading…</div>
+                <div class="search-wrap">
+                    <i class="fas fa-search" style="color:#6B7A8F;"></i>
+                    <input type="text" id="searchInput" placeholder="Search…"
+                           oninput="onSearchInput()" />
+                    <button onclick="clearSearch()" title="Clear search">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-outer">
+                <table class="bmp-table" id="bmpTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>GL Head</th>
+                            <th>GL Sub Head Code</th>
+                            <th>Account ID / BACID</th>
+                            <th>Account Description</th>
+                            <th>Currency</th>
+                            <th>Data Type</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bmpBody">
+                        <tr>
+                            <td colspan="8" class="text-center text-muted" style="padding:20px;">
+                                <i class="fas fa-spinner fa-spin"></i>&nbsp; Loading data…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loading overlay for page changes -->
+            <div id="tableSpinner">
+                <i class="fas fa-spinner fa-spin"></i>&nbsp; Fetching records…
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-wrap" id="paginationWrap" style="display:none;">
+                <div class="pagination-info" id="pageInfo"></div>
+                <ul class="pagination pagination-sm" id="paginationUl"></ul>
+            </div>
+
+        </div><!-- /card-body -->
+
+        <!-- ─── Card Footer ─── -->
+        <div class="card-footer">
+            <button type="button" class="btn btn-sm btn-primary" onclick="home();">Home</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="back();">Back</button>
+        </div>
+
+    </div><!-- /card -->
+</div><!-- /page-content-wrapper -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     ADD / EDIT / VIEW MODAL
+════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="crudModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:680px;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crudModalTitle">Add Record</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalRecordId" />
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">GL Head <span class="req">*</span></label>
+                        <input type="text" id="fldGlHead" class="form-control modal-input"
+                               maxlength="100" placeholder="Enter GL Head" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">GL Sub Head Code <span class="req">*</span></label>
+                        <input type="text" id="fldGlSubHead" class="form-control modal-input"
+                               maxlength="100" placeholder="Enter GL Sub Head Code" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">Account ID / BACID <span class="req">*</span></label>
+                        <input type="text" id="fldAccountId" class="form-control modal-input"
+                               maxlength="50" placeholder="Enter Account ID / BACID" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">Account Description <span class="req">*</span></label>
+                        <input type="text" id="fldAccountDesc" class="form-control modal-input"
+                               maxlength="200" placeholder="Enter Account Description" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">Currency <span class="req">*</span></label>
+                        <input type="text" id="fldCurrency" class="form-control modal-input"
+                               maxlength="10" placeholder="e.g. USD, GBP, EUR" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="modal-label">Data Type <span class="req">*</span></label>
+                        <input type="text" id="fldDataType" class="form-control modal-input"
+                               maxlength="20" placeholder="e.g. GL, TREASURY" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="crudModalFooter">
+                <button type="button" class="btn-cancel-modal" data-dismiss="modal">
+                    <i class="fas fa-times"></i>&nbsp; Cancel
+                </button>
+                <button type="button" class="btn-submit-modal" id="btnCrudSubmit" onclick="submitCrud()">
+                    <i class="fas fa-check"></i>&nbsp; Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     DELETE CONFIRMATION MODAL
+════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;" role="document">
+        <div class="modal-content">
+            <div class="modal-header delete-modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i>&nbsp; Confirm Delete
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-family:verdana;font-size:13px;font-weight:bold;color:#dc3545;margin-bottom:12px;">
+                    Are you sure you want to delete this record?
+                </p>
+                <div id="deleteDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel-modal" data-dismiss="modal">
+                    <i class="fas fa-times"></i>&nbsp; No, Cancel
+                </button>
+                <button type="button" id="btnConfirmDelete"
+                        style="background-color:#dc3545;color:#fff;border:none;border-radius:4px;
+                               padding:5px 18px;font-family:verdana;font-size:13px;cursor:pointer;"
+                        onclick="confirmDelete()">
+                    <i class="fas fa-trash-alt"></i>&nbsp; Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   GLOBAL STATE
+══════════════════════════════════════════════════════════════════════ */
+var _currentPage  = 1;
+var _pageSize     = 20;
+var _totalRecords = 0;
+var _totalPages   = 0;
+var _searchTerm   = '';
+var _searchTimer  = null;
+var _deleteTarget = null;   // row data for the record pending deletion
+var _crudMode     = 'add';  // 'add' | 'edit' | 'view'
+
+/* ══════════════════════════════════════════════════════════════════════
+   ON PAGE LOAD
+══════════════════════════════════════════════════════════════════════ */
+$(document).ready(function () {
+    loadPage(1);
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOAD PAGE  (server-side pagination)
+
+   Backend endpoint (Spring Controller) expected:
+   GET /BRF/BaseMappingParam/list?page=1&size=20&search=xxx
+
+   Expected JSON response:
+   {
+     "totalRecords": 50000,
+     "data": [ { glHead, glSubHeadCode, accountId, accountDescription, currency, dataType, id }, … ]
+   }
+══════════════════════════════════════════════════════════════════════ */
+function loadPage(page) {
+    _currentPage = page;
+
+    var $body = $('#bmpBody');
+    $body.html(
+        '<tr><td colspan="8" class="text-center" style="padding:20px;font-family:verdana;font-size:13px;color:#376275;">' +
+        '<i class="fas fa-spinner fa-spin"></i>&nbsp; Loading records…</td></tr>'
+    );
+    $('#paginationWrap').hide();
+
+    $.ajax({
+        url  : '/BRBS/BaseMappingParam/list',
+        type : 'GET',
+        data : { page: page, size: _pageSize, search: _searchTerm },
+        success: function (res) {
+            _totalRecords = res.totalRecords || 0;
+            _totalPages   = Math.ceil(_totalRecords / _pageSize) || 1;
+
+            var start = (_currentPage - 1) * _pageSize + 1;
+            var end   = Math.min(_currentPage * _pageSize, _totalRecords);
+
+            $('#recordInfo').text(
+                _totalRecords > 0
+                    ? 'Showing ' + start + ' to ' + end + ' of ' + _totalRecords + ' entries'
+                    : 'No records found'
+            );
+
+            renderTableBody(res.data || []);
+            renderPagination();
+            $('#paginationWrap').show();
+        },
+        error: function (xhr) {
+            $body.html(
+                '<tr><td colspan="8" class="text-center text-danger" style="font-family:verdana;font-size:13px;padding:20px;">' +
+                '<i class="fas fa-exclamation-circle"></i>&nbsp; Error loading data: ' +
+                (xhr.responseText || 'Server error') + '</td></tr>'
+            );
+            $('#recordInfo').text('Error loading records');
+        }
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RENDER TABLE BODY
+══════════════════════════════════════════════════════════════════════ */
+function renderTableBody(rows) {
+    var $body = $('#bmpBody').empty();
+    if (!rows || rows.length === 0) {
+        $body.html(
+            '<tr><td colspan="8" class="text-center text-muted"' +
+            ' style="padding:20px;font-family:verdana;font-size:13px;">' +
+            'No records found.</td></tr>'
+        );
+        return;
+    }
+    var offset = (_currentPage - 1) * _pageSize;
+    $.each(rows, function (i, row) {
+        var serialNo = offset + i + 1;
+        $body.append(
+        		'<tr data-id="' + nvl(row['ACCOUNT_ID_BACID']) + '">' +
+            '<td>' + serialNo + '</td>' +
+            '<td>' + nvl(row['GL_HEAD'])          + '</td>' +
+            '<td>' + nvl(row['GL_SUBHEAD_CODE'])    + '</td>' +
+            '<td>' + nvl(row['ACCOUNT_ID_BACID'])       + '</td>' +
+            '<td>' + nvl(row['ACCOUNT_DESCRIPTION'])+ '</td>' +
+            '<td>' + nvl(row['CURRENCY'])        + '</td>' +
+            '<td>' + nvl(row['DATA_TYPE'])        + '</td>' +
+            '<td style="text-align:center;">' +
+              '<div class="action-icons">' +
+                '<button class="icon-btn view"   title="View"   onclick=\'openViewModal(' + JSON.stringify(row) + ')\'>' +
+                  '<i class="fas fa-eye"></i></button>' +
+                '<button class="icon-btn edit"   title="Edit"   onclick=\'openEditModal(' + JSON.stringify(row) + ')\'>' +
+                  '<i class="fas fa-edit"></i></button>' +
+                '<button class="icon-btn del"    title="Delete" onclick=\'openDeleteModal(' + JSON.stringify(row) + ')\'>' +
+                  '<i class="fas fa-trash-alt"></i></button>' +
+              '</div>' +
+            '</td>' +
+            '</tr>'
+        );
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RENDER PAGINATION
+══════════════════════════════════════════════════════════════════════ */
+function renderPagination() {
+    var $ul = $('#paginationUl').empty();
+    $('#pageInfo').text(
+        'Page ' + _currentPage + ' of ' + _totalPages +
+        ' (' + _totalRecords + ' total records)'
+    );
+
+    // Prev
+    $ul.append(
+        '<li class="page-item ' + (_currentPage === 1 ? 'disabled' : '') + '">' +
+        '<a class="page-link" href="#" onclick="goPage(' + (_currentPage - 1) + ');return false;">' +
+        '<i class="fas fa-chevron-left"></i></a></li>'
+    );
+
+    // Page number buttons (show up to 7 pages around current)
+    var start = Math.max(1, _currentPage - 3);
+    var end   = Math.min(_totalPages, start + 6);
+    if (end - start < 6) start = Math.max(1, end - 6);
+
+    if (start > 1) {
+        $ul.append('<li class="page-item"><a class="page-link" href="#" onclick="goPage(1);return false;">1</a></li>');
+        if (start > 2) $ul.append('<li class="page-item disabled"><a class="page-link">…</a></li>');
+    }
+    for (var p = start; p <= end; p++) {
+        $ul.append(
+            '<li class="page-item ' + (p === _currentPage ? 'active' : '') + '">' +
+            '<a class="page-link" href="#" onclick="goPage(' + p + ');return false;">' + p + '</a></li>'
+        );
+    }
+    if (end < _totalPages) {
+        if (end < _totalPages - 1) $ul.append('<li class="page-item disabled"><a class="page-link">…</a></li>');
+        $ul.append('<li class="page-item"><a class="page-link" href="#" onclick="goPage(' + _totalPages + ');return false;">' + _totalPages + '</a></li>');
+    }
+
+    // Next
+    $ul.append(
+        '<li class="page-item ' + (_currentPage === _totalPages ? 'disabled' : '') + '">' +
+        '<a class="page-link" href="#" onclick="goPage(' + (_currentPage + 1) + ');return false;">' +
+        '<i class="fas fa-chevron-right"></i></a></li>'
+    );
+}
+
+function goPage(p) {
+    if (p < 1 || p > _totalPages || p === _currentPage) return;
+    loadPage(p);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════════════════════════════ */
+function onSearchInput() {
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function () {
+        _searchTerm = $('#searchInput').val().trim();
+        loadPage(1);
+    }, 400);
+}
+function clearSearch() {
+    $('#searchInput').val('');
+    _searchTerm = '';
+    loadPage(1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ADD MODAL
+══════════════════════════════════════════════════════════════════════ */
+function openAddModal() {
+    _crudMode = 'add';
+    $('#crudModalTitle').text('BASE MAPPING PARAMETER - ADD');
+    clearModalFields();
+    setModalReadonly(false);
+    $('#btnCrudSubmit').show();
+    $('#crudModal').modal('show');
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VIEW MODAL
+══════════════════════════════════════════════════════════════════════ */
+function openViewModal(row) {
+    _crudMode = 'view';
+    $('#crudModalTitle').text('BASE MAPPING PARAMETER - VIEW');
+    fillModalFields(row);
+    setModalReadonly(true);
+    $('#btnCrudSubmit').hide();
+    $('#crudModal').modal('show');
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EDIT MODAL
+══════════════════════════════════════════════════════════════════════ */
+function openEditModal(row) {
+    _crudMode = 'edit';
+    $('#crudModalTitle').text('BASE MAPPING PARAMETER - EDIT');
+    fillModalFields(row);
+    setModalReadonly(false);
+    $('#btnCrudSubmit').show();
+    $('#crudModal').modal('show');
+}
+
+/* ── helpers ── */
+function clearModalFields() {
+    $('#modalRecordId').val('');
+    $('#fldGlHead').val('');
+    $('#fldGlSubHead').val('');
+    $('#fldAccountId').val('');
+    $('#fldAccountDesc').val('');
+    $('#fldCurrency').val('');
+    $('#fldDataType').val('');
+}
+function fillModalFields(row) {
+    $('#modalRecordId').val(nvl(row['ACCOUNT_ID_BACID']));
+    $('#fldGlHead').val(nvl(row['GL_HEAD']));
+    $('#fldGlSubHead').val(nvl(row['GL_SUBHEAD_CODE']));
+    $('#fldAccountId').val(nvl(row['ACCOUNT_ID_BACID']));
+    $('#fldAccountDesc').val(nvl(row['ACCOUNT_DESCRIPTION']));
+    $('#fldCurrency').val(nvl(row['CURRENCY']));
+    $('#fldDataType').val(nvl(row['DATA_TYPE']));
+}
+function setModalReadonly(flag) {
+    $('#fldGlHead, #fldGlSubHead, #fldAccountId, #fldAccountDesc, #fldCurrency, #fldDataType')
+        .prop('readonly', flag)
+        .css('background-color', flag ? '#f8f9fa' : '#fff');
+}
+
+function submitCrud() {
+    var payload = {
+        id                 : $('#modalRecordId').val().trim(),
+        glHead             : $('#fldGlHead').val().trim(),
+        glSubHeadCode      : $('#fldGlSubHead').val().trim(),
+        oldAccountId       : $('#modalRecordId').val().trim(),
+        accountIdBacid     : $('#fldAccountId').val().trim(),
+        accountDescription : $('#fldAccountDesc').val().trim(),
+        currency           : $('#fldCurrency').val().trim(),
+        dataType           : $('#fldDataType').val().trim()
+    };
+
+    if (!payload.glHead) {
+        alert('GL Head is required.');
+        $('#fldGlHead').focus();
+        return;
+    }
+    if (!payload.glSubHeadCode) {
+        alert('GL Sub Head Code is required.');
+        $('#fldGlSubHead').focus();
+        return;
+    }
+    if (!payload.accountIdBacid) {
+        alert('Account ID / BACID is required.');
+        $('#fldAccountId').focus();
+        return;
+    }
+    if (!payload.accountDescription) {
+        alert('Account Description is required.');
+        $('#fldAccountDesc').focus();
+        return;
+    }
+    if (!payload.currency) {
+        alert('Currency is required.');
+        $('#fldCurrency').focus();
+        return;
+    }
+    if (!payload.dataType) {
+        alert('Data Type is required.');
+        $('#fldDataType').focus();
+        return;
+    }
+
+    var url    = _crudMode === 'add' ? '/BRBS/BaseMappingParam/save' : '/BRBS/BaseMappingParam/update';
+    var method = _crudMode === 'add' ? 'POST' : 'PUT';
+
+    $('#btnCrudSubmit').prop('disabled', true).text('Saving…');
+
+    $.ajax({
+        url         : url,
+        type        : method,
+        contentType : 'application/json',
+        data        : JSON.stringify(payload),
+        success: function () {
+            $('#btnCrudSubmit').prop('disabled', false).text('Submit');
+            $('#crudModal').modal('hide');
+            alert(_crudMode === 'add' ? 'Record added successfully.' : 'Record updated successfully.');
+            loadPage(_crudMode === 'add' ? 1 : _currentPage);
+        },
+        error: function (xhr) {
+            $('#btnCrudSubmit').prop('disabled', false).text('Submit');
+            alert('Error saving record: ' + (xhr.responseText || 'Server error'));
+        }
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   DELETE MODAL
+
+   SOFT DELETE query (Spring Data JPA / native query):
+   UPDATE BRF_BASE_MAPPING_TABLE
+   SET    DEL_FLG = 'Y'
+   WHERE  ACCOUNT_ID_BACID = :accountId
+     AND  (DEL_FLG IS NULL OR DEL_FLG <> 'Y')
+══════════════════════════════════════════════════════════════════════ */
+function openDeleteModal(row) {
+    _deleteTarget = row;
+
+    var html =
+        delRow('GL Head',              nvl(row['GL_HEAD']))           +
+        delRow('GL Sub Head Code',     nvl(row['GL_SUBHEAD_CODE']))    +
+        delRow('Account ID / BACID',   nvl(row['ACCOUNT_ID_BACID']))        +
+        delRow('Account Description',  nvl(row['ACCOUNT_DESCRIPTION']))+
+        delRow('Currency',             nvl(row['CURRENCY']))         +
+        delRow('Data Type',            nvl(row['DATA_TYPE']));
+
+    $('#deleteDetails').html(html);
+    $('#deleteModal').modal('show');
+}
+function delRow(label, value) {
+    return '<div class="delete-field-row">' +
+           '<span class="delete-field-label">' + label + ' :</span>' +
+           '<span class="delete-field-value">' + (value || '—') + '</span>' +
+           '</div>';
+}
+
+function confirmDelete() {
+    if (!_deleteTarget) return;
+
+    var id = _deleteTarget['ACCOUNT_ID_BACID'];
+    $('#btnConfirmDelete').prop('disabled', true).text('Deleting…');
+
+    $.ajax({
+        url  : '/BRBS/BaseMappingParam/delete/' + encodeURIComponent(id),
+        type : 'DELETE',
+        success: function () {
+            $('#btnConfirmDelete').prop('disabled', false).text('Yes, Delete');
+            $('#deleteModal').modal('hide');
+            loadPage(_currentPage);
+            
+            _deleteTarget = null;
+        },
+        error: function (xhr) {
+            $('#btnConfirmDelete').prop('disabled', false).text('Yes, Delete');
+            alert('Error deleting record: ' + (xhr.responseText || 'Server error'));
+        }
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════════════════════ */
+function home() { location.href = '/BRBS/Dashboard'; }
+function back() { window.history.back(); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   HELPER
+══════════════════════════════════════════════════════════════════════ */
+function nvl(val) { return (val !== null && val !== undefined) ? val : ''; }
+
+</script>
+
+</body>
+</html>
