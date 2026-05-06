@@ -59,10 +59,9 @@
 	function home() {
 		location.href = 'Dashboard'
 	}
-
-	function back() {
+	function Back() {
 		window.history.back();
-	}
+		}
 	
 		/*<![CDATA[*/
 		var reportlist = /*[[${reportlist}]]*/null;
@@ -382,11 +381,11 @@
 		function getReport(a) {
 			var todate = a.getAttribute("data-todate");
 			var asondate = a.getAttribute("data-todate");
-			alert("From date - " + todate);
+		//	alert("From date - " + todate);
 
 			var reportid = a.getAttribute("data-repcode");
-			alert(reportid);
-			alert("to date - " + todate)
+			//alert(reportid);
+		//	alert("to date - " + todate)
 
 
 			var Callurl;
@@ -453,7 +452,6 @@
 
 <body>
 	<div th:insert="XBRLHeaderMenu :: header"></div>
-	<i class="fa fa-question-circle" aria-hidden="true" onclick="docEmb('Report')" id="ques"></i>
 	<div class="container content">
 		<div class="row">
 			<div class="col-sm-12">
@@ -501,9 +499,9 @@
 							</div>
 						</div>
 						<div class="card-footer text-center" style="background-color: #376275;">
-							<button type="submit" class="btn btn-primary">Go</button>
+							<button type="submit" class="btn btn-primary">View List</button>
 							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
-								onclick="back();">Back</button>
+								onclick="Back();">Back</button>
 
 						</div>
 					</div>

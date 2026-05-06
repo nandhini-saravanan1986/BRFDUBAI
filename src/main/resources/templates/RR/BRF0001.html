@@ -37,6 +37,30 @@ PURPOSE		: FORT REPORT
 		th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
 	<script src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
 		th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
+		
+		
+		<script type="text/javascript">
+  $(document).ready(function () {
+	 
+  });
+  
+  
+  function tablepagination(){
+	  $('#loader1').modal("hide");
+	  $('#detailtable').DataTable({
+		  "paging": false,
+	     // "pageLength": 100,           // Show 10 rows per page
+	      "lengthChange": false,      // Hide "Show X entries"
+	      "ordering": false,          // Disable sorting on columns
+	      "info": false,               // Show "Showing X to Y of Z entries"
+	      "autoWidth": false,         // Disable automatic column sizing
+	      "searching": false,
+	      "language": {
+	        "emptyTable": "No records available"
+	      }
+	    });
+  }
+</script> 
 
 
 	<script th:inline="javascript">
@@ -73,108 +97,140 @@ PURPOSE		: FORT REPORT
 			num - page number to show to the user
 			maxpage - maximum number of pages avaialble in the data
 		 */
-		function showdetails(mode, num, maxpage) {
-			var filter = $("#filters").val();
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
+		 function showdetails(mode, num, maxpage) {
+			    var filter = $("#filters").val();
+			    var n = parseInt(num);
+			    var max = parseInt(maxpage);
+			    var Callurl;
+			    var searchKeyword = $("#globalSearch").val();
 
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
+			    if (filter != null) {
+			        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/ 
+			        Callurl += "&filter=" + filter;
+			    } else {
+			        filter = null;
+			        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/ 
+			        Callurl += "&filter=" + filter;
+			    }
+			    
+			    if (searchKeyword != null && searchKeyword.trim() !== "") {
+			        Callurl += "&searchVal=" + encodeURIComponent(searchKeyword.trim());
+			    }
 
-			if (filter != null) {
-				Callurl = Callurl + "&filter=" + filter;
-			} else {
-				Callurl = Callurl + "&filter=null";
+			    switch (mode) {
+			        case "nextpage":
+			            n += 1;
+			            if (n > max) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "prevpage":
+			            n -= 1;
+			            if (n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "givenpage":
+			            n = parseInt($("#pageno").val()) - 1;
+			            if (n > max || n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "directpage":
+			            n = parseInt(num);
+			            if (n > max || n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "search": 
+			            n = 0;
+			            Callurl += "&page=" + n;
+			            break;
+			    }
+
+			    $.ajax({
+			        type: 'get',
+			        url: Callurl,
+			        beforeSend: function () {
+			            $('#loader1').modal('show'); // 🔄 Show loader
+			        },
+			        success: function (data) {
+			            $('.content').html(data);
+			            $("#detailsbtn").addClass("active");
+			            $('#loader1').modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+			           	tablepagination();
+			        },
+			        complete: function () {
+			            $('#loader1').modal('hide'); // ✅ Hide loader
+			        },
+			        error: function () {
+			            $('#loader1').modal('hide'); // ❌ Hide even if error
+			            alert("Something went wrong. Please try again.");
+			        }
+			    });
 			}
 
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-			}
 
-			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
-					$('.content').html(data);
-					$("#detailsbtn").addClass("active");
-					tablepagination();
-				},
-				error: function () {
-					alert("Failed to load details.");
-				},
-				complete: function () {
-
-				}
-			});
-		}
-
-
-		function tablepagination() {
-			$('#detailtable').DataTable({
-				"pageLength": 100,           // Show 10 rows per page
-				"lengthChange": false,      // Hide "Show X entries"
-				"ordering": false,          // Disable sorting on columns
-				"info": true,               // Show "Showing X to Y of Z entries"
-				"autoWidth": false,         // Disable automatic column sizing
-				"searching": true,
-				"language": {
-					"emptyTable": "No records available"
-				}
-			});
-		}
 		//to fetch summary from the database - called from the summary button
 		function showsummary(mode, num, maxpage) {
+		var n = parseInt(num);
+		var max = parseInt(maxpage);
+		var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
+		Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
 
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
-			Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
-
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) return;
-					Callurl = Callurl + "&page=" + n;
-					break;
-			}
-
-
-			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
-					$('.content').html(data);
-					$("#summarybtn").addClass("active");
-				},
-				error: function () {
-					alert("Failed to load summary.");
+		switch (mode) {
+			case "nextpage":
+				n = n + 1;
+				if (n > max) {
+					console.log("Next page exceeded max, exiting");
+					$('#loader1').modal('hide');
+					return;
 				}
-			});
+				Callurl = Callurl + "&page=" + n;
+				break;
+			case "prevpage":
+				n = n - 1;
+				if (n < 0) {
+					console.log("Previous page below 0, exiting");
+					$('#loader1').modal('hide');
+					return;
+				}
+				Callurl = Callurl + "&page=" + n;
+				break;
+			case "givenpage":
+				n = parseInt($("#pageno").val()) - 1;
+				if (n > max || n < 0) {
+					console.log("Given page out of range, exiting");
+					$('#loader1').modal('hide');
+					return;
+				}
+				Callurl = Callurl + "&page=" + n;
+				break;
 		}
+
+		console.log("Calling URL: ", Callurl);
+		$('#loader1').modal('show');
+
+		$.ajax({
+			type: 'get',
+			url: Callurl,
+			success: function(data) {
+				console.log("AJAX success");
+				$('#loader1').modal('hide');
+				$('body').removeClass('modal-open');
+				$('.modal-backdrop').remove();
+				$('.content').html(data);
+				$("#summarybtn").addClass("active");
+				
+			},
+			 complete: function () {
+		            $('#loader1').modal('hide'); // ✅ Hide loader
+		        },
+			error: function(xhr) {
+				console.log("AJAX error", xhr);
+				$('#loader1').modal('hide');
+				alert("Failed to load summary.");
+			}
+		});
+	}
 
 		function sectionChange(a) {
 
@@ -1137,13 +1193,70 @@ PURPOSE		: FORT REPORT
 			<!------------------------------ Report summary section ends it will shown only if summary button clicked------------------------->
 
 			<div class="col-sm-12 customcol" th:if="${displaymode}=='detail'" th:fragment="detail">
-				<div style="overflow-x: hidden; border-right: 1px solid #dee2e6;"
-					th:class="${searchmsg == null}?'inner'">
+				<div th:class="${searchmsg == null}?'inner'">
+					<div class="row m-3 align-items-center" th:if="${reportdetailsPage != null}">
+
+						<div class="col-sm-3">
+							<div class="input-group">
+								<input type="text" id="globalSearch" class="form-control"
+									placeholder="Search " th:value="${searchvalue}">
+								<div class="input-group-append">
+									<button class="btn btn-primary" type="button"
+										onclick="showdetails('search', 0, 0)">Search</button>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-sm-9 d-flex justify-content-end" th:if="${reportdetailsPage.totalPages > 1}">
+							<div class="dataTables_paginate paging_simple_numbers">
+								<ul class="pagination mb-0">
+
+									<li class="paginate_button page-item previous"
+										th:classappend="${!reportdetailsPage.hasPrevious() ? 'disabled' : ''}">
+										<a href="javascript:void(0)"
+										th:onclick="'showdetails(\'prevpage\', ' + ${reportdetailsPage.number} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+										class="page-link">Previous</a>
+									</li>
+
+									<th:block
+										th:each="i : ${#numbers.sequence(0, reportdetailsPage.totalPages - 1)}">
+
+										<li class="paginate_button page-item"
+											th:if="${i == 0 or i == reportdetailsPage.totalPages - 1 or (i >= reportdetailsPage.number - 1 and i <= reportdetailsPage.number + 1) or (reportdetailsPage.number == 0 and i == 2) or   (reportdetailsPage.number == reportdetailsPage.totalPages - 1 and i == reportdetailsPage.totalPages - 3)}"
+											th:classappend="${i == reportdetailsPage.number ? 'active' : ''}">
+											<a href="javascript:void(0)"
+											th:onclick="'showdetails(\'directpage\', ' + ${i} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+											class="page-link" th:text="${i + 1}">1</a>
+										</li>
+
+										<li class="paginate_button page-item disabled"
+											th:if="${i == 1 and reportdetailsPage.number > 2}"><a
+											class="page-link" href="javascript:void(0)">…</a></li>
+
+										<li class="paginate_button page-item disabled"
+											th:if="${i == reportdetailsPage.totalPages - 2 and reportdetailsPage.number < reportdetailsPage.totalPages - 3}">
+											<a class="page-link" href="javascript:void(0)">…</a>
+										</li>
+
+									</th:block>
+
+									<li class="paginate_button page-item next"
+										th:classappend="${!reportdetailsPage.hasNext() ? 'disabled' : ''}">
+										<a href="javascript:void(0)"
+										th:onclick="'showdetails(\'nextpage\', ' + ${reportdetailsPage.number} + ', ' + (${reportdetailsPage.totalPages} - 1) + ')'"
+										class="page-link">Next</a>
+									</li>
+
+								</ul>
+							</div>
+						</div>
+
+					</div>
 
 					<table id="detailtable" class="table table-bordered table-sm" style="width: 1430px">
 						<thead class="thead-light">
 							<tr style="text-align: center">
-								<th></th>
+								<th th:if="${dtltype!='ARCH'}"></th>
 
 								<th>CUST ID</th>
 								<th>ACCT NO</th>
@@ -1161,7 +1274,7 @@ PURPOSE		: FORT REPORT
 						<tbody>
 							<tr th:each="report,iterator : ${reportdetails}">
 
-								<td><a data-toggle="tooltip" class="editrec" title="Click to Edit this Record"><i
+								<td th:if="${dtltype!='ARCH'}"><a data-toggle="tooltip" class="editrec" title="Click to Edit this Record"><i
 											th:classappend="${session.PERMISSIONS == 'W'}  ? addedit "
 											class="fas fa-edit" th:attr="
 										data-cust_id=${report.cust_id},

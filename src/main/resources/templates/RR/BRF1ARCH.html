@@ -4,159 +4,248 @@ CREATED BY	: ARUN.R
 CREATED ON	: 8.1.23
 PURPOSE		: BRF1ARCH Reports-development
  -->
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
 <head>
-	<link rel="stylesheet" type="text/css" href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
-		th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
-	<link rel="stylesheet" type="text/css" href="/webjars/font-awesome/5.9.0/css/all.min.css"
-		th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
-	<link rel="stylesheet" type="text/css" href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css"
-		th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
-	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
-	<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css"
+	th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/font-awesome/5.9.0/css/all.min.css"
+	th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
+<link rel="stylesheet" type="text/css"
+	href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css"
+	th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
+<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
 
 
 
-	<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
-		th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
-	<script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
-		th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
-	<script src="/webjars/jquery/3.4.1/jquery.min.js" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
-	<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js"
-		th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
+<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"
+	th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+<script src="/webjars/popper.js/1.14.7/umd/popper.min.js"
+	th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+<script src="/webjars/jquery/3.4.1/jquery.min.js"
+	th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js"
+	th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
 
-	<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js"
-		th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
+<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js"
+	th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
 
-	<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js"
-		th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
+<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js"
+	th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
 
-	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
+<script
+	src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
+	th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
+	
+	
+ <script type="text/javascript">
+  $(document).ready(function () {
+	 
+  });
+  
+  
+  function tablepagination(){
+	  $('#loader1').modal("hide");
+	  $('#detailtable').DataTable({
+		  "paging": false,
+	     // "pageLength": 100,           // Show 10 rows per page
+	      "lengthChange": false,      // Hide "Show X entries"
+	      "ordering": false,          // Disable sorting on columns
+	      "info": false,               // Show "Showing X to Y of Z entries"
+	      "autoWidth": false,         // Disable automatic column sizing
+	      "searching": false,
+	      "language": {
+	        "emptyTable": "No records available"
+	      }
+	    });
+  }
+</script> 
 
-	<script th:inline="javascript">
-		/*<![CDATA[*/
 
-		var subreportid = /*[[${subreportid}]]*/null;
+<script th:inline="javascript">
+	/*<![CDATA[*/
 
-		var secid = /*[[${secid}]]*/null;
+	var subreportid = /*[[${subreportid}]]*/null;
 
-		var permission = /*[[${session.PERMISSIONS}]]*/null;
+	var secid = /*[[${secid}]]*/null;
 
-		var dtltype = /*[[${dtltype}]]*/null;
+	var permission = /*[[${session.PERMISSIONS}]]*/null;
 
-		$(function () {
+	var dtltype = /*[[${dtltype}]]*/null;
 
-			//to make the summary button active on load
-			$("#summarybtn").addClass("active");
+	$(function() {
 
-		});
+		//to make the summary button active on load
+		$("#summarybtn").addClass("active");
 
-		//When report type change: set subreportid and secid and show summary.
-		function changeReptype() {
+	});
 
-			subreportid = $("#reporttype").find(':selected').val();
+	//When report type change: set subreportid and secid and show summary.
+	function changeReptype() {
 
-			secid = "1";
+		subreportid = $("#reporttype").find(':selected').val();
 
-			showsummary();
+		secid = "1";
 
-		};
+		showsummary();
 
-		/*to show details page - 3 parameters
-			mode - valid values are : nextpage, prevpage, givenpage, firstpage
-			num - page number to show to the user
-			maxpage - maximum number of pages avaialble in the data
-		 */
-		function showdetails(mode, num, maxpage) {
-			var filter = $("#filters").val();
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-			if (filter != null) {
-				var Callurl = /*[[@{'/Reports/'+${reportid}+'/DetailsARCH'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					//Callurl = Callurl+"&instancecode="+instancecode;
-					Callurl = Callurl + "&filter=" + filter;
-			} else {
+	};
 
-				var filter = null;
+	/*to show details page - 3 parameters
+		mode - valid values are : nextpage, prevpage, givenpage, firstpage
+		num - page number to show to the user
+		maxpage - maximum number of pages avaialble in the data
+	 */
+	 function showdetails(mode, num, maxpage) {
+		    var filter = $("#filters").val();
+		    var n = parseInt(num);
+		    var max = parseInt(maxpage);
+		    var Callurl;
+		    
+		    var searchKeyword = $("#globalSearch").val();
 
-				var Callurl = /*[[@{'/Reports/'+${reportid}+'/DetailsARCH'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					//	Callurl = Callurl+"&instancecode="+instancecode;
-					Callurl = Callurl + "&filter=" + filter;
+		    if (filter != null) {
+		        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype='ARCH')}]]*/ 
+		        Callurl += "&filter=" + filter;
+		    } else {
+		        filter = null;
+		        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype='ARCH')}]]*/ 
+		        Callurl += "&filter=" + filter;
+		    }
+		    
+		    if (searchKeyword != null && searchKeyword.trim() !== "") {
+		        Callurl += "&searchVal=" + encodeURIComponent(searchKeyword.trim());
+		    }
+
+		    switch (mode) {
+		        case "nextpage":
+		            n += 1;
+		            if (n > max) return;
+		            Callurl += "&page=" + n;
+		            break;
+		        case "prevpage":
+		            n -= 1;
+		            if (n < 0) return;
+		            Callurl += "&page=" + n;
+		            break;
+		        case "givenpage":
+		            n = parseInt($("#pageno").val()) - 1;
+		            if (n > max || n < 0) return;
+		            Callurl += "&page=" + n;
+		            break;
+		        case "directpage":
+		            n = parseInt(num);
+		            if (n > max || n < 0) return;
+		            Callurl += "&page=" + n;
+		            break;
+		        case "search": 
+		            n = 0;
+		            Callurl += "&page=" + n;
+		            break;
+		    }
+
+		    $.ajax({
+		        type: 'get',
+		        url: Callurl,
+		        beforeSend: function () {
+		            $('#loader1').modal('show'); // 🔄 Show loader
+		        },
+		        success: function (data) {
+		            $('.content').html(data);
+		            $("#detailsbtn").addClass("active");
+		            $('#loader1').modal('hide');
+					$('body').removeClass('modal-open');
+					$('.modal-backdrop').remove();
+		            tablepagination();
+		        },
+		        complete: function () {
+		            $('#loader1').modal('hide'); // ✅ Hide loader
+		        },
+		        error: function () {
+		            $('#loader1').modal('hide'); // ❌ Hide even if error
+		            alert("Something went wrong. Please try again.");
+		        }
+		    });
+		}
+	
+	//to fetch summary from the database - called from the summary button
+	function showsummary(mode, num, maxpage) {
+		 // $("#date").css("display","none");
+		var n = parseInt(num);
+		var max = parseInt(maxpage);
+		var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
+		Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
+		switch (mode) {
+		case "nextpage":
+			n = n + 1;
+			if (n > max) {
+				break;
 			}
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "prevpage":
+			n = n - 1;
+			if (n < 0) {
+				break;
 			}
-
-			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
-
-					/*<![CDATA[*/
-
-					$('.content').html(data);
-					$("#detailsbtn").addClass("active");
-					/*]]>*/
-
-				}
-			})
+			Callurl = Callurl + "&page=" + n;
+			break;
+		case "givenpage":
+			n = parseInt($("#pageno").val()) - 1;
+			if (n > max || n < 0) {
+				break;
+			}
+			Callurl = Callurl + "&page=" + n;
 		}
 
-		//to fetch summary from the database - called from the summary button
-		function showsummary(mode, num, maxpage) {
-			// $("#date").css("display","none");
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-				Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-			}
+		$.ajax({
+			type : 'get',
+			url : Callurl,
+			success : function(data) {
 
+				/*<![CDATA[*/
+					$('#loader1').modal('hide');
+				$('body').removeClass('modal-open');
+				$('.modal-backdrop').remove();
+
+				$('.content').html(data);
+				$("#summarybtn").addClass("active");
+
+				/*]]>*/
+			}
+		})
+	}
+
+	function sectionChange(a) {
+
+		secid = a;
+
+		showsummary();
+
+	};
+
+	function home() {
+
+		location.href = "/BRBS/BRFArchival";
+
+
+	}
+
+function back() {
+		 window.history.back(); 
+	}
+
+	function back1() {
+		  var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
 			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
+				type : 'get',
+				url : Callurl,
+				success : function(data) {
 
 					/*<![CDATA[*/
 
@@ -167,355 +256,314 @@ PURPOSE		: BRF1ARCH Reports-development
 				}
 			})
 		}
+	/*]]>*/
+</script>
 
-		function sectionChange(a) {
+<style>
+.nav-buttons {
+	float: right;
+}
 
-			secid = a;
+.reptitle {
+	float: left;
+}
 
-			showsummary();
+.reptitle>p {
+	margin-top: 0px;
+}
 
-		};
+.customcol {
+	padding-left: 0px;
+	padding-right: 0px;
+	min-width: 1500px;
+}
 
-		function home() {
+.btn-primary {
+	background-color: #E77400;
+	border-color: #0c0c0c;
+}
 
-			location.href = "/BRBS/BRFArchival";
+.btn-primary:not (:disabled ):not (.disabled ).active, .btn-primary:not
+	 (:disabled ):not (.disabled ):active, .show>.btn-primary.dropdown-toggle
+	{
+	color: #fff;
+	background-color: #cc000000;
+	border-color: #161617;
+}
 
+.table .thead-light th {
+	border-color: #b3b6b9;
+}
 
-		}
+.error {
+	color: red;
+	padding-left: 10px;
+}
 
-		function back() {
-			window.history.back();
-		}
+.first_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 0;
+	width: 30px;
+	margin-top: -2px;
+}
 
-		function back1() {
-			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-				$.ajax({
-					type: 'get',
-					url: Callurl,
-					success: function (data) {
+.second_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 30px;
+	width: 30px;
+	margin-top: -2px;
+}
 
-						/*<![CDATA[*/
+.third_left {
+	position: absolute;
+	*position: relative; /*ie7*/
+	left: 60px;
+	width: 150px;
+	margin-top: -2px;
+}
 
-						$('.content').html(data);
-						$("#summarybtn").addClass("active");
+.inner {
+	overflow-x: scroll;
+	overflow-y: visible;
+	/* margin-left: 60px; */
+}
 
-						/*]]>*/
-					}
-				})
-		}
-		/*]]>*/
-	</script>
+.table-bordered thead td, .table-bordered thead th {
+	border-bottom-width: 0px;
+}
 
-	<style>
-		.nav-buttons {
-			float: right;
-		}
+.table-bordered {
+	border: 0px;
+}
 
-		.reptitle {
-			float: left;
-		}
+.addedit {
+	color: #007bff;
+}
 
-		.reptitle>p {
-			margin-top: 0px;
-		}
+.addedit:hover {
+	color: #0056b3;
+}
+</style>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var currlist = /*[[${currlist}]]*/null;
+	function editsum(a) {
 
-		.customcol {
-			padding-left: 0px;
-			padding-right: 0px;
-			min-width: 1500px;
-		}
+		if (permission == 'W' && dtltype == 'report') {
+			//Assign action url for the edit/add form
+			var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
+			$("#dataedit").attr('action', url);
+			//Reset form if any data present
+			document.getElementById("dataedit").reset();
 
-		.btn-primary {
-			background-color: #E77400;
-			border-color: #0c0c0c;
-		}
+			/* //make readonly false to unique fields
+			//Make readonly fields
+			$("#cntprty_code").attr("readonly",false);
+			$("#report_date").attr("readonly",false); */
 
-		.btn-primary:not (:disabled):not (.disabled).active,
-		.btn-primary:not (:disabled):not (.disabled):active,
-		.show>.btn-primary.dropdown-toggle {
-			color: #fff;
-			background-color: #cc000000;
-			border-color: #161617;
-		}
+			//Reset errors
+			var validator = $("#dataedit").validate();
+			validator.resetForm();
 
-		.table .thead-light th {
-			border-color: #b3b6b9;
-		}
-
-		.error {
-			color: red;
-			padding-left: 10px;
-		}
-
-		.first_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 0;
-			width: 30px;
-			margin-top: -2px;
-		}
-
-		.second_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 30px;
-			width: 30px;
-			margin-top: -2px;
-		}
-
-		.third_left {
-			position: absolute;
-			*position: relative;
-			/*ie7*/
-			left: 60px;
-			width: 150px;
-			margin-top: -2px;
-		}
-
-		.inner {
-			overflow-x: scroll;
-			overflow-y: visible;
-			/* margin-left: 60px; */
-		}
-
-		.table-bordered thead td,
-		.table-bordered thead th {
-			border-bottom-width: 0px;
-		}
-
-		.table-bordered {
-			border: 0px;
-		}
-
-		.addedit {
-			color: #007bff;
-		}
-
-		.addedit:hover {
-			color: #0056b3;
-		}
-	</style>
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var currlist = /*[[${currlist}]]*/null;
-		function editsum(a) {
-
-			if (permission == 'W' && dtltype == 'report') {
-				//Assign action url for the edit/add form
-				var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
-					$("#dataedit").attr('action', url);
-				//Reset form if any data present
-				document.getElementById("dataedit").reset();
-
-				/* //make readonly false to unique fields
-				//Make readonly fields
-				$("#cntprty_code").attr("readonly",false);
-				$("#report_date").attr("readonly",false); */
-
-				//Reset errors
-				var validator = $("#dataedit").validate();
-				validator.resetForm();
-
-				$("#addedit").modal("toggle");
-
-			}
-		};
-
-		function editsubmitform() {
-
-			var reportdate = $("#report_date").val();
-			//	alert(reportdate);
-
-			if ($("#dataedit").valid()) {
-
-				var url = "./T1Edit?";
-
-				$("#dataedit").attr('action', url);
-
-				var options = {
-					success: showResponse
-					// post-submit callback 
-				};
-
-				$("#dataedit").ajaxSubmit(options);
-
-				function showResponse(responseText, statusText, xhr, $form) {
-
-					$("#alertmsg").text(responseText);
-
-					$('#alert').modal("toggle");
-
-				}
-				;
-			}
-		};
-		function verifyscreen(a) {
-
-			if (permission == 'W' && dtltype == 'report') {
-				//Assign action url for the edit/add form
-				var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
-					$("#dataedit").attr('action', url);
-				//Reset form if any data present
-				document.getElementById("dataedit").reset();
-
-				/* //make readonly false to unique fields
-				//Make readonly fields
-				$("#cntprty_code").attr("readonly",false);
-				$("#report_date").attr("readonly",false); */
-
-				//Reset errors
-				var validator = $("#dataedit").validate();
-				validator.resetForm();
-
-				$("#verify").modal("toggle");
-
-			}
-		};
-
-		function resident(a) {
-			var filter = a.id;
-			var cellValue = a.textContent || a.innerText;
-			if (cellValue != '0') {
-				//alert("rwo"+cellValue)
-				alert(filter);
-				var Callurl = /*[[@{'/Reports/'+${reportid}+'/DetailsARCH'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
-				Callurl = Callurl + "&filter=" + filter;
-				$.ajax({
-					type: 'get',
-					url: Callurl,
-					success: function (data) {
-
-						/*<![CDATA[*/
-						$('.content').html(data);
-						$("#detailsbtn").addClass("active");
-						/*]]>*/
-					}
-				})
-			} else {
-				alert("No Records available for this selected Criteria")
-			}
+			$("#addedit").modal("toggle");
 
 		}
-		function verifysubmitform(a) {
+	};
 
-			if ($("#dataverify").valid()) {
-				var entry = $("#ENTRY_USER").val();
-				var modify = $("#MODIFY_USER").val();
-				var verify = $("#VERIFY_USER").val();
+	function editsubmitform() {
 
-				//var formmode = a.getAttribute("data-formmode");
-				var url = "./T1Verify?";
+		var reportdate = $("#report_date").val();
+		//	alert(reportdate);
 
-				$("#dataverify").attr('action', url);
+		if ($("#dataedit").valid()) {
 
-				var options = {
-					success: showResponse
-					// post-submit callback 
-				};
+			var url = "./T1Edit?";
 
-				$("#dataverify").ajaxSubmit(options);
+			$("#dataedit").attr('action', url);
 
-				function showResponse(responseText, statusText, xhr, $form) {
+			var options = {
+				success : showResponse
+			// post-submit callback 
+			};
 
-					$("#alertmsg").text(responseText);
+			$("#dataedit").ajaxSubmit(options);
 
-					$('#alert').modal("toggle");
+			function showResponse(responseText, statusText, xhr, $form) {
 
-				}
-				;
-			} else {
-				$("#alertmsg").text("Same User Cannot Verify!");
+				$("#alertmsg").text(responseText);
+
 				$('#alert').modal("toggle");
 
 			}
+			;
+		}
+	};
+	function verifyscreen(a) {
 
-		};
-		function refreshPage() {
-			window.location.reload();
+		if (permission == 'W' && dtltype == 'report') {
+			//Assign action url for the edit/add form
+			var url = /*[[@{'/Reports/'+${reportid}+'/Changes/fim0800add'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency})}]]*/
+			$("#dataedit").attr('action', url);
+			//Reset form if any data present
+			document.getElementById("dataedit").reset();
+
+			/* //make readonly false to unique fields
+			//Make readonly fields
+			$("#cntprty_code").attr("readonly",false);
+			$("#report_date").attr("readonly",false); */
+
+			//Reset errors
+			var validator = $("#dataedit").validate();
+			validator.resetForm();
+
+			$("#verify").modal("toggle");
+
+		}
+	};
+	
+	function resident(a) {
+		var filter = a.id;
+		var cellValue = a.textContent || a.innerText;
+		if (cellValue != '0') {
+			//alert("rwo"+cellValue)
+			alert(filter);
+			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/;
+			Callurl = Callurl + "&filter=" + filter;
+			$.ajax({
+				type: 'get',
+				url: Callurl,
+				success: function (data) {
+
+					/*<![CDATA[*/
+					$('.content').html(data);
+					$("#detailsbtn").addClass("active");
+					/*]]>*/
+				}
+			})
+		} else {
+			alert("No Records available for this selected Criteria")
 		}
 
-	</script>
+	}
+	
+	function verifysubmitform(a) {
+
+		if ($("#dataverify").valid()) {
+			var entry = $("#ENTRY_USER").val();
+			var modify = $("#MODIFY_USER").val();
+			var verify = $("#VERIFY_USER").val();
+
+			//var formmode = a.getAttribute("data-formmode");
+			var url = "./T1Verify?";
+
+			$("#dataverify").attr('action', url);
+
+			var options = {
+				success : showResponse
+			// post-submit callback 
+			};
+
+			$("#dataverify").ajaxSubmit(options);
+
+			function showResponse(responseText, statusText, xhr, $form) {
+
+				$("#alertmsg").text(responseText);
+
+				$('#alert').modal("toggle");
+
+			}
+			;
+		} else {
+			$("#alertmsg").text("Same User Cannot Verify!");
+			$('#alert').modal("toggle");
+
+		}
+
+	};
+	function refreshPage() {
+		window.location.reload();
+	}
+
+</script>
 
 
 
 	<script>
-		function downloadexcel(button) {
-			var reportid = button.getAttribute('data-reportid');
-			var asondate = button.getAttribute('data-asondate');
-			var fromdate = button.getAttribute('data-fromdate');
-			var todate = button.getAttribute('data-todate');
-			var currency = button.getAttribute('data-currency');
-			var subreportid = button.getAttribute('data-subreportid');
-			var secid = button.getAttribute('data-secid');
-			var dtltype = button.getAttribute('data-dtltype');
-			var filetype = button.getAttribute('data-filetype');
+function downloadexcel(button) {
+	var reportid = button.getAttribute('data-reportid');
+	var asondate = button.getAttribute('data-asondate');
+	var fromdate = button.getAttribute('data-fromdate');
+	var todate = button.getAttribute('data-todate');
+	var currency = button.getAttribute('data-currency');
+	var subreportid = button.getAttribute('data-subreportid');
+	var secid = button.getAttribute('data-secid');
+	var dtltype = button.getAttribute('data-dtltype');
+	var filetype = button.getAttribute('data-filetype');
+	
+	console.log(filetype);
 
-			console.log(filetype);
+	$('#downloadProcessingModal').modal('show');
 
-			$('#downloadProcessingModal').modal('show');
-
-			$.ajax({
-				url: '/BRBS/Reports/' + reportid + '/Download',
-				data: {
-					asondate: asondate,
-					fromdate: fromdate,
-					todate: todate,
-					currency: currency,
-					subreportid: subreportid,
-					secid: secid,
-					dtltype: dtltype,
-					filetype: filetype
-				},
-				type: 'POST',
-				xhrFields: {
-					responseType: 'blob'
-				},
-				success: function (data) {
-					$('#downloadProcessingModal').modal('hide');
-					var blob = new Blob([data], {
-						type: 'application/octet-stream'
-					});
-					var url = window.URL.createObjectURL(blob);
-					var a = document.createElement('a');
-					a.href = url;
-					if (filetype == "excel" || filetype == "detailexcel") {
-						a.download = '011-BRF-001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
-					} else if (filetype == "BRF") {
-						a.download = '011-BRF-001-A' + ".xls"; // assuming .pdf extension for PDF files
-					} else {
-						a.download = '011-BRF-001-A' + ".pdf";
-					}
-
-					document.body.appendChild(a);
-					a.click();
-					window.URL.revokeObjectURL(url);
-
-					// Set the appropriate message based on the downloaded filetype
-					if (filetype == "excel") {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".xlsx");
-					} else if (filetype == "detailexcel") {
-						$('#customAlertBody').text('Downloaded BRF-001 Detail Excel' + ".xlsx");
-					} else if (filetype == "BRF") {
-						$('#customAlertBody').text('Downloaded BRF 001 ' + ".xls"); // assuming .pdf extension for PDF files
-					} else {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".pdf");
-					}
-					$('#customAlertModal').modal('show');
-				}
+	$.ajax({
+		url: '/BRBS/Reports/' + reportid + '/Download',
+		data : {
+			asondate : asondate,
+			fromdate : fromdate,
+			todate : todate,
+			currency : currency,
+			subreportid : subreportid,
+			secid : secid,
+			dtltype : dtltype,
+			filetype : filetype
+		},
+		type : 'POST',
+		xhrFields : {
+			responseType : 'blob'
+		},
+		success : function(data) {
+			$('#downloadProcessingModal').modal('hide');
+			var blob = new Blob([ data ], {
+				type : 'application/octet-stream'
 			});
+			var url = window.URL.createObjectURL(blob);
+			var a = document.createElement('a');
+			a.href = url;
+			if (filetype == "excel" || filetype == "detailexcel") {
+                a.download = '011-BRF-001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
+            } else if(filetype == "BRF"){
+                a.download = '011-BRF-001-A' + ".xls"; // assuming .pdf extension for PDF files
+            }else{
+            	a.download = '011-BRF-001-A' + ".pdf";
+            }
+            
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            // Set the appropriate message based on the downloaded filetype
+            if (filetype == "excel") {
+                $('#customAlertBody').text('Downloaded BRF-001 ' + ".xlsx");
+            } else if (filetype == "detailexcel") {
+                $('#customAlertBody').text('Downloaded BRF-001 Detail Excel' + ".xlsx");
+            }else if(filetype == "BRF"){
+            	$('#customAlertBody').text('Downloaded BRF 001 ' + ".xls"); // assuming .pdf extension for PDF files
+            } else {
+                $('#customAlertBody').text('Downloaded BRF-001 ' + ".pdf");
+            }
+            $('#customAlertModal').modal('show');
 		}
+	});
+}
 
-	</script>
+</script>
 
-	<title>XBRL</title>
+<title>XBRL</title>
 </head>
-
 <body>
 	<!----------------------------------------------------- Header Section starts ----------------------------------------------------->
 	<div th:insert="XBRLHeaderMenu :: header"></div>
-	<i class="fa fa-question-circle" aria-hidden="true" onclick="docEmb('Report')" id="ques"></i>
 	<!----------------------------------------------------- Header Section Ends ------------------------------------------------------->
 	<div class="container content" th:fragment="reportcontent">
 		<!--------------------------------------------------------------- Report title starts -------------------------------------------->
@@ -527,21 +575,22 @@ PURPOSE		: BRF1ARCH Reports-development
 					STATISTICS - ASSETS </b>
 				<th id="date"><b style="color: white; margin-left: 35%;">Report
 						Date - <span th:text="${todate}"></span>
-					</b></th>
+				</b></th>
 				<!--  -->
 				<div class="btn-group nav-buttons">
 					<button style="color: black;" type="button" class="btn btn-primary"
 						onclick="showdetails('firstpage','1','0');" id="detailsbtn">Details</button>
-					<button style="color: black;" type="button" class="btn btn-primary" onclick="showsummary();"
-						id="summarybtn">Summary</button>
+					<button style="color: black;" type="button" class="btn btn-primary"
+						onclick="showsummary();" id="summarybtn">Summary</button>
 					<div class="btn-group">
-						<button style="color: black;" type="button" class="btn btn-primary dropdown-toggle"
-							data-toggle="dropdown">
+						<button style="color: black;" type="button"
+							class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 							Download <span class="caret"></span>
 						</button>
-						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
-								<a class="text-primary" th:attr="data-reportid=${reportid}, 
+							<ul class="dropdown-menu" role="menu">
+														<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+								<a class="text-primary"
+									th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -549,10 +598,13 @@ PURPOSE		: BRF1ARCH Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='pdf'" onclick="downloadexcel(this)">Pdf</a>
-							</li>
-							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
-								<a class="text-primary" th:attr="data-reportid=${reportid}, 
+							            data-filetype='pdf'"
+									onclick="downloadexcel(this)">Pdf</a>
+								</li>
+								<li
+									th:if="${displaymode} == 'summary' or ${displaymode} == null">
+									<a class="text-primary"
+									th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -560,10 +612,13 @@ PURPOSE		: BRF1ARCH Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='excel'" onclick="downloadexcel(this)">Excel</a>
-							</li>
-							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
-								<a class="text-primary" th:attr="data-reportid=${reportid}, 
+							            data-filetype='excel'"
+									onclick="downloadexcel(this)">Excel</a>
+								</li>
+								<li
+									th:if="${displaymode} == 'summary' or ${displaymode} == null">
+									<a class="text-primary"
+									th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -571,9 +626,11 @@ PURPOSE		: BRF1ARCH Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='BRF'" onclick="downloadexcel(this)">BRF FINAL</a>
-							</li>
-							<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a th:attr="data-reportid=${reportid}, 
+							            data-filetype='BRF'"
+									onclick="downloadexcel(this)">BRF FINAL</a>
+								</li>
+							<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a
+								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
 							            data-todate=${todate}, 
@@ -581,7 +638,8 @@ PURPOSE		: BRF1ARCH Reports-development
 							            data-subreportid=${subreportid}, 
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
-							            data-filetype='detailexcel'" onclick="downloadexcel(this)">Excel</a></li>
+							            data-filetype='detailexcel'"
+									onclick="downloadexcel(this)">Excel</a></li>
 						</ul>
 					</div>
 
@@ -589,9 +647,12 @@ PURPOSE		: BRF1ARCH Reports-development
 					<span id="downloadMessage"></span>
 
 					<!-- Download Processing Modal -->
-					<div class="modal fade" id="downloadProcessingModal" tabindex="-1" role="dialog"
-						aria-labelledby="downloadProcessingModalLabel" aria-hidden="true">
-						<div class="modal-dialog modal-dialog-centered d-flex align-items-center" role="document">
+					<div class="modal fade" id="downloadProcessingModal" tabindex="-1"
+						role="dialog" aria-labelledby="downloadProcessingModalLabel"
+						aria-hidden="true">
+						<div
+							class="modal-dialog modal-dialog-centered d-flex align-items-center"
+							role="document">
 							<div class="modal-content">
 								<div class="modal-header">
 									<h5 class="modal-title" id="downloadProcessingModalLabel">Download
@@ -601,8 +662,9 @@ PURPOSE		: BRF1ARCH Reports-development
 						</div>
 					</div>
 					<!-- Download Message -->
-					<div class="modal fade" id="customAlertModal" tabindex="-1" role="dialog"
-						aria-labelledby="customAlertModalLabel" aria-hidden="true">
+					<div class="modal fade" id="customAlertModal" tabindex="-1"
+						role="dialog" aria-labelledby="customAlertModalLabel"
+						aria-hidden="true">
 						<div class="modal-dialog modal-dialog-centered" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
@@ -610,7 +672,8 @@ PURPOSE		: BRF1ARCH Reports-development
 								</div>
 								<div class="modal-body" id="customAlertBody"></div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+									<button type="button" class="btn btn-primary"
+										data-dismiss="modal">OK</button>
 								</div>
 							</div>
 						</div>
@@ -625,16 +688,19 @@ PURPOSE		: BRF1ARCH Reports-development
 
 
 				<div class="btn-group nav-buttons" th:if="${type} =='RBS'">
-					<button type="button" class="btn btn-primary" onclick="editsum(this);"
-						style="margin-top: -10px; padding: 3px;" title="Click to EDIT Records"
+					<button type="button" class="btn btn-primary"
+						onclick="editsum(this);" style="margin-top: -10px; padding: 3px;"
+						title="Click to EDIT Records"
 						th:classappend="${session.PERMISSIONS == 'W'} AND ${dtltype == 'report'} ? addedit "
 						id="addRecord">Modify</button>
 					<button type="button" class="btn btn-primary"
 						style="margin-right: 0px; margin-top: -10px; padding: 3px; background-color: #4d8cb9;"
 						title="view the records" id="addRecord">Inquiry</button>
 					<button type="button" class="btn btn-primary"
-						th:if="${report?.entity_flg}=='N' AND  ${type} !='ARCHIVAL'" onclick="verifyscreen(this);"
-						style="margin-top: -10px; padding: 3px;" title="Click to EDIT Records"
+						th:if="${report?.entity_flg}=='N' AND  ${type} !='ARCHIVAL'"
+						onclick="verifyscreen(this);"
+						style="margin-top: -10px; padding: 3px;"
+						title="Click to EDIT Records"
 						th:classappend="${session.PERMISSIONS == 'W'} AND ${dtltype == 'report'} ? addedit "
 						id="addRecord">Verify</button>
 				</div>
@@ -645,12 +711,14 @@ PURPOSE		: BRF1ARCH Reports-development
 
 
 		<div class="row">
-			<div class="col-sm-12 customcol" th:if="${displaymode}=='summary' or ${displaymode}==null">
+			<div class="col-sm-12 customcol"
+				th:if="${displaymode}=='summary' or ${displaymode}==null">
 				<div class="row">
 
 					<div class="col-sm-12">
 
-						<div class="table-responsive" style="border-right: 1px solid #dee2e6">
+						<div class="table-responsive"
+							style="border-right: 1px solid #dee2e6">
 							<table style="width: 1498px;"
 								class="table  table-bordered table-hover table-sm table-condensed">
 								<thead class="thead-light">
@@ -730,7 +798,7 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r2_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW102">CHENNAI</th>
-										<td></td>
+										<td ></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r2_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW102">CHENNAI</th>
@@ -739,8 +807,7 @@ PURPOSE		: BRF1ARCH Reports-development
 											th:text="${#numbers.formatDecimal(report.r2_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW102">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
-											th:text="${#numbers.formatDecimal(report.r2_total_amount, 1, 'COMMA', 0, 'POINT')}">
-											CHENNAI</th>
+											th:text="${#numbers.formatDecimal(report.r2_total_amount, 1, 'COMMA', 0, 'POINT')}">CHENNAI</th>
 
 									</tr>
 									<tr>
@@ -751,7 +818,7 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r3_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW103">CHENNAI</th>
-										<td></td>
+										<td ></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r3_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW103">CHENNAI</th>
@@ -1538,8 +1605,8 @@ PURPOSE		: BRF1ARCH Reports-development
 											th:text="${#numbers.formatDecimal(report.r35_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW135">CHENNAI</th>
 										<td></td>
-										<th style="text-align: right; background-color: yellow" onclick="resident(this)"
-											id="ROW135"
+										<th style="text-align: right; background-color: yellow"
+											onclick="resident(this)" id="ROW135"
 											th:text="${#numbers.formatDecimal(report.r35_amount_fcy_non_resident,1,'COMMA',0,'POINT')}">
 											CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
@@ -1642,22 +1709,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">7.1.1</td>
 										<td th:text="${report.r39_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r39_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r39_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r39_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r39_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW139"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r39_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1673,22 +1744,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">7.1.2</td>
 										<td th:text="${report.r40_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r40_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r40_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r40_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r40_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW140"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r40_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1736,22 +1811,29 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">7.2.1</td>
 										<td th:text="${report.r42_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<td th:text="${#numbers.formatDecimal(report.r42_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<th th:text="${#numbers.formatDecimal(report.r42_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r42_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW142"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r42_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r42_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142"></td>
-										<th th:text="${#numbers.formatDecimal(report.r42_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r42_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW142">CHENNAI</th>
 										<th style="background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r42_total_amount,1,'COMMA',0,'POINT')}"
@@ -1761,21 +1843,29 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">7.2.2</td>
 										<td th:text="${report.r43_product}" style="text-align: left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r43_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143"></td>
-										<th th:text="${#numbers.formatDecimal(report.r43_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r43_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW143">CHENNAI</th>
 										<th style="background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r43_total_amount,1,'COMMA',0,'POINT')}"
@@ -1786,21 +1876,29 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th style="text-align: right">8</th>
 										<th></th>
 										<td th:text="${report.r44_product}" align="left">CHENNAI</td>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r44_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r44_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r44_total_amount,1,'COMMA',0,'POINT')}"
@@ -1810,21 +1908,29 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th style="text-align: right">8.1</th>
 										<th></th>
 										<td th:text="${report.r45_product}" align="left">CHENNAI</td>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_aed_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_fcy_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
-										<th th:text="${#numbers.formatDecimal(report.r45_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<th
+											th:text="${#numbers.formatDecimal(report.r45_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right">CHENNAI</th>
 										<th style="text-align: right; background-color: #b3b6b9"
 											th:text="${#numbers.formatDecimal(report.r45_total_amount,1,'COMMA',0,'POINT')}"
@@ -1834,22 +1940,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.1</td>
 										<td th:text="${report.r46_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW146">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r46_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" oonclick="resident(this)" id="ROW146"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r46_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1862,22 +1972,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.2</td>
 										<td th:text="${report.r47_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r47_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW147"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r47_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1893,22 +2007,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.3</td>
 										<td th:text="${report.r48_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r48_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW148"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r48_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1921,22 +2039,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.4</td>
 										<td th:text="${report.r49_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r49_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW149"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r49_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -1952,22 +2074,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.1.5</td>
 										<td th:text="${report.r50_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r50_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW150"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r50_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2081,22 +2207,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.2.3</td>
 										<td th:text="${report.r54_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r54_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW154"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r54_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2112,22 +2242,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th></th>
 										<td style="text-align: right">8.2.4</td>
 										<td th:text="${report.r55_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r55_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW155"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r55_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2142,22 +2276,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<th style="background-color: #b3b6b9"></th>
 										<th style="background-color: #b3b6b9; text-align: right">8.3</th>
 										<td th:text="${report.r56_product}" align="left">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r56_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW156"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r56_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2202,22 +2340,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">9.1</td>
 										<td th:text="${report.r58_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r58_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r58_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r58_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW158">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r58_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r58_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r58_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW158">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r58_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r58_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r58_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW158">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r58_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r58_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r58_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2233,22 +2375,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">9.2</td>
 										<td th:text="${report.r59_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r59_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r59_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r59_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW159">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r59_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r59_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r59_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW159">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r59_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r59_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r59_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW159">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r59_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r59_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r59_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2261,23 +2407,27 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">9.3</td>
 										<td th:text="${report.r60_product}">CHENNAI</td>
-										<td style="text-align: right" onclick="resident(this)" id="ROW160"
+										<td style="text-align: right" onclick="resident(this)"
+											id="ROW160"
 											th:text="${#numbers.formatDecimal(report.r60_no_acct_aed_resident,1,'COMMA',0,'POINT')}">
 										</td>
 										<td style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r60_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right" onclick="resident(this)" id="ROW160">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r60_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r60_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<td style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r60_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW160" align="right">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r60_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r60_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<td style="background-color: yellow; text-align: right"
 											th:text="${#numbers.formatDecimal(report.r60_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW160" align="right">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r60_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r60_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<td style="background-color: yellow; text-align: right"
 											th:text="${#numbers.formatDecimal(report.r60_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2291,22 +2441,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">9.4</td>
 										<td th:text="${report.r61_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r61_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r61_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r61_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW161">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r61_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r61_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r61_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW161">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r61_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r61_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r61_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW161">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r61_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r61_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r61_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2322,22 +2476,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">9.5</td>
 										<td th:text="${report.r62_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r62_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r62_no_acct_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r62_amount_aed_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW162">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r62_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r62_no_acct_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r62_amount_fcy_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW162">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r62_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r62_no_acct_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r62_amount_aed_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right" onclick="resident(this)" id="ROW162">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r62_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r62_no_acct_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r62_amount_fcy_non_resident, 1, 'COMMA', 0, 'POINT')}"
@@ -2350,24 +2508,28 @@ PURPOSE		: BRF1ARCH Reports-development
 									<tr>
 										<th style="text-align: right; background-color: #b3b6b9">10</th>
 										<td style="background-color: #b3b6b9"></td>
-										<th style="background-color: #b3b6b9" th:text="${report.r63_product}">CHENNAI
-										</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<th style="background-color: #b3b6b9"
+											th:text="${report.r63_product}">CHENNAI</th>
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r63_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r63_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r63_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW163">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r63_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r63_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2406,22 +2568,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.1</td>
 										<td th:text="${report.r65_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r65_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r65_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r65_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW165">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r65_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r65_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r65_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW165">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r65_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r65_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r65_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW165">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r65_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r65_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r65_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2436,22 +2602,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.2</td>
 										<td th:text="${report.r66_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r66_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r66_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r66_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW166">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r66_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r66_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r66_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW166">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r66_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r66_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r66_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW166">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r66_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r66_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r66_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2465,22 +2635,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.3</td>
 										<td th:text="${report.r67_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r67_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r67_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r67_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW167">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r67_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r67_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r67_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW167">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r67_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r67_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r67_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW167">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r67_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r67_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r67_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2494,22 +2668,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.4</td>
 										<td th:text="${report.r68_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r68_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r68_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r68_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW168">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r68_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r68_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r68_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW168">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r68_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r68_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r68_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW168">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r68_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r68_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r68_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2522,22 +2700,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.5</td>
 										<td th:text="${report.r69_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r69_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r69_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r69_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW169">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r69_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r69_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r69_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW169">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r69_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r69_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r69_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW169">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r69_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r69_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r69_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2550,22 +2732,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.6</td>
 										<td th:text="${report.r70_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r70_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r70_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r70_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW170">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r70_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r70_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r70_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW170">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r70_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r70_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r70_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW170">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r70_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r70_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r70_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2579,22 +2765,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.7</td>
 										<td th:text="${report.r71_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r71_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r71_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r71_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW171">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r71_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r71_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r71_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW171">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r71_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r71_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r71_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW171">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r71_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r71_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r71_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2608,22 +2798,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">11.8</td>
 										<td th:text="${report.r72_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r72_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r72_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r72_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW172">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r72_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r72_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r72_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW172">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r72_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r72_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r72_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW172">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r72_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r72_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r72_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2662,22 +2856,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.1</td>
 										<td th:text="${report.r74_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r74_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r74_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r74_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW174">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r74_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r74_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r74_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW174">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r74_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r74_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r74_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW174">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r74_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r74_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r74_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2690,22 +2888,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.2</td>
 										<td th:text="${report.r75_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r75_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r75_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r75_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW175">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r75_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r75_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r75_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW175">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r75_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r75_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r75_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW175">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r75_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r75_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r75_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2719,22 +2921,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.3</td>
 										<td th:text="${report.r76_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r76_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r76_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r76_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW176">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r76_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r76_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r76_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW176">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r76_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r76_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r76_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW176">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r76_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r76_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r76_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2747,22 +2953,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.4</td>
 										<td th:text="${report.r77_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r77_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r77_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r77_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW177">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r77_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r77_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r77_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW177">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r77_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r77_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r77_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW177">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r77_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r77_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r77_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2775,22 +2985,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.5</td>
 										<td th:text="${report.r78_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r78_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r78_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r78_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW178">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r78_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r78_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r78_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW178">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r78_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r78_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r78_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW178">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r78_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r78_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r78_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2803,22 +3017,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.5</td>
 										<td th:text="${report.r79_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r79_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r79_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r79_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW179">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r79_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r79_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r79_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW179">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r79_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r79_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r79_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW179">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r79_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r79_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r79_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2831,22 +3049,26 @@ PURPOSE		: BRF1ARCH Reports-development
 										<td></td>
 										<td style="text-align: right">12.6</td>
 										<td th:text="${report.r80_product}">CHENNAI</td>
-										<td th:text="${#numbers.formatDecimal(report.r80_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r80_no_acct_aed_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r80_amount_aed_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW180">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r80_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r80_no_acct_fcy_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right"
 											th:text="${#numbers.formatDecimal(report.r80_amount_fcy_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW180">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r80_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r80_no_acct_aed_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r80_amount_aed_non_resident,1,'COMMA',0,'POINT')}"
 											onclick="resident(this)" id="ROW180">CHENNAI</th>
-										<td th:text="${#numbers.formatDecimal(report.r80_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
+										<td
+											th:text="${#numbers.formatDecimal(report.r80_no_acct_fcy_non_resident,1,'COMMA',0,'POINT')}"
 											align="right"></td>
 										<th style="text-align: right; background-color: yellow"
 											th:text="${#numbers.formatDecimal(report.r80_amount_fcy_non_resident,1,'COMMA',0,'POINT')}"
@@ -2893,8 +3115,9 @@ PURPOSE		: BRF1ARCH Reports-development
 
 							</table>
 						</div>
-						<div class="card-footer text-center" th:if="${displaymode}=='summary' "
-							style="background-color: #386276" ;>
+						<div class="card-footer text-center"
+							th:if="${displaymode}=='summary' "
+							style="background-color: #386276";>
 							<button type="button" class="btn btn-xs btn-primary" id="btnHome"
 								onclick="home();">Home</button>
 							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
@@ -2907,10 +3130,12 @@ PURPOSE		: BRF1ARCH Reports-development
 
 			<!------------------------------ Report summary section ends it will shown only if summary button clicked------------------------->
 			<!------------------------------ Report Details section starts it will shown only if Details button clicked------------------------->
-			<div class="col-sm-12 customcol" th:if="${displaymode}=='detail'" th:fragment="detail">
+			<div class="col-sm-12 customcol" th:if="${displaymode}=='detail'"
+				th:fragment="detail">
 				<div style="overflow-x: inherit; border-right: 1px solid #dee2e6"
 					th:class="${searchmsg == null}?'inner'">
-					<table th:if="${searchmsg} == null" class="table table-bordered table-sm" style="width: 1498px"
+					<table th:if="${searchmsg} == null"
+						class="table table-bordered table-sm" style="width: 1498px"
 						id="detailtb">
 						<thead class="thead-light">
 							<tr style="text-align: center">
@@ -2931,14 +3156,13 @@ PURPOSE		: BRF1ARCH Reports-development
 						<tbody th:each="report,iterator : ${reportdetails}">
 
 
-							<tr style="text-align: center: font-weight: bold;">
+							<tr style="text-align: center; font-weight: bold;">
 
 								<td th:text="${report.cust_id}"></td>
 								<td th:text="${report.foracid}"></td>
 								<td th:text="${report.acct_name}">CHENNAI</td>
 								<td style="text-align: right;"
-									th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 3, 'POINT')}">
-									CHENNAI</td>
+									th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 3, 'POINT')}">CHENNAI</td>
 								<!-- 	<td th:text="${report.remarks}"></td> -->
 								<td th:text="${report.report_name_1}"></td>
 								<td th:text="${report.report_label_1}">CHENNAI</td>
@@ -2951,13 +3175,17 @@ PURPOSE		: BRF1ARCH Reports-development
 						</tbody>
 					</table>
 				</div>
-				<div class="card-footer text-center" style="background-color: #386276" ;>
-					<button type="button" class="btn btn-xs btn-primary" id="btnHome" onclick="home();">Home</button>
-					<button type="button" class="btn btn-xs btn-primary" id="btnBack" onclick="back1();">Back</button>
+				<div class="card-footer text-center"
+					style="background-color: #386276";>
+					<button type="button" class="btn btn-xs btn-primary" id="btnHome"
+						onclick="home();">Home</button>
+					<button type="button" class="btn btn-xs btn-primary" id="btnBack"
+						onclick="back1();">Back</button>
 				</div>
 				<!-- -----------------------------------Details edit modal form----------------------------------------------------->
 				<div class="modal fade" id="addedit" th:fragment="dataedit">
-					<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+					<div
+						class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 						<div class="modal-content">
 
 							<!-- Modal Header -->
@@ -2970,12 +3198,12 @@ PURPOSE		: BRF1ARCH Reports-development
 									<div class="form-group">
 
 										<div class="row">
-											<label class="col-sm-5">CUST ID</label> <input class="form-control col-sm-5"
-												id="cust_id" readonly />
+											<label class="col-sm-5">CUST ID</label> <input
+												class="form-control col-sm-5" id="cust_id" readonly />
 										</div>
 										<div class="row">
-											<label class="col-sm-5">Acct No</label> <input class="form-control col-sm-5"
-												id="foracid" readonly />
+											<label class="col-sm-5">Acct No</label> <input
+												class="form-control col-sm-5" id="foracid" readonly />
 										</div>
 										<div class="row">
 											<label class="col-sm-5">Acct Name</label> <input
@@ -2993,7 +3221,8 @@ PURPOSE		: BRF1ARCH Reports-development
 
 										<div class="row">
 											<label class="col-sm-5">REPORT NAME</label> <input
-												class="form-control col-sm-5" id=report_name_1 name="report_name_1" />
+												class="form-control col-sm-5" id=report_name_1
+												name="report_name_1" />
 										</div>
 										<div class="row">
 											<label class="col-sm-5">REPORT LABLE</label> <input
@@ -3012,8 +3241,8 @@ PURPOSE		: BRF1ARCH Reports-development
 								</form>
 								<div class="modal-footer">
 
-									<button type="button" class="btn btn-primary" onclick="submitdataformedit(this);"
-										id="edit">Submit</button>
+									<button type="button" class="btn btn-primary"
+										onclick="submitdataformedit(this);" id="edit">Submit</button>
 
 								</div>
 							</div>
@@ -3023,7 +3252,8 @@ PURPOSE		: BRF1ARCH Reports-development
 
 					<!-------------------------------------Details edit modal form----------------------------------------------------->
 					<div class="modal fade" id="datadelete">
-						<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+						<div
+							class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 							<div class="modal-content">
 								<div class="modal-body" style="text-align: center">
 									<button type="button" class="close" data-dismiss="modal">×</button>
@@ -3032,7 +3262,8 @@ PURPOSE		: BRF1ARCH Reports-development
 								<div class="modal-footer">
 									<button type="button" class="btn btn-primary"
 										onclick="submitdataformdelete(this);">Submit</button>
-									<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+									<button type="button" class="btn btn-primary"
+										data-dismiss="modal">Cancel</button>
 								</div>
 							</div>
 						</div>
@@ -3059,7 +3290,8 @@ PURPOSE		: BRF1ARCH Reports-development
 
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 	<div class="modal fade" id="alert">
-		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+		<div
+			class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-body" style="text-align: center">
 					<p id="alertmsg"></p>
@@ -3069,6 +3301,23 @@ PURPOSE		: BRF1ARCH Reports-development
 			</div>
 		</div>
 	</div>
+	
+	<div class="modal fade" id="loader1" data-backdrop="static"
+			data-keyboard="false">
+			<div
+				class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+				<div class="modal-content" style="background: transparent;">
+					<div class="modal-body" style="text-align: center">
+						<div>
+							<img th:src=@{/images/loader.gif} id="bfirelogo"
+								style="width: 153px; height: auto; margin-left: 18px; background-color: transparent;
+								border-color: transparent;"
+								alt="Bornfire">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 </body>
 

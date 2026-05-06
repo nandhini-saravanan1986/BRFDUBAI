@@ -67,103 +67,139 @@ PURPOSE		: DEVELOPMENT
 			num - page number to show to the user
 			maxpage - maximum number of pages avaialble in the data
 		 */
-		function showdetails(mode, num, maxpage) {
-			var filter = $("#filters").val();
-			var n = parseInt(num);
-			var max = parseInt(maxpage);
-			if (filter != null) {
-				var Callurl = /*[[@{'/Reports/'+${reportid}+'/DetailsARCH'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					//Callurl = Callurl+"&instancecode="+instancecode;
-					Callurl = Callurl + "&filter=" + filter;
-			} else {
+			function showdetails(mode, num, maxpage) {
+			    var filter = $("#filters").val();
+			    var n = parseInt(num);
+			    var max = parseInt(maxpage);
+			    var Callurl;
+			    
+			    var searchKeyword = $("#globalSearch").val();
 
-				var filter = null;
+			    if (filter != null) {
+			        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype='ARCH')}]]*/ 
+			        Callurl += "&filter=" + filter;
+			    } else {
+			        filter = null;
+			        Callurl = /*[[@{'/Reports/'+${reportid}+'/Details'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype='ARCH')}]]*/ 
+			        Callurl += "&filter=" + filter;
+			    }
+			    
+			    if (searchKeyword != null && searchKeyword.trim() !== "") {
+			        Callurl += "&searchVal=" + encodeURIComponent(searchKeyword.trim());
+			    }
 
-				var Callurl = /*[[@{'/Reports/'+${reportid}+'/DetailsARCH'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-					//	Callurl = Callurl+"&instancecode="+instancecode;
-					Callurl = Callurl + "&filter=" + filter;
+			    switch (mode) {
+			        case "nextpage":
+			            n += 1;
+			            if (n > max) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "prevpage":
+			            n -= 1;
+			            if (n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "givenpage":
+			            n = parseInt($("#pageno").val()) - 1;
+			            if (n > max || n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "directpage":
+			            n = parseInt(num);
+			            if (n > max || n < 0) return;
+			            Callurl += "&page=" + n;
+			            break;
+			        case "search": 
+			            n = 0;
+			            Callurl += "&page=" + n;
+			            break;
+			    }
+
+			    $.ajax({
+			        type: 'get',
+			        url: Callurl,
+			        beforeSend: function () {
+			            $('#loader1').modal('show'); // 🔄 Show loader
+			        },
+			        success: function (data) {
+			            $('.content').html(data);
+			            $("#detailsbtn").addClass("active");
+			            $('#loader1').modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+			            tablepagination();
+			        },
+			        complete: function () {
+			            $('#loader1').modal('hide'); // ✅ Hide loader
+			        },
+			        error: function () {
+			            $('#loader1').modal('hide'); // ❌ Hide even if error
+			            alert("Something went wrong. Please try again.");
+			        }
+			    });
 			}
-			switch (mode) {
-				case "nextpage":
-					n = n + 1;
-					if (n > max) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "prevpage":
-					n = n - 1;
-					if (n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-					break;
-				case "givenpage":
-					n = parseInt($("#pageno").val()) - 1;
-					if (n > max || n < 0) {
-						break;
-					}
-					Callurl = Callurl + "&page=" + n;
-			}
-
-			$.ajax({
-				type: 'get',
-				url: Callurl,
-				success: function (data) {
-
-					/*<![CDATA[*/
-
-					$('.content').html(data);
-					$("#detailsbtn").addClass("active");
-					/*]]>*/
-
-				}
-			})
-		}
 
 		//to fetch summary from the database - called from the summary button
 		function showsummary(mode, num, maxpage) {
-
 			var n = parseInt(num);
 			var max = parseInt(maxpage);
 			var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
-				Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
+			Callurl = Callurl + "&subreportid=" + subreportid + "&secid=" + secid;
+
 			switch (mode) {
 				case "nextpage":
 					n = n + 1;
 					if (n > max) {
-						break;
+						console.log("Next page exceeded max, exiting");
+						$('#loader1').modal('hide');
+						return;
 					}
 					Callurl = Callurl + "&page=" + n;
 					break;
 				case "prevpage":
 					n = n - 1;
 					if (n < 0) {
-						break;
+						console.log("Previous page below 0, exiting");
+						$('#loader1').modal('hide');
+						return;
 					}
 					Callurl = Callurl + "&page=" + n;
 					break;
 				case "givenpage":
 					n = parseInt($("#pageno").val()) - 1;
 					if (n > max || n < 0) {
-						break;
+						console.log("Given page out of range, exiting");
+						$('#loader1').modal('hide');
+						return;
 					}
 					Callurl = Callurl + "&page=" + n;
+					break;
 			}
+
+			console.log("Calling URL: ", Callurl);
+			$('#loader1').modal('show');
 
 			$.ajax({
 				type: 'get',
 				url: Callurl,
-				success: function (data) {
-
-					/*<![CDATA[*/
-
+				success: function(data) {
+					console.log("AJAX success");
+					$('#loader1').modal('hide');
+					$('body').removeClass('modal-open');
+					$('.modal-backdrop').remove();
 					$('.content').html(data);
 					$("#summarybtn").addClass("active");
-
-					/*]]>*/
+					
+				},
+				 complete: function () {
+			            $('#loader1').modal('hide'); // ✅ Hide loader
+			        },
+				error: function(xhr) {
+					console.log("AJAX error", xhr);
+					$('#loader1').modal('hide');
+					alert("Failed to load summary.");
 				}
-			})
+			});
 		}
 
 		function sectionChange(a) {
@@ -1053,6 +1089,20 @@ PURPOSE		: DEVELOPMENT
 			</div>
 		</div>
 	</div>
+	
+	<div class="modal fade" id="loader1" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content" style="background: transparent;">
+				<div class="modal-body" style="text-align: center">
+					<div>
+						<img th:src=@{/images/loader.gif} id="bfirelogo" style="width: 153px; height: auto; margin-left: 18px; background-color: transparent;
+								border-color: transparent;" alt="Bornfire">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<!--------------------------------------------------------------- Modal for alert messages-------------------------------->
 </body>
 

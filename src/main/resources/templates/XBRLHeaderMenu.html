@@ -606,8 +606,7 @@
 				</div>
 			</li>
 			
-			<li class="nav-item"><a class="nav-link" id="XBRLAccountInquiry"
-				href="#" onclick="contentLoad(this)">E-Statement Generation</a></li>
+			
 			
 			
 			
@@ -830,6 +829,12 @@ th:if="${session.ROLEID == 'GEN' or session.ROLEID == 'RECONADM' or session.ROLE
 					</ul>
 				</div>
 			</li>
+			
+			<li class="nav-item">
+    <a class="nav-link" id="XBRLAccountInquiry" href="#" onclick="contentLoad(this)">
+        <i class="fa fa-file-excel mr-2"></i> E-Statement Generation
+    </a>
+</li>
 
 			<!--<li class="nav-item" th:if="${session.ROLEID == 'ADM'}"><a
 				class="nav-link" id="Consolidated" style="padding-left: 15px;"

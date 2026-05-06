@@ -259,12 +259,34 @@ public class XBRLAccountStatement {
 					category);
 
 			response.setHeader("Content-Disposition", "attachment; filename=" + repfile.getName());
-			emailservices.sendEmail(repfile.getName());
+			//emailservices.sendEmail(repfile.getName());
+			
+			FileInputStream fis = new FileInputStream(repfile);
+			byte[] fileBytes = convertInputStreamToBytes(fis);
+			 emailservices.sendEmail(
+		                repfile.getName(),
+		                fileBytes,
+		                "application/pdf"
+		        );
+			fis.close();
+			
 			resource = new InputStreamResource(new FileInputStream(repfile));
 		} catch (JRException e) {
 			e.printStackTrace();
 		}
 		return resource;
+	}
+	
+	public byte[] convertInputStreamToBytes(InputStream is) throws IOException {
+	    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+	    byte[] data = new byte[4096];
+	    int nRead;
+
+	    while ((nRead = is.read(data, 0, data.length)) != -1) {
+	        buffer.write(data, 0, nRead);
+	    }
+
+	    return buffer.toByteArray();
 	}
 
 	public File getDownloadFileScr(String acid,String userid, String reportId, String fromdate, String todate, String currency,
@@ -364,12 +386,23 @@ public class XBRLAccountStatement {
 	
 	}
 	public ByteArrayInputStream getDownloadFileExcelE(String userid, String reportId, String fromdate, String todate, 
-			String dtltype, String filetype, String catgeory,String fileName ) throws FileNotFoundException, JRException, SQLException, ParseException {
+			String dtltype, String filetype, String catgeory,String fileName ) throws JRException, SQLException, ParseException, IOException {
 
 		ByteArrayInputStream repfile = null;
 		
 				repfile = getFileLoanExcel(userid,reportId, fromdate, todate,  dtltype, filetype,fileName);
-				emailservices.sendEmail(fileName);
+				//emailservices.sendEmail(fileName);
+				
+				 
+			    byte[] fileBytes = convertInputStreamToBytes(repfile);
+
+			    emailservices.sendEmail(
+			            fileName,
+			            fileBytes,
+			            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+			    );
+				
+				
 			return repfile;
 	
 	}
@@ -425,7 +458,7 @@ public class XBRLAccountStatement {
 
 			Row TitleRow = sheet.createRow(0);
 			Cell cellTitle = TitleRow.createCell((short) 0);
-			cellTitle.setCellValue("BORNFIRE XBRL & ACCOUNT STATEMENT GENERATION SYSTEM");
+			cellTitle.setCellValue("BORNFIRE BRF & ACCOUNT STATEMENT GENERATION SYSTEM");
 			sheet.addMergedRegion(CellRangeAddress.valueOf("A1:I2"));
 			headerCellStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
 //			headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);

@@ -65,8 +65,9 @@
 	padding-bottom: 15px;
 }
 
+
 .btn-primary {
-	background-color: #d77410b8;
+	background-color: #E77400;
 	border-color: #0c0c0c;
 }
 
@@ -224,9 +225,9 @@
 		location.href = 'Dashboard'
 	}
 
-/* 	function back() {
+	function backbutton() {
 		window.history.back();
-	} */
+	} 
 
 	function fnClick(a) {
 		var userid = a.getAttribute("data-userid")
@@ -593,6 +594,8 @@
 		}else{
 		location.href = 'ReportsAccount/ReportDownloadPDFE?reportId=RISK_DEP&formmode=list&filetype=pdf&fromdate='
 				+ fromdate + '&todate=' + todate+'&userid='+acid+'&acid='+acid;
+		
+		
 		}
 	}
 	function getEexcelDep() {
@@ -638,8 +641,8 @@
 		<div class="row" style="width: 1550px;margin-left: auto;">
 			<div class="col-sm-12">
 				<div class="card">
-					<div class="card-header">
-						<div class="float-left">
+					<div class="card-header" style="background-color: #376275;">
+						<div class="float-left" style="color: white;">
 							<h4> E-Statement Customer Inquiry</h4>
 						</div>
 						
@@ -666,7 +669,7 @@
 										<td colspan="9" style="text-align: center; color: red">No
 											Data Found</td>
 									</tr>
-									<tr th:if="${COUNT} != '0'" th:each="custInq : ${custParameter}"
+									<tr style="cursor: pointer;" th:if="${COUNT} != '0'" th:each="custInq : ${custParameter}"
 										th:attr="data-ref_id=${custInq.orgkey}"
 										th:id="${custInq.orgkey}" class="userlist">
 <td><a  data-toggle="tooltip" class="editrec"
@@ -686,8 +689,10 @@
 													data-mail=${custInq.preferredemail}"
 											onclick="editRecord(this)"></i></a></td>
 										<td th:text="${custInq.orgkey}"
-											th:attr="data-ref_id=${custInq.orgkey}"
-										 onclick="getCustenquiry(this);" style="color: blue;text-decoration: underline;"></td>
+										    th:attr="data-ref_id=${custInq.orgkey}"
+										    onclick="getCustenquiry(this);"
+										    style="color: blue; text-decoration: underline; cursor: pointer;">
+										</td>
 
 										<td th:text="${custInq.cust_last_name}"></td>
 										<td th:text="${#dates.format(custInq?.cust_dob, 'dd-MM-yyyy')}"></td>
@@ -705,6 +710,13 @@
 								</tbody>
 						</table>
 					</div>
+					
+					<div class="card-footer text-center" style="background-color: #386276";>
+							<button type="button" class="btn btn-xs btn-primary" id="btnHome"
+								onclick="home();">Home </button>
+							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
+								onclick="backbutton();">Back</button>
+						</div>
 				</div>
 			</div>
 		</div>
@@ -715,9 +727,9 @@
 		<div class="row" style="width: 1550px;margin-left: auto;">
 			<div class="col-sm-12">
 				<div class="card">
-					<div class="card-header">
-						<div class="float-left">
-							<h4>E-Statement Account Inquiry</h4>
+					<div class="card-header" style="background-color: #376275;">
+						<div class="float-left" style="color: white;">
+							<h4> E-Statement Customer Inquiry</h4>
 						</div>
 						
 					</div>
@@ -745,9 +757,9 @@
 										th:attr="data-ref_id=${custInq.acct_number},data-acid=${custInq.acid}"
 										th:id="${custInq.acct_number}" class="userlist">
 
-										<td th:text="${custInq.acct_number}"
+										<td   th:text="${custInq.acct_number}"
 											th:attr="data-ref_id=${custInq.acct_number},data-acid=${custInq.acid}"
-										 onclick="getAccountenquiry(this);" style="color: blue;text-decoration: underline;"></td>
+										 onclick="getAccountenquiry(this);" style="color: blue;text-decoration: underline;cursor: pointer;"></td>
 
 										<td th:text="${custInq.acct_name}"></td>
 										<td th:text="${custInq.schm_code}"></td>
@@ -764,6 +776,14 @@
 								</tbody>
 						</table>
 					</div>
+					
+					<div class="card-footer text-center" style="background-color: #386276";>
+							<button type="button" class="btn btn-xs btn-primary" id="btnHome"
+								onclick="home();">Home </button>
+							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
+								onclick="backbutton();">Back</button>
+						</div>
+						
 				</div>
 			</div>
 		</div>
@@ -774,10 +794,11 @@
 		<div class="row" style="width: 1550px;margin-left: auto;">
 			<div class="col-sm-12">
 				<div class="card">
-					<div class="card-header">
-						<div class="float-left">
-							<h4>E-Statement Account Inquiry</h4>
+					<div class="card-header" style="background-color: #376275;">
+						<div class="float-left" style="color: white;">
+							<h4> E-Statement Customer Inquiry</h4>
 						</div>
+						
 						
 					<div class="btn-group nav-buttons float-right">
 									<button class="btn btn-secondary dropdown-toggle" type="button"
@@ -846,7 +867,7 @@
 
 									</div>
 									<i class="fa fa-arrow-circle-right"
-																			style="font-size: 38px; color: #080876; float: right;"
+																			style="font-size: 38px; color: #080876; float: right; cursor: pointer;"
 																			onclick="getdeposit();"></i>
 									</div>
 									
@@ -927,6 +948,13 @@
 									</tr>
 								</tbody>
 						</table>
+					</div>
+					
+					<div class="card-footer text-center" style="background-color: #386276";>
+							<button type="button" class="btn btn-xs btn-primary" id="btnHome"
+								onclick="home();">Home </button>
+							<button type="button" class="btn btn-xs btn-primary" id="btnBack"
+								onclick="backbutton();">Back</button>
 					</div>
 				</div>
 			</div>
@@ -1010,7 +1038,7 @@
 
 									</div>
 									<i class="fa fa-arrow-circle-right"
-																			style="font-size: 38px; color: #080876; float: right;"
+																			style="font-size: 38px; color: #080876;cursor: pointer; float: right; cursor: pointer;"
 																			onclick="getdeposit();"></i>
 									</div>
 									

@@ -160,7 +160,7 @@ public class BRF001_FORT_SERVICE {
 	}
 
 	public ModelAndView getBRF0001currentDtl(String reportId, String fromdate, String todate, String currency,
-			String dtltype, Pageable pageable, String filter) {
+			String dtltype, Pageable pageable, String filter,String searchVal) {
 
 		int pageSize = pageable.getPageSize();
 		int currentPage = pageable.getPageNumber();
@@ -172,37 +172,63 @@ public class BRF001_FORT_SERVICE {
 		List<Object> T1Dt1 = new ArrayList<Object>();
 
 		Query<Object[]> qr;
+		Query<Number> countQr;
 
-		if (dtltype.equals("report")) {
+		String searchCondition = "";
+		if (searchVal != null && !searchVal.trim().isEmpty()) {
+			String safeSearch = searchVal.replace("'", "''").toUpperCase();
+			searchCondition = " and (CUST_ID like '%" + safeSearch + "%' or FORACID like '%" + safeSearch
+					+ "%' or ACCT_NAME like '%" + safeSearch + "%' or ACT_BALANCE_AMT_LC like '%" + safeSearch
+					+ "%' or REPORT_NAME_1 like '%" + safeSearch + "%' or REPORT_LABEL_1 like '%" + safeSearch
+					+ "%' or REPORT_ADDL_CRITERIA_1 like '%" + safeSearch + "%' or REPORT_DATE like '%" + safeSearch
+					+ "%') ";
+		}
+
+		if (dtltype.equals("report") || dtltype.equals("ARCH")) {
 			if (!filter.equals("null")) {
 				
-				System.out.println("1");
-				qr = hs.createNativeQuery("select * from BRF001_DETAILTABLE   a where report_date = ?1 and report_label_1 =?2");
-				qr.setParameter(2, filter);
+				qr = hs.createNativeQuery(
+						"select * from BRF001_DETAILTABLE  a where report_date = ?1 and report_label_1 =?2" + searchCondition);
+				countQr = hs.createNativeQuery("select count(*) from BRF001_DETAILTABLE a where report_date = ?1 and report_label_1 = ?2" + searchCondition);
 
-			} else {System.out.println("2");
-				qr = hs.createNativeQuery("select * from BRF001_DETAILTABLE a where report_date = ?1");
+				qr.setParameter(2, filter);
+				countQr.setParameter(2, filter);
+
+			} else {
+			qr = hs.createNativeQuery("select * from BRF001_DETAILTABLE a where report_date = ?1" + searchCondition);
+			countQr = hs.createNativeQuery("select count(*) from BRF001_DETAILTABLE a where report_date = ?1" + searchCondition);
 
 			}
 		} else {System.out.println("3");
-			qr = hs.createNativeQuery("select * from BRF001_DETAILTABLE  where report_date = ?1");
+		qr = hs.createNativeQuery("select * from BRF001_DETAILTABLE  where report_date = ?1" + searchCondition);
+		countQr = hs.createNativeQuery("select count(*) from BRF001_DETAILTABLE where report_date = ?1" + searchCondition);
 		}
 
 		try {
 			qr.setParameter(1, df.parse(todate));
+			countQr.setParameter(1, df.parse(todate));
 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		long totalRecords = countQr.getSingleResult().longValue();
+
+		logger.info("REQUESTED PAGE SIZE: " + pageSize);
+		logger.info("REQUESTED OFFSET: " + startItem);
+
+		qr.setFirstResult(startItem);
+		qr.setMaxResults(pageSize);
+		
+		
 		List<BRF0001_DETAIL_ENTITY> T1Master = new ArrayList<BRF0001_DETAIL_ENTITY>();
 
-		try {
+		/*try {
 			T1Master = hs.createQuery("from BRF0001_DETAIL_ENTITY a where a.report_date = ?1", BRF0001_DETAIL_ENTITY.class)
 					.setParameter(1, df.parse(todate)).getResultList();
 		} catch (ParseException e) {
 
 			e.printStackTrace();
-		}
+		}*/
 
 		logger.info("Getting Report Detail for : " + reportId + "," + fromdate + "," + todate + "," + currency);
 		List<Object[]> result = qr.getResultList();
@@ -294,8 +320,8 @@ public class BRF001_FORT_SERVICE {
 		}
 
 		logger.info("Converting to Page");
-		Page<Object> T1Dt1Page = new PageImpl<Object>(pagedlist, PageRequest.of(currentPage, pageSize), T1Dt1.size());
-
+		Page<Object> T1Dt1Page = new PageImpl<>(T1Dt1, pageable, totalRecords);
+		mv.addObject("reportdetailsPage", T1Dt1Page);
 		mv.setViewName("RR" + "/" + "BRF0001::reportcontent");
 		mv.addObject("reportdetails", T1Dt1Page.getContent());
 		mv.addObject("reportmaster", T1Master);
@@ -303,6 +329,7 @@ public class BRF001_FORT_SERVICE {
 		mv.addObject("singledetail", new T1CurProdDetail());
 		mv.addObject("reportsflag", "reportsflag");
 		mv.addObject("menu", reportId);
+		mv.addObject("dtltype", dtltype);
 		return mv;
 
 		

@@ -2174,7 +2174,7 @@ public class RegulatoryReportServices {
 			break;
 		case "BRF0001":
 			repdetail = brf001_FORT_SERVIVE.getBRF0001currentDtl(reportId, fromdate, todate, currency, dtltype,
-					pageable, Filter);
+					pageable, Filter,searchVal);
 			break;
 
 		}
