@@ -1569,9 +1569,9 @@ to {
 								Balance (LC)</label> <select id="editBalanceLc"
 								class="form-control form-control-sm" style="min-width: 180px;">
 								<option value="">-- Select --</option>
-								<option value="&lt;0">&lt; 0</option>
-								<option value="&gt;0">&gt; 0</option>
-								<option value="&lt;&gt;0">&lt;&gt; 0</option>
+								<option value="&lt;0">Debit</option>
+								<option value="&gt;0">Credit</option>
+								<option value="&lt;&gt;0">Net Off</option>
 							</select>
 						</div>
 						<div class="col-auto" style="position: relative;">
@@ -2347,7 +2347,7 @@ function showAccounts() {
             hdr += '<th>Account Balance (LC)</th><th>Filter</th></tr>';
             $('#accountsHead').html(hdr);
             $('#selectAll').off('change').on('change', function() { $('.row-select').prop('checked', this.checked); });
-            var balOpts = '<option value="">-- Select --</option><option value="<0">&lt; 0</option><option value=">0">&gt; 0</option><option value="<>0">&lt;&gt; 0</option>';
+            var balOpts = '<option value="">-- Select --</option><option value="<0">Debit</option><option value=">0">Credit</option><option value="<>0">Net Off</option>';
             $.each(data, function(i, row) {
                 var tr = '<tr><td><input type="checkbox" class="row-select" data-idx="' + i + '"></td><td>' + (i + 1) + '</td>';
                 $.each(keys, function(j, key) { tr += '<td>' + nvl(row[key]) + '</td>'; });
@@ -2475,7 +2475,7 @@ function renderAccountsTable(data) {
  $('#accountsHead').html(hdr);
  $('#selectAll').off('change').on('change', function() { $('.row-select').prop('checked', this.checked); });
  
- var balOpts = '<option value="">-- Select --</option><option value="<0">&lt; 0</option><option value=">0">&gt; 0</option><option value="<>0">&lt;&gt; 0</option>';
+ var balOpts = '<option value="">-- Select --</option><option value="<0">Debit</option><option value=">0">Credit</option><option value="<>0">Net Off</option>';
  
  $.each(data, function(i, row) {
      var tr = '<tr><td><input type="checkbox" class="row-select" data-idx="' + i + '"></td><td>' + (i + 1) + '</td>';
@@ -2878,7 +2878,7 @@ function modalShowAccounts() {
             hdr += '<th>Account Balance (LC)</th><th>Filter</th></tr>';
             $('#modalAccountsHead').html(hdr);
             $('#modalSelectAll').off('change').on('change', function() { $('.modal-row-select').prop('checked', this.checked); });
-            var balOpts = '<option value="">-- Select --</option><option value="<0">&lt; 0</option><option value=">0">&gt; 0</option><option value="<>0">&lt;&gt; 0</option>';
+            var balOpts = '<option value="">-- Select --</option><option value="<0">Debit</option><option value=">0">Credit</option><option value="<>0">Net Off</option>';
             $.each(data, function(i, row) {
                 var tr = '<tr><td><input type="checkbox" class="modal-row-select" data-idx="' + i + '"></td><td>' + (i + 1) + '</td>';
                 $.each(keys, function(j, key) { tr += '<td>' + nvl(row[key]) + '</td>'; });

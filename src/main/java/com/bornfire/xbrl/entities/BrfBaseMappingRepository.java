@@ -64,17 +64,16 @@ public interface BrfBaseMappingRepository
      * Oracle-style pagination: OFFSET … ROWS FETCH NEXT … ROWS ONLY
      */
     @Query(
-        value = "SELECT * FROM BRF_BASE_MAPPING_TABLE " +
-                "WHERE (DEL_FLG IS NULL OR DEL_FLG <> 'Y') " +
-                "AND (:search IS NULL OR :search = '' " +
-                "     OR UPPER(ACCOUNT_ID_BACID)    LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(ACCOUNT_DESCRIPTION) LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(GL_HEAD)             LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(GL_SUBHEAD_CODE)     LIKE '%' || UPPER(:search) || '%') " +
-                "ORDER BY GL_HEAD, GL_SUBHEAD_CODE " +
-                "OFFSET (:page - 1) * :size ROWS FETCH NEXT :size ROWS ONLY",
-        nativeQuery = true
-    )
+    	    value = "SELECT * FROM BRF_BASE_MAPPING_TABLE " +
+    	            "WHERE (:search IS NULL OR :search = '' " +
+    	            "     OR UPPER(ACCOUNT_ID_BACID)    LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(ACCOUNT_DESCRIPTION) LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(GL_HEAD)             LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(GL_SUBHEAD_CODE)     LIKE '%' || UPPER(:search) || '%') " +
+    	            "ORDER BY GL_HEAD, GL_SUBHEAD_CODE " +
+    	            "OFFSET (:page - 1) * :size ROWS FETCH NEXT :size ROWS ONLY",
+    	    nativeQuery = true
+    	)
     List<BrfBaseMapping> findPagedList(
         @Param("search") String search,
         @Param("page")   int page,
@@ -106,15 +105,14 @@ public interface BrfBaseMappingRepository
      * COUNT companion for the paged list — used to build totalRecords.
      */
     @Query(
-        value = "SELECT COUNT(*) FROM BRF_BASE_MAPPING_TABLE " +
-                "WHERE (DEL_FLG IS NULL OR DEL_FLG <> 'Y') " +
-                "AND (:search IS NULL OR :search = '' " +
-                "     OR UPPER(ACCOUNT_ID_BACID)    LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(ACCOUNT_DESCRIPTION) LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(GL_HEAD)             LIKE '%' || UPPER(:search) || '%' " +
-                "     OR UPPER(GL_SUBHEAD_CODE)     LIKE '%' || UPPER(:search) || '%')",
-        nativeQuery = true
-    )
+    	    value = "SELECT COUNT(*) FROM BRF_BASE_MAPPING_TABLE " +
+    	            "WHERE (:search IS NULL OR :search = '' " +
+    	            "     OR UPPER(ACCOUNT_ID_BACID)    LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(ACCOUNT_DESCRIPTION) LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(GL_HEAD)             LIKE '%' || UPPER(:search) || '%' " +
+    	            "     OR UPPER(GL_SUBHEAD_CODE)     LIKE '%' || UPPER(:search) || '%')",
+    	    nativeQuery = true
+    	)
     long countBySearch(@Param("search") String search);
 
     /**
@@ -124,17 +122,16 @@ public interface BrfBaseMappingRepository
     @Modifying
     @Transactional
     @Query(
-        value = "UPDATE BRF_BASE_MAPPING_TABLE " +
-                "SET    ACCOUNT_ID_BACID    = :newId, " +   // allow ID change
-                "       GL_HEAD             = :glHead, " +
-                "       GL_SUBHEAD_CODE     = :glSubHeadCode, " +
-                "       ACCOUNT_DESCRIPTION = :accountDescription, " +
-                "       CURRENCY            = :currency, " +
-                "       DATA_TYPE           = :dataType " +
-                "WHERE  ACCOUNT_ID_BACID = :oldId " +       //use OLD ID
-                "AND   (DEL_FLG IS NULL OR DEL_FLG <> 'Y')",
-        nativeQuery = true
-    )
+    	    value = "UPDATE BRF_BASE_MAPPING_TABLE " +
+    	            "SET    ACCOUNT_ID_BACID    = :newId, " +
+    	            "       GL_HEAD             = :glHead, " +
+    	            "       GL_SUBHEAD_CODE     = :glSubHeadCode, " +
+    	            "       ACCOUNT_DESCRIPTION = :accountDescription, " +
+    	            "       CURRENCY            = :currency, " +
+    	            "       DATA_TYPE           = :dataType " +
+    	            "WHERE ACCOUNT_ID_BACID = :oldId",
+    	    nativeQuery = true
+    	)
     int updateRecord(
         @Param("glHead") String glHead,
         @Param("glSubHeadCode") String glSubHeadCode,
@@ -149,16 +146,25 @@ public interface BrfBaseMappingRepository
      * SOFT DELETE  —  DELETE /BRF/BaseMappingParam/delete/{id}
      * Sets DEL_FLG = 'Y'; never physically removes the row.
      */
+//    @Modifying
+//    @Transactional
+//    @Query(
+//        value = "UPDATE BRF_BASE_MAPPING_TABLE " +
+//                "SET    DEL_FLG = 'Y' " +
+//                "WHERE  ACCOUNT_ID_BACID = :accountId " +
+//                "AND   (DEL_FLG IS NULL OR DEL_FLG <> 'Y')",
+//        nativeQuery = true
+//    )
+//    int softDelete(@Param("accountId") String accountId);
+    
     @Modifying
     @Transactional
     @Query(
-        value = "UPDATE BRF_BASE_MAPPING_TABLE " +
-                "SET    DEL_FLG = 'Y' " +
-                "WHERE  ACCOUNT_ID_BACID = :accountId " +
-                "AND   (DEL_FLG IS NULL OR DEL_FLG <> 'Y')",
+        value = "DELETE FROM BRF_BASE_MAPPING_TABLE " +
+                "WHERE ACCOUNT_ID_BACID = :accountId",
         nativeQuery = true
     )
-    int softDelete(@Param("accountId") String accountId);
+    int deleteRecord(@Param("accountId") String accountId);
     
 	@Query(value = "SELECT DISTINCT " + "  DATA_TYPE AS \"source\", " + "  GL_HEAD AS \"glHead\", "
 			+ "  GL_SUBHEAD_CODE AS \"subHeadCode\" " + "FROM BRF_BASE_MAPPING_TABLE "

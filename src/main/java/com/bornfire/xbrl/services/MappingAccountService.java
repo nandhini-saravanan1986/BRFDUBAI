@@ -197,7 +197,7 @@ public class MappingAccountService {
             return "ACCOUNT_ID_BACID is required";
         }
 
-        int deleted = baseMappingRepo.softDelete(accountId.trim());
+        int deleted = baseMappingRepo.deleteRecord(accountId.trim());
         return deleted > 0 ? "SUCCESS" : "No active record found for: " + accountId;
     }
 }
