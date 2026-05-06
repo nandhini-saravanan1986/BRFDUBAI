@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.itextpdf.text.FontFactory;
 
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -93,10 +94,19 @@ public class BRF_DetailExcel_Service {
             headerStyle.setFont(headerFont);
             headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            headerStyle.setAlignment(HorizontalAlignment.CENTER);
             headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
             headerStyle.setWrapText(true);
             applyThinBorder(headerStyle);
+
+            /* Header style for TEXT columns */
+            CellStyle headerTextStyle = wb.createCellStyle();
+            headerTextStyle.cloneStyleFrom(headerStyle);
+            headerTextStyle.setAlignment(HorizontalAlignment.LEFT);
+
+            /* Header style for NUMBER columns */
+            CellStyle headerNumberStyle = wb.createCellStyle();
+            headerNumberStyle.cloneStyleFrom(headerStyle);
+            headerNumberStyle.setAlignment(HorizontalAlignment.RIGHT);	
 
             // ── Text cell style ───────────────────────────────────────────
             CellStyle textStyle = wb.createCellStyle();
@@ -117,9 +127,16 @@ public class BRF_DetailExcel_Service {
             XSSFRow headerRow = sheet.createRow(0);
             headerRow.setHeightInPoints(28);
             for (int col = 0; col < DETAIL_HEADERS.length; col++) {
+
                 XSSFCell cell = headerRow.createCell(col);
                 cell.setCellValue(DETAIL_HEADERS[col]);
-                cell.setCellStyle(headerStyle);
+
+                // Amount column
+                if (col == 3) {
+                    cell.setCellStyle(headerNumberStyle);
+                } else {
+                    cell.setCellStyle(headerTextStyle);
+                }
             }
 
             // ── Data rows ─────────────────────────────────────────────────
@@ -238,7 +255,20 @@ public class BRF_DetailExcel_Service {
 	        int firstCol = headerRow.getFirstCellNum();
 	        int lastCol = headerRow.getLastCellNum();
 
+//	        PdfPTable table = new PdfPTable(lastCol - firstCol);
 	        PdfPTable table = new PdfPTable(lastCol - firstCol);
+	        float[] columnWidths = {
+	        	    12f, // Cust ID
+	        	    20f, // Acct No
+	        	    36f, // Acct Name
+	        	    20f, // Amount
+	        	    16f, // Report Name
+	        	    16f, // Report Label
+	        	    22f, // Criteria
+	        	    14f  // Date
+	        	};
+
+	        table.setWidths(columnWidths);
 	        table.setWidthPercentage(100);
 	        table.setSpacingBefore(10f);
 
@@ -273,7 +303,14 @@ public class BRF_DetailExcel_Service {
 	                    }
 	                }
 
-	                PdfPCell pdfCell = new PdfPCell(new Phrase(cellValue));
+//	                PdfPCell pdfCell = new PdfPCell(new Phrase(cellValue));
+	                Phrase phrase = new Phrase(
+	                	    10f, // line spacing
+	                	    cellValue,
+	                	    FontFactory.getFont(FontFactory.HELVETICA, 8)
+	                	);
+
+	                	PdfPCell pdfCell = new PdfPCell(phrase);
 
 	                // Handle merged regions
 	                for (CellRangeAddress range : mergedRegions) {
@@ -321,9 +358,19 @@ public class BRF_DetailExcel_Service {
 	                }
 
 	                if (bgColor != null) pdfCell.setBackgroundColor(bgColor);
-	                pdfCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//	                pdfCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+	                if (colIndex == 3) {
+	                    pdfCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+	                } else {
+	                    pdfCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+	                }
 	                pdfCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-	                pdfCell.setPadding(4f);
+//	                pdfCell.setPadding(4f);
+	                pdfCell.setPaddingTop(4f);
+	                pdfCell.setPaddingBottom(4f);
+	                pdfCell.setPaddingLeft(3f);
+	                pdfCell.setPaddingRight(3f);
+	                pdfCell.setNoWrap(false);
 	                table.addCell(pdfCell);
 	            }
 	        }

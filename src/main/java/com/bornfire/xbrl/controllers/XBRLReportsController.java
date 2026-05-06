@@ -768,9 +768,9 @@ public class XBRLReportsController {
 	            List<Object[]> entityList;
 
 	            switch (reportid) {
-	                case "BRF001": entityList = brf1_DetaiRep.find(); break;
-	                case "BRF002": entityList = brf2_DetaiRep.find(); break;
-	                case "BRF004": entityList = brf4_DetaiRep.find(); break;
+	                case "BRF001": entityList = brf1_DetaiRep.find(todate); break;
+	                case "BRF002": entityList = brf2_DetaiRep.find(todate); break;
+	                case "BRF004": entityList = brf4_DetaiRep.find(todate); break;
 	                default: throw new RuntimeException("Unknown reportid: " + reportid);
 	            }
 
@@ -790,9 +790,9 @@ public class XBRLReportsController {
 			    List<Object[]> entityList;
 
 			    switch (reportid) {
-			        case "BRF001": entityList = brf1_DetaiRep.find(); break;
-			        case "BRF002": entityList = brf2_DetaiRep.find(); break;
-			        case "BRF004": entityList = brf4_DetaiRep.find(); break;
+			        case "BRF001": entityList = brf1_DetaiRep.find(todate); break;
+			        case "BRF002": entityList = brf2_DetaiRep.find(todate); break;
+			        case "BRF004": entityList = brf4_DetaiRep.find(todate); break;
 			        default: throw new RuntimeException("Unknown reportid: " + reportid);
 			    }
 

@@ -18,8 +18,9 @@ public interface BRF1_DetaiRep extends JpaRepository<BRF1_DETAIL_ENTITY, BRFDETA
 		    value = "SELECT cust_id, foracid, acct_name, act_balance_amt_lc, " +
 		            "report_name_1, report_label_1, report_addl_criteria_1, report_date " +
 		            "FROM brf1_detailtable " +
+		            "WHERE report_date = ?1 "+
 		            "ORDER BY report_label_1",
 		    nativeQuery = true
 		)
-	List<Object[]> find();
+	List<Object[]> find(String todate);
 }
