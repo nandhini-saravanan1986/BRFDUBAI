@@ -50,6 +50,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.bornfire.xbrl.config.SequenceGenerator;
+import com.bornfire.xbrl.entities.AuditReasonDTO;
 import com.bornfire.xbrl.entities.BRF1_ARCHIVENTITY;
 import com.bornfire.xbrl.entities.TransactionmastertableRep;
 import com.bornfire.xbrl.entities.UserProfile;
@@ -2333,7 +2334,7 @@ public class BRF001ReportService {
 	private JdbcTemplate jdbcTemplate;
 
 	public String detailChanges1(BRF1_DETAIL_ENTITY detail, String foracid, String report_addl_criteria_1,
-	        BigDecimal act_balance_amt_lc, String report_label_1, String report_name_1,String report_date) {
+	        BigDecimal act_balance_amt_lc, String report_label_1, String report_name_1,String report_date, AuditReasonDTO reason) {
 
 	    String msg = "";
 
