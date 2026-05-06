@@ -652,7 +652,7 @@
 							style="margin-bottom: 0px" id="usertable">
 							<thead class="thead-light">
 								<tr>
-									 <th></th> 
+									<!--<th></th>--> 
 								<th>Customer ID</th>
 										<th>Customer Name</th>
 										<th>Customer DOB</th>
@@ -672,7 +672,7 @@
 									<tr style="cursor: pointer;" th:if="${COUNT} != '0'" th:each="custInq : ${custParameter}"
 										th:attr="data-ref_id=${custInq.orgkey}"
 										th:id="${custInq.orgkey}" class="userlist">
-<td><a  data-toggle="tooltip" class="editrec"
+<!--<td><a  data-toggle="tooltip" class="editrec"
 										title="Click to Edit this Record"><i 
 										th:classappend="${session.PERMISSIONS == 'W'}  ? addedit "
 										class="fas fa-edit"
@@ -687,7 +687,7 @@
 													data-add2=${custInq.address2},
 													data-add3=${custInq.address3},
 													data-mail=${custInq.preferredemail}"
-											onclick="editRecord(this)"></i></a></td>
+											onclick="editRecord(this)"></i></a></td>-->
 										<td th:text="${custInq.orgkey}"
 										    th:attr="data-ref_id=${custInq.orgkey}"
 										    onclick="getCustenquiry(this);"
