@@ -537,13 +537,13 @@
 				<button type="button" class="btn btn-xs btn-primary" id="btnDownload" onclick="downloadExcel();">Download Excel</button> 
 			</div>
 
-			<form class="form-horizontal" method="post" name="CriteriaForm" id="reportform">
+<!-- 			<form class="form-horizontal" method="post" name="CriteriaForm" id="reportform">
 				<div class="form-group">
 					<div class="row row1">
-						<!-- Additional criteria inputs can go here -->
+						Additional criteria inputs can go here
 					</div>
 				</div>
-			</form>
+			</form> -->
 
 			<div class="table-container">
 				<table id="userAuditLevelTb" class="table table-bordered table-hover" style="width:100%">
@@ -557,7 +557,7 @@
 							<th>Entry Time</th>
 							<th>Auth User</th>
 							<!--   <th>Auth Time</th>-->
-							<th>Event ID</th>
+							<!-- <th>Event ID</th> -->
 							<th>Event Name</th>
 							<th>Modification Details</th>
 							<!-- <th>Remarks</th>-->
@@ -575,7 +575,7 @@
 						<td th:text="${#dates.format(list.entry_time, 'HH:mm:ss')}"></td>
 						<!--<td th:text="${list.auth_time}"></td>-->
 						<td th:text="${list.auth_user}"></td>
-						<td th:text="${list.event_id}"></td>
+						<!-- <td th:text="${list.event_id}"></td> -->
 						<td th:text="${list.event_name}"></td>
 						<td th:text="${list.modi_details}"></td>
 						<!--<td th:text="${list.remarks}"></td>-->
