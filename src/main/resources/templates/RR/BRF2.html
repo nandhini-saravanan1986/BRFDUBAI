@@ -581,6 +581,7 @@ function downloadexcel(button) {
 	var secid = button.getAttribute('data-secid');
 	var dtltype = button.getAttribute('data-dtltype');
 	var filetype = button.getAttribute('data-filetype');
+	var pagesize = button.getAttribute('data-pagesize') || 'A3';
 	
 	console.log(filetype);
 
@@ -596,7 +597,8 @@ function downloadexcel(button) {
 			subreportid : subreportid,
 			secid : secid,
 			dtltype : dtltype,
-			filetype : filetype
+			filetype : filetype,
+			pagesize : pagesize
 		},
 		type : 'POST',
 		xhrFields : {
@@ -610,11 +612,24 @@ function downloadexcel(button) {
 			var url = window.URL.createObjectURL(blob);
 			var a = document.createElement('a');
 			a.href = url;
-					if (filetype == "excel" || filetype == "detailexcel") {
+					/* if (filetype == "excel" || filetype == "detailexcel") {
 		                a.download = '011-BRF-002-A' + ".xlsx"; // assuming .xlsx extension for Excel files
 		            } else if(filetype == "BRF"){
 		                a.download = '011-BRF-002-A' + ".xls"; // assuming .pdf extension for PDF files
 		            }else{
+		            	a.download = '011-BRF-002-A' + ".pdf";
+		            } */
+					if (filetype == "excel") {
+		                a.download = '011-BRF-002-A' + ".xlsx"; // assuming .xlsx extension for Excel files
+		            }else if (filetype == "detailexcel") {
+		            	a.download = 'BRF002-Detail' + ".xlsx";
+		            } 
+					else if(filetype == "BRF"){
+		                a.download = '011-BRF-002-A' + ".xls"; // assuming .pdf extension for PDF files
+		            }else if (filetype == "detailpdf") {
+				        a.download = 'BRF002-Detail' + ".pdf";
+		            }
+					else{
 		            	a.download = '011-BRF-002-A' + ".pdf";
 		            }
 		            
@@ -623,13 +638,25 @@ function downloadexcel(button) {
 		            window.URL.revokeObjectURL(url);
 		            
 		            // Set the appropriate message based on the downloaded filetype
-		            if (filetype == "excel") {
+		            /* if (filetype == "excel") {
 		                $('#customAlertBody').text('Downloaded BRF-002 ' + ".xlsx");
 		            } else if (filetype == "detailexcel") {
 		                $('#customAlertBody').text('Downloaded BRF-002 Detail Excel' + ".xlsx");
 		            }else if(filetype == "BRF"){
 		            	$('#customAlertBody').text('Downloaded BRF 002 ' + ".xls"); // assuming .pdf extension for PDF files
 		            } else {
+		                $('#customAlertBody').text('Downloaded BRF-002 ' + ".pdf");
+		            } */
+		            if (filetype == "excel") {
+		                $('#customAlertBody').text('Downloaded BRF-002 ' + ".xlsx");
+		            } else if (filetype == "detailexcel") {
+		                $('#customAlertBody').text('Downloaded BRF-002 Detail Excel' + ".xlsx");
+		            }else if(filetype == "BRF"){
+		            	$('#customAlertBody').text('Downloaded BRF 002 ' + ".xls"); // assuming .pdf extension for PDF files
+		            }else if(filetype == "detailpdf"){
+		            	$('#customAlertBody').text('Downloaded BRF 002 Detail ' + ".pdf"); // assuming .pdf extension for PDF files
+		            }  
+		            else {
 		                $('#customAlertBody').text('Downloaded BRF-002 ' + ".pdf");
 		            }
 		            $('#customAlertModal').modal('show');
@@ -685,6 +712,27 @@ function downloadexcel(button) {
     top: 108px; /* Adjust based on row height */
     background-color: #b3b6b9;
     z-index: 1;
+}
+
+/* PDF page-size submenu */
+.dropdown-submenu {
+    position: relative;
+}
+.dropdown-submenu .dropdown-submenu-menu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    z-index: 1050;
+    min-width: 80px;
+}
+
+.dropdown-submenu a,
+.dropdown-submenu-menu a {
+    cursor: pointer !important;
+}
+.dropdown-submenu:hover > .dropdown-submenu-menu {
+    display: block;
 }
 
 
@@ -818,6 +866,42 @@ function tablepagination(){
 							            data-filetype='BRF'"
 								onclick="downloadexcel(this)">BRF FINAL</a>
 							</li>
+							
+							<li th:if="${displaymode} == 'summary'"
+							    class="dropdown-submenu">
+							    <a class="text-primary dropdown-toggle-sub" href="#">BRF FINAL PDF &raquo;</a>
+							    <ul class="dropdown-menu dropdown-submenu-menu">
+							        <li th:each="size : ${pageSizes}">
+								    <a class="text-primary"
+								       th:text="${size}"
+								       th:attr="data-pagesize=${size},
+								                data-reportid=${reportid},
+								                data-asondate=${asondate},
+								                data-fromdate=${fromdate},
+								                data-todate=${todate},
+								                data-currency=${currency},
+								                data-subreportid=${subreportid},
+								                data-secid=${secid},
+								                data-dtltype=${dtltype},
+								                data-filetype='BRFEXCELTOPDF'"
+								       onclick="downloadexcel(this)">
+								    </a>
+								</li>
+							    </ul>
+							</li>
+							
+							<li th:if="${displaymode}=='detail'"><a
+								th:attr="data-reportid=${reportid}, 
+							            data-asondate=${asondate}, 
+							            data-fromdate=${fromdate}, 
+							            data-todate=${todate}, 
+							            data-currency=${currency}, 
+							            data-subreportid=${subreportid}, 
+							            data-secid=${secid}, 
+							            data-dtltype=${dtltype}, 
+							            data-filetype='detailpdf'"
+								onclick="downloadexcel(this)">Pdf</a></li>
+							
 							<li th:if="${displaymode}=='detail'"><a
 								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 

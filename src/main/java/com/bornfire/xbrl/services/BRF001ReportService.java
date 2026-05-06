@@ -398,7 +398,7 @@ public class BRF001ReportService {
 		 */
 
 		if (!filetype.equals("xbrl")) {
-			if (!filetype.equals("BRF")) {
+			if (!filetype.contains("BRF")) {
 
 				try {
 					InputStream jasperFile;

@@ -560,11 +560,24 @@ PURPOSE		: BRF4 Reports-development
 					var url = window.URL.createObjectURL(blob);
 					var a = document.createElement('a');
 					a.href = url;
-					if (filetype == "excel" || filetype == "detailexcel") {
+					/* if (filetype == "excel" || filetype == "detailexcel") {
 						a.download = '011-BRF-004-A' + ".xlsx"; // assuming .xlsx extension for Excel files
 					} else if (filetype == "BRF") {
 						a.download = '011-BRF-004-A' + ".xls"; // assuming .pdf extension for PDF files
 					} else {
+						a.download = '011-BRF-004-A' + ".pdf";
+					} */
+					if (filetype == "excel") {
+						a.download = '011-BRF-004-A' + ".xlsx"; // assuming .xlsx extension for Excel files
+					}else if (filetype == "detailexcel") {
+		            	a.download = 'BRF004-Detail' + ".xlsx";
+		            }  
+					else if (filetype == "BRF") {
+						a.download = '011-BRF-004-A' + ".xls"; // assuming .pdf extension for PDF files
+					}else if (filetype == "detailpdf") {
+				        a.download = 'BRF004-Detail' + ".pdf";
+                    }
+					else {
 						a.download = '011-BRF-004-A' + ".pdf";
 					}
 
@@ -573,13 +586,25 @@ PURPOSE		: BRF4 Reports-development
 					window.URL.revokeObjectURL(url);
 
 					// Set the appropriate message based on the downloaded filetype
-					if (filetype == "excel") {
+					/* if (filetype == "excel") {
 						$('#customAlertBody').text('Downloaded BRF-004 ' + ".xlsx");
 					} else if (filetype == "detailexcel") {
 						$('#customAlertBody').text('Downloaded BRF-004 Detail Excel' + ".xlsx");
 					} else if (filetype == "BRF") {
 						$('#customAlertBody').text('Downloaded BRF 004 ' + ".xls"); // assuming .pdf extension for PDF files
 					} else {
+						$('#customAlertBody').text('Downloaded BRF-004 ' + ".pdf");
+					} */
+					if (filetype == "excel") {
+						$('#customAlertBody').text('Downloaded BRF-004 ' + ".xlsx");
+					} else if (filetype == "detailexcel") {
+						$('#customAlertBody').text('Downloaded BRF-004 Detail Excel' + ".xlsx");
+					} else if (filetype == "BRF") {
+						$('#customAlertBody').text('Downloaded BRF 004 ' + ".xls"); // assuming .pdf extension for PDF files
+					}else if(filetype == "detailpdf"){
+		            	$('#customAlertBody').text('Downloaded BRF 004 Detail ' + ".pdf"); // assuming .pdf extension for PDF files
+		            }  
+					else {
 						$('#customAlertBody').text('Downloaded BRF-004 ' + ".pdf");
 					}
 					$('#customAlertModal').modal('show');
@@ -764,6 +789,17 @@ PURPOSE		: BRF4 Reports-development
 							            data-dtltype=${dtltype}, 
 							            data-filetype='BRF'" onclick="downloadexcel(this)">BRF FINAL</a>
 							</li>
+							
+							<li th:if="${displaymode}=='detail'"><a th:attr="data-reportid=${reportid}, 
+							            data-asondate=${asondate}, 
+							            data-fromdate=${fromdate}, 
+							            data-todate=${todate}, 
+							            data-currency=${currency}, 
+							            data-subreportid=${subreportid}, 
+							            data-secid=${secid}, 
+							            data-dtltype=${dtltype}, 
+							            data-filetype='detailpdf'" onclick="downloadexcel(this)">Pdf</a></li>
+							
 							<li th:if="${displaymode}=='detail'"><a th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 

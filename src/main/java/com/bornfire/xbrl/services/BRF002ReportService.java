@@ -50,6 +50,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.bornfire.xbrl.config.SequenceGenerator;
+import com.bornfire.xbrl.entities.AuditReasonDTO;
 import com.bornfire.xbrl.entities.BRF2_ARCHIVENTITY;
 import com.bornfire.xbrl.entities.TransactionmastertableRep;
 import com.bornfire.xbrl.entities.UserProfile;
@@ -393,7 +394,7 @@ public class BRF002ReportService {
 		
 
 		if (!filetype.equals("xbrl")) {
-			if(!filetype.equals("BRF")) {
+			if(!filetype.contains("BRF")) {
 
 			try {
 				InputStream jasperFile;
@@ -2863,7 +2864,7 @@ public class BRF002ReportService {
     			
 	
 	public String detailChanges2(BRF2_DETAIL_ENTITY detail, String report_label_1, BigDecimal act_balance_amt_lc,
-	        String foracid, String report_name_1, String report_addl_criteria_1,String report_date) {
+	        String foracid, String report_name_1, String report_addl_criteria_1,String report_date, AuditReasonDTO reason) {
 
 	    String msg = "";
 
