@@ -1,14 +1,21 @@
 package com.bornfire.xbrl.services;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Table;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -121,7 +128,8 @@ public class AuditService {
 
 	// ---------- ENTITY FIELD CHANGE AUDIT ----------
 	@Transactional
-	public void auditChanges(Object newEntity) {
+	public void auditChanges(Object newEntity,String reason) {
+		System.out.println("Reaon in service : "+reason);
 	    if (newEntity == null) return;
 
 	    Class<?> entityClass = newEntity.getClass();
@@ -136,6 +144,73 @@ public class AuditService {
 	    // Get primary key value
 	    Object primaryKey = entityManager.getEntityManagerFactory()
 	        .getPersistenceUnitUtil().getIdentifier(newEntity);
+	    //-----------------------------
+	    System.out.println("Primary Key : "+primaryKey);
+	    
+	    EntityType<?> entityType = entityManager.getMetamodel().entity(newEntity.getClass());
+	    List<String> idNames = new ArrayList<>();
+
+	    if (entityType.hasSingleIdAttribute()) {
+	        // Single @Id
+	        for (SingularAttribute<?, ?> attribute : entityType.getSingularAttributes()) {
+	            if (attribute.isId()) {
+	                idNames.add(attribute.getName());
+	                break;
+	            }
+	        }
+	    } else {
+	    	// composite @Idclass
+	        for (Object attrObj : entityType.getIdClassAttributes()) {
+	            SingularAttribute<?, ?> attribute = (SingularAttribute<?, ?>) attrObj;
+	            idNames.add(attribute.getName());
+	        }
+	    }
+
+	    // Get the ID value
+	    Object idValue = entityManager.getEntityManagerFactory()
+	    	    .getPersistenceUnitUtil().getIdentifier(newEntity);
+
+	    	System.out.println("--- Extracting Composite Key Values ---");
+
+	    	String formattedIdString = "";
+	    	
+	    	if (idValue != null) {
+		    	SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+	    	    if (entityType.hasSingleIdAttribute()) {
+	    	        // Single Primary Key
+	    	        String singleIdName = idNames.get(0);
+	    	        String displayName=singleIdName.replace('_', ' ');
+                	displayName=displayName.substring(0,1).toUpperCase()+displayName.substring(1);
+	    	        String displayValue = (idValue instanceof Date) ? sdf.format((Date) idValue) : idValue.toString();
+	    	        formattedIdString = displayName + " : " + displayValue;
+	    	        
+	    	    } else {
+	    	        //Composite Primary Key
+	    	        StringJoiner joiner = new StringJoiner(";");
+	    	        Field[] fields = idValue.getClass().getDeclaredFields();
+	    	        
+	    	        for (Field field : fields) {
+	    	            field.setAccessible(true);
+	    	            try {
+	    	                String fieldName = field.getName();
+	    	                Object fieldValue = field.get(idValue);	    	                
+	    	                if (!fieldName.equals("serialVersionUID")) {
+	    	                	String displayName=fieldName.replace('_', ' ');
+	    	                	displayName=displayName.substring(0,1).toUpperCase()+displayName.substring(1);
+								Object displayValue = (fieldValue instanceof Date) ? sdf.format((Date) fieldValue) : fieldValue;
+	    	                    joiner.add(displayName + " : " + displayValue);
+	    	                }
+	    	            } catch (IllegalAccessException e) {
+	    	                System.err.println("Could not read field: " + field.getName());
+	    	            }
+	    	        }
+	    	        formattedIdString = joiner.toString();
+	    	    }
+	    	}
+
+	    	System.out.println("ID values : " + formattedIdString);
+	    	
+	 //-------------------------------
 
 	    if (primaryKey == null) {
 	        logger.warn("Primary key not found for entity: {}", entityClass.getSimpleName());
@@ -156,18 +231,29 @@ public class AuditService {
 	    List<String> fieldNames = new ArrayList<>();
 	    List<String> oldValues = new ArrayList<>();
 	    List<String> newValues = new ArrayList<>();
+		Set<String> ignoreFields = new HashSet<>(Arrays.asList("report_date"));
 
 	    // Compare field-by-field
 	    for (Field field : entityClass.getDeclaredFields()) {
 	        field.setAccessible(true);
+	        if (ignoreFields.contains(field.getName())) {
+	            continue;
+	        }
+
 	        try {
 	            Object oldValue = field.get(oldEntity);
 	            Object newValue = field.get(newEntity);
+				//System.out.println("Before Field: " + field.getName() + " Old: " + oldValue + " New: " + newValue + " Equals: " + Objects.equals(oldValue, newValue));
 
-	            if (!Objects.equals(oldValue, newValue)) {
+	            String formattedOld = (oldValue == null || oldValue.toString().trim().isEmpty()) ? null : oldValue.toString();
+	            String formattedNew = (newValue == null || newValue.toString().trim().isEmpty()) ? null : newValue.toString();
+	            
+				//System.out.println("After Field: " + field.getName() + " Old: " + formattedOld + " New: " + formattedNew+ " Equals: " + Objects.equals(formattedOld, formattedNew));
+	            
+	            if (!Objects.equals(formattedOld, formattedNew) && !formattedOld.equals(formattedNew)) {
 	                fieldNames.add(field.getName());
-	                oldValues.add(oldValue != null ? oldValue.toString() : "null");
-	                newValues.add(newValue != null ? newValue.toString() : "null");
+	                oldValues.add(formattedOld != null  ? formattedOld.toString() : "null");
+	                newValues.add(formattedNew != null ? formattedNew.toString() : "null");
 	            }
 	        } catch (IllegalAccessException e) {
 	            logger.error("Unable to access field: " + field.getName(), e);
@@ -208,6 +294,9 @@ public class AuditService {
 	    audit.setEvent_id(primaryKey.toString());
 	    audit.setEvent_name(username);
 	    audit.setRemarks("Edit Successfully");
+	    
+	    audit.setID_VALUES(formattedIdString);
+	    audit.setREASON(reason);
 
 	    audit.setField_name(String.join("; ", fieldNames));
 	    audit.setOld_value(String.join("; ", oldValues));

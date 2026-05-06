@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -5042,6 +5043,9 @@ public class XBRLNavigationController {
 			if (changes == null || changes.isEmpty()) {
 				return ""; // No data found
 			}
+			String tableids=changes.get(0).getID_VALUES();
+			String reason="Reason : "+changes.get(0).getREASON();
+			//System.out.println("IDs : "+tableids+" Reason : "+reason);
 
 			StringBuilder sb = new StringBuilder();
 			for (MANUAL_Service_Entity entity : changes) {
@@ -5049,14 +5053,13 @@ public class XBRLNavigationController {
 						.append(", NewValue: ").append(entity.getNew_value()).append("|||");
 			}
 
-			return sb.toString();
+			return tableids+"-|-|-"+sb.toString()+"-|-|-"+reason;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error: " + e.getMessage();
 		}
 	}
-
 	@RequestMapping(value = "archivalform", method = { RequestMethod.GET, RequestMethod.POST })
 	public String archivalform(Model md, @RequestParam(value = "reportid", required = false) String reportid,
 			@RequestParam(value = "repdesc", required = false) String repdesc, HttpServletRequest req) {
@@ -11641,4 +11644,81 @@ public class XBRLNavigationController {
 
 		return "CustomerInquiry";
 	}
+	@GetMapping("/downloadauditexcel")
+	public void downloadAuditExcel(@RequestParam String fromDate, 
+	                          @RequestParam String toDate, 
+	                          HttpServletResponse response) throws IOException {
+		
+		//System.out.println("From Date : "+fromDate+" To Date : "+toDate);
+	    
+	    List<MANUAL_Service_Entity> dataList = mANUAL_Service_Rep.findByDateRange(fromDate, toDate);
+
+	    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	    response.setHeader("Content-Disposition", "attachment; filename=Audit_report.xlsx");
+
+	    try (Workbook workbook = new XSSFWorkbook(); 
+	         ServletOutputStream out = response.getOutputStream()) {
+	        
+	        Sheet sheet = workbook.createSheet("Data Report");
+
+	        String[] columns = {"Audit Ref No", "Table Name", "Function", "Entry User", "Entry Date","Entry Time","Authorizer","Modified Data"};
+	        Row headerRow = sheet.createRow(0);
+	        for (int i = 0; i < columns.length; i++) {
+	            Cell cell = headerRow.createCell(i);
+	            cell.setCellValue(columns[i]);
+	            
+	            CellStyle headerStyle = workbook.createCellStyle();
+	            Font font = workbook.createFont();
+	            font.setBold(true);
+	            headerStyle.setFont(font);
+	            cell.setCellStyle(headerStyle);
+	        }
+	        SimpleDateFormat dateonly = new SimpleDateFormat("yyyy-MM-dd");
+	        SimpleDateFormat timeonly = new SimpleDateFormat("HH:mm:ss");
+
+	        int rowIdx = 1;
+	        for (MANUAL_Service_Entity item : dataList) {
+	            Row row = sheet.createRow(rowIdx++);
+
+	            row.createCell(0).setCellValue(item.getAudit_ref_no());
+	            row.createCell(1).setCellValue(item.getAudit_table());
+	            row.createCell(2).setCellValue(item.getFunc_code());
+	            row.createCell(3).setCellValue(item.getEntry_user());
+	            row.createCell(4).setCellValue(dateonly.format(item.getEntry_time()));
+	            row.createCell(5).setCellValue(timeonly.format(item.getEntry_time()));
+	            row.createCell(6).setCellValue(item.getAuth_user());
+	            row.createCell(7).setCellValue(item.getRemarks());
+	        }
+
+	        for (int i = 0; i < columns.length; i++) {
+	            sheet.autoSizeColumn(i);
+	        }
+
+	        workbook.write(out);
+	        out.flush();
+	    }
+	}
+	
+	@PostMapping("/executeSummaryProcedure")
+	public ResponseEntity<String> executeSummaryProcedure(@RequestParam String reportDate,
+			@RequestParam String rpt_code, HttpServletRequest req) {
+		try {
+			//System.out.println("Report_Date : " + reportDate);
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			LocalDate parsedDate = LocalDate.parse(reportDate, inputFormatter);
+			String formattedDate = parsedDate.format(dateFormatter);
+			//System.out.println("Report_Date Formatted Date : " + formattedDate);
+			
+			String sql = "CALL COMMON_SUMMARY_TRIGGERING_PROCEDURE(?, ?)";
+			jdbcTemplate.update(sql, formattedDate, rpt_code);
+			
+			return ResponseEntity.ok("{\"message\": \"Procedure executed successfully!\"}");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("{\"error\": \"Failed to execute procedure: " + e.getMessage() + "\"}");
+		}
+	}
+	
 }

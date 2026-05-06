@@ -29,6 +29,22 @@ public class MANUAL_Service_Entity {
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date auth_time;
 	private String func_code;
+	private String ID_VALUES;
+	private String REASON;
+	
+	
+	public String getREASON() {
+		return REASON;
+	}
+	public void setREASON(String rEASON) {
+		REASON = rEASON;
+	}
+	public String getID_VALUES() {
+		return ID_VALUES;
+	}
+	public void setID_VALUES(String iD_VALUES) {
+		ID_VALUES = iD_VALUES;
+	}
 	public String getAudit_ref_no() {
 		return audit_ref_no;
 	}
@@ -125,10 +141,11 @@ public class MANUAL_Service_Entity {
 	public void setFunc_code(String func_code) {
 		this.func_code = func_code;
 	}
+	
 	public MANUAL_Service_Entity(String audit_ref_no, Date audit_date, String audit_table, String audit_screen,
 			String event_id, String event_name, String old_value, String new_value, String field_name,
 			String modi_details, String entry_user, Date entry_time, String remarks, String auth_user, Date auth_time,
-			String func_code) {
+			String func_code, String iD_VALUES) {
 		super();
 		this.audit_ref_no = audit_ref_no;
 		this.audit_date = audit_date;
@@ -146,6 +163,7 @@ public class MANUAL_Service_Entity {
 		this.auth_user = auth_user;
 		this.auth_time = auth_time;
 		this.func_code = func_code;
+		ID_VALUES = iD_VALUES;
 	}
 	public MANUAL_Service_Entity() {
 		super();
