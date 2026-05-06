@@ -6,12 +6,16 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.bornfire.xbrl.entities.BRFDETAILID;
+
 
 @Entity
+@IdClass(BRFDETAILID.class)
 @Table(name="BRF3_DETAILTABLE")
 public class BRF3_DETAILTABLE {
 	private String	cust_id;
@@ -59,6 +63,7 @@ public class BRF3_DETAILTABLE {
 	private String	modify_flg;
 	private String	del_flg;
 	private String	nre_status;
+	@Id
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date	report_date;
 	private String	maturity_date;

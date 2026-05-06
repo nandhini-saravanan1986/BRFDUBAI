@@ -2079,7 +2079,7 @@ public class RegulatoryReportServices {
 
 		case "BRF003":
 			repdetail = brf003ReportService.getBRF003currentDtl(reportId, fromdate, todate, currency, dtltype, pageable,
-					Filter);
+					Filter,searchVal);
 			break;
 
 		case "BRF010":
@@ -2102,7 +2102,7 @@ public class RegulatoryReportServices {
 
 		case "BRF004":
 			repdetail = brf004ReportService.getBRF004currentDtl(reportId, fromdate, todate, currency, dtltype, pageable,
-					Filter);
+					Filter,searchVal);
 			break;
 		case "BRF007":
 			repdetail = brf007ReportService.getBRF007currentDtl(reportId, fromdate, todate, currency, dtltype, pageable,
@@ -2183,7 +2183,7 @@ public class RegulatoryReportServices {
 
 	public ModelAndView getReportDetails1(String reportId, String instanceCode, String asondate, String fromdate,
 			String todate, String currency, String reportingTime, String dtltype, String subreportid, String secid,
-			Pageable pageable, String Filter) {
+			Pageable pageable, String Filter,String searchVal) {
 
 		ModelAndView repdetail = new ModelAndView();
 		logger.info("Getting Details for the Report :" + reportId);
