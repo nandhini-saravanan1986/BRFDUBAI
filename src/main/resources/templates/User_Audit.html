@@ -31,7 +31,7 @@
 <script src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js"
 	th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
 <!-- Load jQuery first -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script src="/webjars/jquery/3.6.0/jquery.min.js" th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
 <script src="/webjars/bootstrap/4.6.0/js/bootstrap.bundle.min.js"
@@ -39,43 +39,38 @@
 <script src="/webjars/datatables.net/1.13.4/js/jquery.dataTables.min.js"
 	th:src="@{/webjars/datatables.net/1.13.4/js/jquery.dataTables.min.js}"></script>
 <script th:inline="javascript">
-
 	/*<![CDATA[*/
+	
+	document.addEventListener("DOMContentLoaded", function () {
 
-	$(document).ready(function () {
+		var userTable = $('#userAuditLevelTb').DataTable();
 
-		// Load JSON data from Thymeleaf model
-		var userAuditLevelData = /*[[${userAuditLevels}]]*/[];
-		console.log(userAuditLevelData[0]);
+		var datePicker = document.getElementById('searchDate');
 
-		console.log("DATA RECEIVED:", userAuditLevelData);
+		datePicker.addEventListener('change', function () {
+			
+			var selectedDate = this.value; 
 
-		// Initialize DataTable with data
-		$('#userAuditLevelTb').DataTable({
-			data: userAuditLevelData,
-			columns: [
-				{data: 'audit_ref_no'},
-				{data: 'audit_date'},
-				{data: 'audit_table'},
-				{data: 'function_code'},
-				{data: 'entry_user'},
-				{data: 'entry_time'},
-				{data: 'auth_user'},
-				{data: 'auth_time'},
-				{data: 'event_id'},
-				{data: 'event_name'},
-				{data: 'modification_details'},
-				{data: 'remarks'}
-			]
+			if (!selectedDate) {
+				userTable.column(1).search('').draw();
+				return;
+			}
+
+			var parts = selectedDate.split('-');
+			var formattedDate = parts[2] + '-' + parts[1] + '-' + parts[0]; 
+
+			userTable.column(1).search(formattedDate).draw();
 		});
-	});
 
+	});
+	
 	/*]]>*/
 </script>
 
+
 <script th:inline="javascript">
 	// Date filter event
-	$('#searchDate').on('change', function () {
+/*	$('#searchDate').on('change', function () {
 		var selectedDate = $(this).val(); // yyyy-mm-dd
 
 		var filteredData = userAuditLevelData.filter(function (item) {
@@ -84,7 +79,7 @@
 
 		table.clear().rows.add(filteredData).draw();
 	});
-
+*/
 
 
 
@@ -466,6 +461,60 @@
 		/* You can adjust this height */
 		overflow-y: auto;
 	}
+
+.dataTables_length label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+}
+.dataTables_length select {
+    margin: 0 10px !important;
+    width: auto !important;
+    display: inline-block !important;
+    border-radius: 4px;
+}
+
+.dataTables_filter label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    justify-content: flex-end !important;
+}
+.dataTables_filter input {
+    margin-left: 10px !important;
+    width: auto !important;
+    display: inline-block !important;
+    border-radius: 4px;
+}
+
+.dataTables_length {
+    float: left !important;
+    margin-bottom: 10px;
+}
+.dataTables_filter {
+    float: right !important;
+    margin-bottom: 10px;
+}
+
+.dataTables_info {
+    float: left !important;
+    padding-top: 12px !important;
+}
+.dataTables_paginate {
+    float: right !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    padding-top: 8px !important;
+}
+
+.dataTables_wrapper::after {
+    content: "";
+    display: table;
+    clear: both;
+}
 </style>
 
 </head>
@@ -501,7 +550,7 @@
 					<thead>
 						<tr>
 							<th>Audit Ref No</th>
-							<!-- <th>Audit Date</th>-->
+							 <th>Audit Date</th>
 							<th>Audit Table</th>
 							<th>Function Code</th>
 							<th>Entry User</th>
@@ -514,11 +563,11 @@
 							<!-- <th>Remarks</th>-->
 						</tr>
 					</thead>
-					<tbody th:each="list : ${userAuditLevels}">
-
+					<tbody >
+<tr th:each="list : ${userAuditLevels}">
 						<td th:text="${list.audit_ref_no}"></td>
 
-						<!--	<td th:text="${#dates.format(list.audit_date, 'dd-MM-yyyy')}"></td>-->
+							<td th:text="${#dates.format(list.audit_date, 'dd-MM-yyyy')}"></td>
 						<td th:text="${list.audit_table}"></td>
 						<td th:text="${list.func_code}"></td>
 						<td th:text="${list.entry_user}"></td>
@@ -531,7 +580,7 @@
 						<td th:text="${list.modi_details}"></td>
 						<!--<td th:text="${list.remarks}"></td>-->
 
-
+</tr>
 					</tbody>
 				</table>
 

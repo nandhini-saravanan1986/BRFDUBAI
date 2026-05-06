@@ -117,7 +117,7 @@ public class BRF001ReportService {
 		logger.info("Report precheck : " + reportid);
 
 		try {
-			dt1 = new SimpleDateFormat("dd/MM/yyyy").parse(fromdate);
+			//dt1 = new SimpleDateFormat("dd/MM/yyyy").parse(fromdate);
 			dt9 = new SimpleDateFormat("dd/MM/yyyy").parse(todate);
 			logger.info("Getting No of records in Master table :" + reportid);
 			Long dtlcnt = (Long) hs.createQuery("select count(*) from BRF1_REPORT_ENTITY a where a.report_date=?1")
