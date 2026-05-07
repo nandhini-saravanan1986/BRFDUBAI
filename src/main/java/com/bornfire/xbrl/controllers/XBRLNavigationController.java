@@ -8250,7 +8250,7 @@ public class XBRLNavigationController {
 
 		// System.out.println("Report Date : " + reportdate);
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 		LocalDate parsedDate = LocalDate.parse(reportdate, inputFormatter);
 		String formattedDate = parsedDate.format(dateFormatter);
 		// System.out.println("Report_Date Formatted Date : " + formattedDate);
