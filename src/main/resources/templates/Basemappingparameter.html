@@ -290,16 +290,24 @@
     <div class="card">
 
         <!-- ─── Card Header ─── -->
-        <div class="card-header">
-            <div class="d-flex align-items-center justify-content-between" style="width:100%;">
-                <h5>GL Configuration</h5>
-                <button class="btn-add-new" onclick="openAddModal()">
-                    <i class="fas fa-plus"></i>&nbsp; Add New
-                </button>
-            </div>
-        </div>
+			<div class="card-header">
+				<div class="d-flex align-items-center justify-content-between"
+					style="width: 100%;">
+					<h5>GL Configuration</h5>
+					<div class="d-flex">
+						<button class="btn-add-new mr-2" onclick="openAddModal()">
+							<i class="fas fa-plus"></i>&nbsp; Add New
+						</button>
+						<button type="button" class="btn-add-new"
+							onclick="Uploadglbalance()">
+							<i class="fas fa-cloud-upload-alt"></i>&nbsp; GL Upload 
+						</button>
+					</div>
 
-        <!-- ─── Card Body ─── -->
+				</div>
+			</div>
+
+			<!-- ─── Card Body ─── -->
         <div class="card-body">
 
             <!-- Toolbar -->
@@ -458,7 +466,53 @@
     </div>
 </div>
 
-
+	<div class="modal fade" id="Uploadglmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+	
+				<!-- Modal Header -->
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title" id="exampleModalLabel"
+						style="font-family: Verdana, Geneva, Tahoma, sans-serif;">
+						<i class="fas fa-cloud-upload-alt mr-2"></i> GL Upload 
+					</h5>
+					<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+	
+				<!-- Modal Body -->
+				<div class="modal-body">
+					<!-- Report Date -->
+					<div class="form-group">
+						<label for="reportDate" class="font-weight-bold">Selected Report Date:</label>
+						<input type="date" id="reportDate" th:value="${#dates.format(Selectedreport_date, 'yyyy-MM-dd')}"
+							class="form-control border-info"  />
+					</div>
+	
+					<!-- File Upload -->
+					<div class="form-group">
+						<label for="file" class="font-weight-bold">File (.xlsx/.xls/.csv): <b style="color: red;">*</b></label>
+						<input type="file" name="file" id="excelFile" class="form-control"
+							autocomplete="new-text" accept=".xlsx,.xls,.csv" required />
+					</div>
+				</div>
+	
+				<!-- Modal Footer -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" style="font-family: Verdana, Geneva, Tahoma, sans-serif;"
+						onclick="submitExcel()">
+						<i class="fas fa-upload mr-2"></i> Upload 
+					</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">
+						<i class="fas fa-times mr-2"></i> Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 <script>
 /* ══════════════════════════════════════════════════════════════════════
    GLOBAL STATE
@@ -830,6 +884,38 @@ function back() { window.history.back(); }
 ══════════════════════════════════════════════════════════════════════ */
 function nvl(val) { return (val !== null && val !== undefined) ? val : ''; }
 
+function Uploadglbalance() {
+	$('#Uploadglmodal').modal('show');
+}
+
+function submitExcel() {
+    const fileInput = document.getElementById("excelFile");
+
+    if (!fileInput || fileInput.files.length === 0) {
+        alert("Please select a file.");
+        return;
+    }
+/*
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("formmode", "UPLOAD");
+
+    fetch("./Glbalance/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {*/
+            alert("File uploaded and data saved successfully.");
+            location.reload();/*
+        } else {
+            response.text().then(text => alert("Upload failed: " + text));
+        }
+    })
+    .catch(error => {
+        alert("Error: " + error);
+    });*/
+}
 </script>
 
 </body>
