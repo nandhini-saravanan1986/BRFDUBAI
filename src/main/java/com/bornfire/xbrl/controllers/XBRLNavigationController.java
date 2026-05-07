@@ -4010,7 +4010,7 @@ public class XBRLNavigationController {
 
 	    try {
 	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 
 	        LocalDate parsedDate = LocalDate.parse(todate, inputFormatter);
 	        String formattedDate = parsedDate.format(outputFormatter);
