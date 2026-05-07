@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Loan" pageWidth="1300" pageHeight="842" columnWidth="1260" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="079e0a35-ccdb-4fbd-9c5e-855031a7de4e">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CXBRL.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -84,13 +84,6 @@
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Store Label]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="380" y="10" width="539" height="30" uuid="ed1e1b5e-ead1-4820-ab0d-5d93ba1bca8e"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="14" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Bank Of Baroda]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="0" y="70" width="380" height="20" backcolor="#F2886B" uuid="04f7142c-a5ef-4e1b-a40a-1dd2cb38bcd4"/>
