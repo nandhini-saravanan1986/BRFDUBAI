@@ -44,7 +44,7 @@
 				{"title":"Report Name"},
 				{"title":"Frequency"},
 				{"title":"Taxonomy Version"},
-				{"title":"Taxonomy Version Date"},
+			<!--{"title":"Taxonomy Version Date"},-->
 				{"title":"Enabled",
 				 "orderable": false},
 				{"title":"Domain"},
@@ -116,8 +116,8 @@ function goHome() {
 </script>
 <body>
 	<div th:insert="XBRLHeaderMenu :: header"></div>
-	<i class="fa fa-question-circle" aria-hidden="true"
-		onclick="docEmb('Report')" id="ques"></i>
+<!--	<i class="fa fa-question-circle" aria-hidden="true"-->
+<!--		onclick="docEmb('Report')" id="ques"></i>-->
 	<div class="container content">
 		<div class="row">
 			<div class="col-sm-12">
@@ -137,7 +137,7 @@ function goHome() {
 									<th STYLE="text-align:left;">Report Name</th>
 									<th STYLE="text-align:left;">Frequency</th>
 									<th STYLE="text-align:left;">Taxonomy Version</th>
-									<th>Taxonomy Version Date</th>
+<!--									<th>Taxonomy Version Date</th>-->
 									<th>Enabled</th>
 									<th>Domain</th>
 								</tr>
@@ -148,7 +148,7 @@ function goHome() {
 									<td th:text="${report.report_name}"></td>
 									<td th:text="${report.report_frequency}"></td>
 									<td th:text="${report.xbrl_taxonomy_version}"></td>
-									<td th:text="${report.taxonomy_version_date}"></td>
+<!--									<td th:text="${report.taxonomy_version_date}"></td>-->
 									<td><input type="checkbox" th:name="${report.reportid}"
 										th:value="${report.reportid}" th:id="${report.reportid}"
 										th:onchange="updateValidity(this)"
