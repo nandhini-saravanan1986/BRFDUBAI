@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -2870,8 +2872,14 @@ public class BRF002ReportService {
 
 	    try {
 	        Session hs = sessionFactory.getCurrentSession();
-	       // Optional<BRF2_DETAIL_ENTITY> Brf2detail = BRF2_DetaiRep1.findById(foracid);
-	        BRF2_DETAIL_ENTITY Brf2detail = BRF2_DetaiRep1.getbyaccnoanddate(foracid, report_date);
+	       // Optional<BRF2_DETAIL_ENTITY> Brf2detail = BRF2_DetaiRep1.findById(foracid);	        
+	        
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+			LocalDate parsedDate = LocalDate.parse(report_date, inputFormatter);
+			String formattedDate1 = parsedDate.format(dateFormatter);			
+			
+	        BRF2_DETAIL_ENTITY Brf2detail = BRF2_DetaiRep1.getbyaccnoanddate(foracid, formattedDate1);
 
 	        if (!Brf2detail.equals(null) && Brf2detail!=null) {
 	            BRF2_DETAIL_ENTITY BRFdetail = Brf2detail;
