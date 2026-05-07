@@ -212,6 +212,9 @@ PURPOSE		: FORT REPORT
 		$.ajax({
 			type: 'get',
 			url: Callurl,
+	        beforeSend: function () {
+	            $('#loader1').modal('show'); // 🔄 Show loader
+	        },
 			success: function(data) {
 				console.log("AJAX success");
 				$('#loader1').modal('hide');
@@ -691,22 +694,21 @@ PURPOSE		: FORT REPORT
 		$(document).ready(function () {
 
 		});
-		function tablepagination() {
-			$('#detailtable').DataTable({
-				"pageLength": 100,
-				"lengthChange": false,
-				"ordering": false,
-				"info": true,
-				"autoWidth": false,
-				"searching": true,
-				"language": {
-					"emptyTable": "No records available"
-				},
-				// --- ADD THIS LINE BELOW ---
-				"dom": '<"top"f>rt<"bottom"ip>'
-				// --- ADD THIS LINE ABOVE ---
-			});
-		}
+		function tablepagination(){
+			  $('#loader1').modal("hide");
+			  $('#detailtable').DataTable({
+				  "paging": false,
+			     // "pageLength": 100,           // Show 10 rows per page
+			      "lengthChange": false,      // Hide "Show X entries"
+			      "ordering": false,          // Disable sorting on columns
+			      "info": false,               // Show "Showing X to Y of Z entries"
+			      "autoWidth": false,         // Disable automatic column sizing
+			      "searching": false,
+			      "language": {
+			        "emptyTable": "No records available"
+			      }
+			    });
+		  }
 	</script>
 	<style>
 		/* Styles for the search box (from previous answer) */

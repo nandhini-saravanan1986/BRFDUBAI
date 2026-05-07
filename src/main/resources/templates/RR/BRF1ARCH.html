@@ -206,6 +206,9 @@ PURPOSE		: BRF1ARCH Reports-development
 		$.ajax({
 			type : 'get',
 			url : Callurl,
+	        beforeSend: function () {
+	            $('#loader1').modal('show'); // 🔄 Show loader
+	        },
 			success : function(data) {
 
 				/*<![CDATA[*/

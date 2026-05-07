@@ -232,11 +232,11 @@
 	 		            url: callUrl,
 	 		            success: function (data) {
 	 		                if (data === 'success') {
-	 		                    if (confirm("Do you want to open report?")) {
+	 		                   /* if (confirm("Do you want to open report?")) {*/
 	 		                        const type = 'RBS';
 	 		                        $("#reportform").attr('action', `Reports/${reportid}?dtltype=report&fromdate=${fromdate}&todate=${todate}&type=${type}&asondate=${asondate}`);
 	 		                        form.submit();
-	 		                    }
+	 		                   /* }*/
 	 		                    $('#loader1').modal('hide');
 	 		                } else {
 	 		                    $('#loader1').modal('hide');

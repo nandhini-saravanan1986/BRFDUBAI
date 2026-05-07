@@ -182,6 +182,9 @@ PURPOSE		: DEVELOPMENT
 			$.ajax({
 				type: 'get',
 				url: Callurl,
+		        beforeSend: function () {
+		            $('#loader1').modal('show'); // 🔄 Show loader
+		        },
 				success: function(data) {
 					console.log("AJAX success");
 					$('#loader1').modal('hide');
@@ -494,7 +497,7 @@ PURPOSE		: DEVELOPMENT
 <body>
 	<!----------------------------------------------------- Header Section starts ----------------------------------------------------->
 	<div th:insert="XBRLHeaderMenu :: header"></div>
-	<i class="fa fa-question-circle" aria-hidden="true" onclick="docEmb('Report')" id="ques"></i>
+	<!-- <i class="fa fa-question-circle" aria-hidden="true" onclick="docEmb('Report')" id="ques"></i> -->
 	<!----------------------------------------------------- Header Section Ends ------------------------------------------------------->
 	<div class="container content" th:fragment="reportcontent">
 		<!--------------------------------------------------------------- Report title starts -------------------------------------------->

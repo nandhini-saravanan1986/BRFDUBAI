@@ -196,6 +196,9 @@ PURPOSE		: BRF2 Reports-development
 	$.ajax({
 		type: 'get',
 		url: Callurl,
+        beforeSend: function () {
+            $('#loader1').modal('show'); // 🔄 Show loader
+        },
 		success: function(data) {
 			console.log("AJAX success");
 			$('#loader1').modal('hide');
