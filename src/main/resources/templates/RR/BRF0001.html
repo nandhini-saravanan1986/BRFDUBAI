@@ -615,7 +615,7 @@ PURPOSE		: FORT REPORT
 
 
 				// Display a centered custom alert
-				$('#customAlertBody').text('Downloaded BRF-001 ' + filetype);
+				$('#customAlertBody').text('Downloaded BRF-0001 ' + filetype);
 				$('#customAlertModal').modal('show');
 
 				// Hide the download processing modal
@@ -662,12 +662,18 @@ PURPOSE		: FORT REPORT
 					var url = window.URL.createObjectURL(blob);
 					var a = document.createElement('a');
 					a.href = url;
-					if (filetype == "excel" || filetype == "detailexcel") {
-						a.download = '011-BRF-001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
-					} else if (filetype == "BRF") {
-						a.download = '011-BRF-001-A' + ".xls"; // assuming .pdf extension for PDF files
+					if (filetype == "excel") {
+						a.download = '011-BRF-0001-A' + ".xlsx"; // assuming .xlsx extension for Excel files
+					  } else if (filetype == "detailexcel") {
+			            	a.download = 'BRF0001-Detail' + ".xlsx";
+			            }
+						else if(filetype == "BRF"){
+			                a.download = '011-BRF-0001-A' + ".xls"; // assuming .pdf extension for PDF files
+			            }else if (filetype == "detailpdf") {
+					        a.download = 'BRF0001-Detail' + ".pdf";
+			            
 					} else {
-						a.download = '011-BRF-001-A' + ".pdf";
+						a.download = '011-BRF-0001-A' + ".pdf";
 					}
 
 					document.body.appendChild(a);
@@ -676,13 +682,13 @@ PURPOSE		: FORT REPORT
 
 					// Set the appropriate message based on the downloaded filetype
 					if (filetype == "excel") {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".xlsx");
+						$('#customAlertBody').text('Downloaded BRF-0001 ' + ".xlsx");
 					} else if (filetype == "detailexcel") {
-						$('#customAlertBody').text('Downloaded BRF-001 Detail Excel' + ".xlsx");
+						$('#customAlertBody').text('Downloaded BRF-0001 Detail Excel' + ".xlsx");
 					} else if (filetype == "BRF") {
-						$('#customAlertBody').text('Downloaded BRF 001 ' + ".xls"); // assuming .pdf extension for PDF files
+						$('#customAlertBody').text('Downloaded BRF 0001 ' + ".xls"); // assuming .pdf extension for PDF files
 					} else {
-						$('#customAlertBody').text('Downloaded BRF-001 ' + ".pdf");
+						$('#customAlertBody').text('Downloaded BRF-0001 ' + ".pdf");
 					}
 					$('#customAlertModal').modal('show');
 				}
@@ -779,15 +785,15 @@ PURPOSE		: FORT REPORT
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+							<!-- <li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a th:href="|@{'/Reports/'+${reportid}+'/Download'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},subreportid=${subreportid},secid=${secid},dtltype=${dtltype})}&filetype=pdf|"
 									onclick="downloadFile('pdf')">Pdf</a>
 							</li>
 							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a th:href="|@{'/Reports/'+${reportid}+'/Download'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},subreportid=${subreportid},secid=${secid},dtltype=${dtltype})}&filetype=excel|"
 									onclick="downloadFile('Excel')">Excel</a>
-							</li>
-							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
+							</li> -->
+							 <li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary" th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
@@ -798,13 +804,38 @@ PURPOSE		: FORT REPORT
 							            data-dtltype=${dtltype}, 
 							            data-filetype='BRF'" onclick="downloadexcel(this)">BRF FINAL</a>
 							</li>
-							<li th:if="${displaymode}=='detail'"><a
+							<!--<li th:if="${displaymode}=='detail'"><a
 									th:href="|@{'/Reports/'+${reportid}+'/Download'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},subreportid=${subreportid},secid=${secid},dtltype=${dtltype})}&filetype=detailexcel|"
-									onclick="downloadFile('DetailPdf')">pdf</a></li>
-							<li th:if="${displaymode}=='detail'"><a
+									onclick="downloadFile('DetailPdf')">pdf</a></li> -->
+							<!-- <li th:if="${displaymode}=='detail'"><a
 									th:href="|@{'/Reports/'+${reportid}+'/Download'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},subreportid=${subreportid},secid=${secid},dtltype=${dtltype})}&filetype=detailexcel|"
-									onclick="downloadFile('DetailExcel')">Excel</a></li>
+									onclick="downloadFile('DetailExcel')">Excel</a></li> -->
+									
+									<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a
+								th:attr="data-reportid=${reportid}, 
+							            data-asondate=${asondate}, 
+							            data-fromdate=${fromdate}, 
+							            data-todate=${todate}, 
+							            data-currency=${currency}, 
+							            data-subreportid=${subreportid}, 
+							            data-secid=${secid}, 
+							            data-dtltype=${dtltype}, 
+							            data-filetype='detailpdf'"
+								onclick="downloadexcel(this)">Pdf</a></li>
+							
+							<li th:if="${displaymode}== 'detail' or ${displaymode} == null"><a
+								th:attr="data-reportid=${reportid}, 
+							            data-asondate=${asondate}, 
+							            data-fromdate=${fromdate}, 
+							            data-todate=${todate}, 
+							            data-currency=${currency}, 
+							            data-subreportid=${subreportid}, 
+							            data-secid=${secid}, 
+							            data-dtltype=${dtltype}, 
+							            data-filetype='detailexcel'"
+								onclick="downloadexcel(this)">Excel</a></li>
 						</ul>
+						
 					</div>
 
 					<!-- Download Message -->
@@ -842,7 +873,7 @@ PURPOSE		: FORT REPORT
 
 			</div>
 		</div>
-		<div class="row">
+		<!-- <div class="row">
 			<div class="col-sm-12 customcol"
 				style="background-color: #dadddf; padding-top: 10px; padding-bottom: 10px; padding-left: 5px;">
 
@@ -862,7 +893,7 @@ PURPOSE		: FORT REPORT
 						id="addRecord">Verify</button>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<!--------------------------------------------------------------- Report title ends ------------------------------------------------->
 

@@ -208,15 +208,22 @@ PURPOSE		: T1 RBS REPORT
 			} else if (roleid === "OP") {
 				location.href = "/BRBS/opmodel";
 			}
+			else{
+				location.href = "/BRBS/yearly";
+			}
 		}
 
-		function back(a) {
+	/*	function back(a) {
 			var reportcode = a.getAttribute("data-reportcode");
 			var todate = a.getAttribute("data-todate");
-			/* alert(reportcode);
-			alert(todate); */
+			//alert(reportcode);
+			//alert(todate);
 			location.href = "/BRBS/BRFValidations?rptcode=" + reportcode
 				+ "&todate=" + todate;
+		}*/
+		
+		function back() {
+			window.history.back();
 		}
 
 		function back1() {
@@ -821,7 +828,7 @@ PURPOSE		: T1 RBS REPORT
 
 			var r1_s_no = a.getAttribute("data-sl_no");
 
-			alert(r1_s_no); // Uncomment this line for debugging
+			//alert(r1_s_no); // Uncomment this line for debugging
 
 			$.ajax({
 				url: './Deletetobrf301',
@@ -919,7 +926,7 @@ PURPOSE		: T1 RBS REPORT
 				url: './modifyBrf301?asondate=' + asondate,
 				data: JSON.stringify(formData),
 				success: function (responseText) {
-					alert("Success");
+					//alert("Success");
 					$("#alertmsg").text(responseText);
 					$('#alert').modal("toggle");
 					showButton();
@@ -951,7 +958,7 @@ PURPOSE		: T1 RBS REPORT
 				url: './verifyBRF301Report?asondate=' + asondate,
 				type: 'POST',
 				success: function (responseText, statusText, xhr, $form) {
-					alert("Success");
+					//alert("Success");
 					$("#alertmsg").text(responseText);
 					$('#alert').modal("toggle");
 				},
@@ -1188,7 +1195,7 @@ max-width: 1275px;
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+						<!-- 	<li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a class="text-primary"
 									th:attr="data-reportid=${reportid}, data-asondate=${asondate}, data-fromdate=${fromdate}, data-todate=${todate}, data-currency=${currency}, data-subreportid=${subreportid}, data-secid=${secid}, data-dtltype=${dtltype}, data-filetype='pdf'"
 									onclick="downloadexcel(this)">Pdf</a>
@@ -1197,7 +1204,7 @@ max-width: 1275px;
 								<a class="text-primary"
 									th:attr="data-reportid=${reportid}, data-asondate=${asondate}, data-fromdate=${fromdate}, data-todate=${todate}, data-currency=${currency}, data-subreportid=${subreportid}, data-secid=${secid}, data-dtltype=${dtltype}, data-filetype='excel'"
 									onclick="downloadexcel(this)">Excel</a>
-							</li>
+							</li> -->
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary"
 									th:attr="data-reportid=${reportid}, data-asondate=${asondate}, data-fromdate=${fromdate}, data-todate=${todate}, data-currency=${currency}, data-subreportid=${subreportid}, data-secid=${secid}, data-dtltype=${dtltype}, data-filetype='BRF'"
@@ -1440,7 +1447,7 @@ max-width: 1275px;
 								style="display: none;" onclick="CancelEdit();">Back</button>
 							<button type="button" class="btn btn-xs btn-primary" id="verify_btn" style="display: none;"
 								th:attr="data-fromDate =${asondate}" onclick="verifySubmit(this);">Verify</button>
-							<button type="button" class="btn btn-primary text-white" onclick="back(this);"
+							<button type="button" class="btn btn-primary text-white" onclick="back()"
 								title="Click to EDIT Records"
 								th:attr="data-reportcode=${reportid}, data-todate=${todate}" id="btnBack">Back</button>
 						</div>

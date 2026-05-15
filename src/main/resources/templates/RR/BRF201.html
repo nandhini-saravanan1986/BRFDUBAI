@@ -1074,13 +1074,17 @@ function addTableRows() {
 		    	location.href = "/BRBS/itmodel";
 	        }
 		}
-		
+		/*
 		function back(a) {
 		    var reportcode = a.getAttribute("data-reportcode");
 		    var todate = a.getAttribute("data-todate");
-		    /* alert(reportcode);
-		    alert(todate); */
+		    //alert(reportcode);
+		    //alert(todate); 
 		    location.href = "/BRBS/BRFValidations?rptcode=" + reportcode + "&todate=" + todate; 
+		} */
+		
+		function back() {
+			window.history.back();
 		}
 		
 		function back1() {
@@ -1753,7 +1757,7 @@ max-width: 1275px;
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+						<!-- 	<li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a class="text-primary"
 								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
@@ -1778,7 +1782,7 @@ max-width: 1275px;
 							            data-dtltype=${dtltype}, 
 							            data-filetype='excel'"
 								onclick="downloadexcel(this)">Excel</a>
-							</li>
+							</li> -->
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary"
 								th:attr="data-reportid=${reportid}, 
@@ -3041,7 +3045,7 @@ max-width: 1275px;
 							th:attr="data-fromDate =${asondate}"
 							onclick="verifySubmit(this);">Verify</button>
 						<button type="button" class="btn btn-primary text-white"
-							onclick="back(this);" title="Click to EDIT Records"
+							onclick="back();" title="Click to EDIT Records"
 							th:attr="data-reportcode=${reportid}, data-todate=${todate}"
 							id="btnBack">Back</button>
 					</div>

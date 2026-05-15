@@ -737,7 +737,8 @@ public class XBRLReportsController {
 	}
 	@Autowired
 	private AuditService auditService;
-	
+	@Autowired
+	BRF0001_DETAIL_REP BRF0001_DETAIL_REP;
 	@RequestMapping(value = "{reportid}/Download", method = { RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
 	public ResponseEntity<InputStreamResource> XBRLDownload(HttpServletResponse response,
@@ -771,6 +772,7 @@ public class XBRLReportsController {
 	                case "BRF001": entityList = brf1_DetaiRep.find(todate); break;
 	                case "BRF002": entityList = brf2_DetaiRep.find(todate); break;
 	                case "BRF004": entityList = brf4_DetaiRep.find(todate); break;
+	                case "BRF0001": entityList = BRF0001_DETAIL_REP.find(todate); break;
 	                default: throw new RuntimeException("Unknown reportid: " + reportid);
 	            }
 
@@ -793,6 +795,7 @@ public class XBRLReportsController {
 			        case "BRF001": entityList = brf1_DetaiRep.find(todate); break;
 			        case "BRF002": entityList = brf2_DetaiRep.find(todate); break;
 			        case "BRF004": entityList = brf4_DetaiRep.find(todate); break;
+			        case "BRF0001": entityList = BRF0001_DETAIL_REP.find(todate); break;
 			        default: throw new RuntimeException("Unknown reportid: " + reportid);
 			    }
 

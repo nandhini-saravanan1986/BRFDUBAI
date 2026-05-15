@@ -656,12 +656,12 @@ th:if="${session.ROLEID == 'GEN' or session.ROLEID == 'ADM' or
 						</li>
 						<li class="nav-item"><a class="nav-link" id="yearly"
 								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">Yearly </a></li>
-						<li class="nav-item"><a class="nav-link" id="hrmodel"
+						<!-- <li class="nav-item"><a class="nav-link" id="hrmodel"
 								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">HR </a></li>
 						<li class="nav-item"><a class="nav-link" id="itmodel"
 								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">IT </a></li>
 						<li class="nav-item"><a class="nav-link" id="opmodel"
-								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">OPERATION </a></li>
+								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">OPERATION </a></li> -->
 						<li class="nav-item" th:if="${session.ROLEID == 'AC'}"><a class="nav-link" id="acmodel"
 								style="padding-left: 30px;" href="#" onclick="contentLoad(this)">ACCOUNTS </a></li>
 					</ul>
