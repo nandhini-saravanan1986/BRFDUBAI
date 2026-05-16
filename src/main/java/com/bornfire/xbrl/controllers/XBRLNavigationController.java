@@ -11587,7 +11587,7 @@ public class XBRLNavigationController {
 			@RequestParam(value = "fd",required = false) String fromdate,
 			@RequestParam(value = "td",required = false) String todate,
 			@RequestParam(required = false) String userid, @RequestParam(required = false) Optional<Integer> page,
-			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) {
+			@RequestParam(value = "size", required = false) Optional<Integer> size, Model md, HttpServletRequest req) throws ParseException {
 
 		int currentPage = page.orElse(0);
 		int pageSize = size.orElse(Integer.parseInt(pagesize));
@@ -11636,9 +11636,29 @@ public class XBRLNavigationController {
 			md.addAttribute("userProfile", loginServices.getUser(userid1));
 			md.addAttribute("formmode", formmode); // to set which form - valid values are "edit" , "add" & "list"
 			md.addAttribute("repParameter", generalMasterTbRep.findAllCustomind(Account));
-			md.addAttribute("tranInquiry", transactionInquiryRep.findAllCustominddate(Account,fromdate,todate));
+			System.out.println("todate="+todate);
 			md.addAttribute("opr_datefd",fromdate);
 			md.addAttribute("opr_datetd",todate);
+			
+			if (fromdate!=null & todate!=null) {
+				SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
+				SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MMM/yyyy");
+
+				Date fromDateValue = inputFormat.parse(fromdate);
+				Date toDateValue = inputFormat.parse(todate);
+
+				fromdate = outputFormat.format(fromDateValue).toUpperCase();
+				todate = outputFormat.format(toDateValue).toUpperCase();
+
+			}
+			
+			System.out.println("fromdate="+fromdate);
+			System.out.println("todate="+todate);
+			
+			
+			
+			md.addAttribute("tranInquiry", transactionInquiryRep.findAllCustominddate(Account,fromdate,todate));
+			
 			
 		}
 

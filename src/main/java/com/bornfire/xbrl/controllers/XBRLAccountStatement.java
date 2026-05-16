@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -64,6 +65,24 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 
 @Controller
@@ -190,7 +209,10 @@ public class XBRLAccountStatement {
 			@RequestParam(value = "todate", required = false) String todate,
 			@RequestParam(value = "userid", required = false) String userid,
 			@RequestParam(value = "filetype", required = false) String filetype,
-			@RequestParam(value = "category", required = false) String category)
+			@RequestParam(value = "category", required = false) String category,
+			@RequestParam(value = "accountnumber", required = false) String accountnumber,
+			@RequestParam(value = "Acctname", required = false) String Acctname
+			)
 			throws IOException, SQLException, ParseException {
 		response.setContentType("application/octet-stream");
 
@@ -214,7 +236,7 @@ public class XBRLAccountStatement {
 			logger.info("Getting download File :" + reportId + ", FileType :" + filetype);
 			// System.out.println(asondate);getDownloadFile
 			File repfile = getDownloadFileScr(acid,userid, reportId, fromdate, todate, null, null, filetype,
-					category);
+					category,accountnumber,Acctname);
 
 			response.setHeader("Content-Disposition", "attachment; filename=" + repfile.getName());
 			resource = new InputStreamResource(new FileInputStream(repfile));
@@ -232,7 +254,9 @@ public class XBRLAccountStatement {
 			@RequestParam(value = "todate", required = false) String todate,
 			@RequestParam(value = "userid", required = false) String userid,
 			@RequestParam(value = "filetype", required = false) String filetype,
-			@RequestParam(value = "category", required = false) String category)
+			@RequestParam(value = "category", required = false) String category,
+			@RequestParam(value = "accountnumber", required = false) String accountnumber,
+			@RequestParam(value = "Acctname", required = false) String Acctname)
 			throws IOException, SQLException, ParseException {
 		response.setContentType("application/octet-stream");
 
@@ -256,7 +280,7 @@ public class XBRLAccountStatement {
 			logger.info("Getting download File :" + reportId + ", FileType :" + filetype);
 			// System.out.println(asondate);getDownloadFile
 			File repfile = getDownloadFileScr(acid,userid, reportId, fromdate, todate, null, null, filetype,
-					category);
+					category,accountnumber,Acctname);
 
 			response.setHeader("Content-Disposition", "attachment; filename=" + repfile.getName());
 			//emailservices.sendEmail(repfile.getName());
@@ -290,7 +314,7 @@ public class XBRLAccountStatement {
 	}
 
 	public File getDownloadFileScr(String acid,String userid, String reportId, String fromdate, String todate, String currency,
-			String dtltype, String filetype, String catgeory) throws FileNotFoundException, JRException, SQLException, ParseException {
+			String dtltype, String filetype, String catgeory ,String accountnumber, String Acctname) throws FileNotFoundException, JRException, SQLException, ParseException {
 
 		File repfile = null;
 
@@ -298,82 +322,425 @@ public class XBRLAccountStatement {
 
 	
 			repfile = getFile(acid,reportId, fromdate, todate, currency, dtltype, filetype,
-					catgeory);
+					catgeory,accountnumber,Acctname);
 	
 		return repfile;
 	}
 
-	public File getFile(String acid,String reportId, String fromdate, String todate, String currency, String dtltype,
-			String filetype,String category) throws FileNotFoundException, JRException, SQLException {
+	public File getFile(String acid,String reportId,String fromdate,String todate,String currency,String dtltype,String filetype,String category,String accountnumber, String Acctname) {
 
-		DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+File outputFile = null;
 
-		String path =  env.getProperty("output.exportpath");
-		String fileName = "";
-		
-		File outputFile;
+try {
 
-		logger.info("Getting Output file :" + reportId);
+// ================= GET DATA =================
 
-		String msg="";
+List<TransactionInquiry> tranList =transactionInquiryRep.findAllCustominddate(acid,fromdate,todate);
 
+// ================= ACCOUNT DETAILS =================
+
+String accountName = Acctname;
+
+String accountNumber = accountnumber;
+
+// ================= FILE NAME =================
+
+String fileName ="Account_Statement_"+ System.currentTimeMillis()+ ".pdf";
+
+// ================= PDF =================
+
+Document document =new Document(PageSize.A4.rotate());
+
+PdfWriter.getInstance(document,new FileOutputStream(fileName));
+
+document.open();
+
+// ================= FONT =================
+
+com.itextpdf.text.Font titleFont =new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA,18,com.itextpdf.text.Font.BOLD);
+
+com.itextpdf.text.Font headerFont =
+        new com.itextpdf.text.Font(
+                com.itextpdf.text.Font.FontFamily.HELVETICA,
+                10,
+                com.itextpdf.text.Font.BOLD
+        );
+
+com.itextpdf.text.Font normalFont =
+        new com.itextpdf.text.Font(
+                com.itextpdf.text.Font.FontFamily.HELVETICA,
+                9,
+                com.itextpdf.text.Font.NORMAL
+        );
+
+// ================= LOGO =================
+
+Image logo =
+        Image.getInstance(
+                getClass()
+                        .getClassLoader()
+                        .getResource(
+                                "static/images/icici.png"));
+
+logo.scaleToFit(120, 60);
+
+document.add(logo);
+
+// ================= TITLE =================
+
+Paragraph title =
+        new Paragraph(
+                "ACCOUNT STATEMENT",
+                titleFont);
+
+title.setAlignment(
+        Element.ALIGN_CENTER);
+
+document.add(title);
+
+document.add(new Paragraph(" "));
+
+// ================= ACCOUNT DETAILS =================
+
+PdfPTable detailTable =
+        new PdfPTable(4);
+
+detailTable.setWidthPercentage(100);
+
+addDetailCell(
+        detailTable,
+        "Account Name",
+        headerFont,
+        Element.ALIGN_LEFT,
+        true);
+
+addDetailCell(
+        detailTable,
+        accountName,
+        normalFont,
+        Element.ALIGN_LEFT,
+        false);
+
+addDetailCell(
+        detailTable,
+        "Account Number",
+        headerFont,
+        Element.ALIGN_LEFT,
+        true);
+
+addDetailCell(
+        detailTable,
+        accountNumber,
+        normalFont,
+        Element.ALIGN_LEFT,
+        false);
+
+addDetailCell(
+        detailTable,
+        "From Date",
+        headerFont,
+        Element.ALIGN_LEFT,
+        true);
+
+addDetailCell(
+        detailTable,
+        fromdate,
+        normalFont,
+        Element.ALIGN_LEFT,
+        false);
+
+addDetailCell(
+        detailTable,
+        "To Date",
+        headerFont,
+        Element.ALIGN_LEFT,
+        true);
+
+addDetailCell(
+        detailTable,
+        todate,
+        normalFont,
+        Element.ALIGN_LEFT,
+        false);
+
+document.add(detailTable);
+
+document.add(new Paragraph(" "));
+
+// ================= MAIN TABLE =================
+
+PdfPTable table =
+        new PdfPTable(8);
+
+table.setWidthPercentage(100);
+
+float[] widths = {
+        5f,
+        12f,
+        12f,
+        12f,
+        30f,
+        12f,
+        12f,
+        12f
+};
+
+table.setWidths(widths);
+
+// ================= HEADER =================
+
+addHeader(
+        table,
+        "S.No",
+        headerFont,
+        Element.ALIGN_CENTER);
+
+addHeader(
+        table,
+        "Value Date",
+        headerFont,
+        Element.ALIGN_LEFT);
+
+addHeader(
+        table,
+        "Tran Date",
+        headerFont,
+        Element.ALIGN_LEFT);
+
+addHeader(
+        table,
+        "Tran ID",
+        headerFont,
+        Element.ALIGN_LEFT);
+
+addHeader(
+        table,
+        "Tran Particular",
+        headerFont,
+        Element.ALIGN_LEFT);
+
+addHeader(
+        table,
+        "Debit Amount",
+        headerFont,
+        Element.ALIGN_RIGHT);
+
+addHeader(
+        table,
+        "Credit Amount",
+        headerFont,
+        Element.ALIGN_RIGHT);
+
+addHeader(
+        table,
+        "Closing Balance",
+        headerFont,
+        Element.ALIGN_RIGHT);
+
+// ================= DATA =================
+
+int sno = 1;
+
+BigDecimal closingBalance =
+        BigDecimal.ZERO;
+
+SimpleDateFormat sdf =
+        new SimpleDateFormat("dd-MM-yyyy");
+
+for (TransactionInquiry t : tranList) {
+
+    // ================= SNO =================
+
+    addBodyCell(
+            table,
+            String.valueOf(sno++),
+            normalFont,
+            Element.ALIGN_CENTER);
+
+    // ================= VALUE DATE =================
+
+    addBodyCell(
+            table,
+            t.getValue_date() != null
+                    ? sdf.format(
+                    t.getValue_date())
+                    : "-",
+            normalFont,
+            Element.ALIGN_LEFT);
+
+    // ================= TRAN DATE =================
+
+    addBodyCell(
+            table,
+            t.getTran_date() != null
+                    ? sdf.format(
+                    t.getTran_date())
+                    : "-",
+            normalFont,
+            Element.ALIGN_LEFT);
+
+    // ================= TRAN ID =================
+
+    addBodyCell(
+            table,
+            t.getTran_id(),
+            normalFont,
+            Element.ALIGN_LEFT);
+
+    // ================= PARTICULAR =================
+
+    addBodyCell(
+            table,
+            t.getTran_particular(),
+            normalFont,
+            Element.ALIGN_LEFT);
+
+    // ================= DEBIT / CREDIT =================
+
+    if ("D".equalsIgnoreCase(
+            t.getPart_tran_type())) {
+
+        addBodyCell(
+                table,
+                t.getTran_amt().toString(),
+                normalFont,
+                Element.ALIGN_RIGHT);
+
+        addBodyCell(
+                table,
+                "0.00",
+                normalFont,
+                Element.ALIGN_RIGHT);
+
+        closingBalance =
+                closingBalance.subtract(
+                        t.getTran_amt());
+
+    } else {
+
+        addBodyCell(
+                table,
+                "0.00",
+                normalFont,
+                Element.ALIGN_RIGHT);
+
+        addBodyCell(
+                table,
+                t.getTran_amt().toString(),
+                normalFont,
+                Element.ALIGN_RIGHT);
+
+        closingBalance =
+                closingBalance.add(
+                        t.getTran_amt());
+    }
+
+    // ================= BALANCE =================
+
+    addBodyCell(
+            table,
+            closingBalance.toString(),
+            normalFont,
+            Element.ALIGN_RIGHT);
+}
+
+// ================= FINAL BALANCE =================
+
+PdfPCell closingCell =
+        new PdfPCell(
+                new Phrase(
+                        "Final Closing Balance",
+                        headerFont));
+
+closingCell.setColspan(7);
+
+closingCell.setHorizontalAlignment(
+        Element.ALIGN_RIGHT);
+
+closingCell.setBackgroundColor(
+        BaseColor.LIGHT_GRAY);
+
+table.addCell(closingCell);
+
+PdfPCell amountCell =
+        new PdfPCell(
+                new Phrase(
+                        closingBalance.toString(),
+                        headerFont));
+
+amountCell.setHorizontalAlignment(
+        Element.ALIGN_RIGHT);
+
+table.addCell(amountCell);
+
+document.add(table);
+
+document.close();
+
+outputFile = new File(fileName);
+
+} catch (Exception e) {
+
+e.printStackTrace();
+}
+
+return outputFile;
+}
 
 	
-		 if (!filetype.equals("xbrl")) {
+	private void addHeader(PdfPTable table,
+            String text,
+            com.itextpdf.text.Font font,
+            int alignment) {
 
-			try {
-				
-				
-				InputStream fileStream = null;
-				
-					 fileName = "Account Statement" + "_" + dateFormat.format(new SimpleDateFormat("dd-MMM-yyyy").parse(todate));
-						logger.info("Getting Jasper file :" + reportId);
-						if (filetype.equals("xlsx")) {
-						    fileStream = this.getClass().getResourceAsStream("/static/jasper/Loan.jrxml");
-						}else {
-						    fileStream = this.getClass().getResourceAsStream("/static/jasper/Loan.jrxml");
-						}
-				
-						JasperReport jr = JasperCompileManager.compileReport(fileStream);
-				// JasperReport jr = (JasperReport) JRLoader.loadObject(fileStream);
-					HashMap<String, Object> map = new HashMap<String, Object>();
+PdfPCell cell =
+ new PdfPCell(
+         new Phrase(text, font));
 
-					logger.info("Assigning Parameters for Jasper");
-					map.put("TODATE", todate);
-					map.put("FROMDATE", fromdate);
-					map.put("ACID", acid);
+cell.setBackgroundColor(
+ BaseColor.LIGHT_GRAY);
 
-					logger.info("BEFORE GENERATING PDF :" + reportId);
-					if (filetype.equals("pdf")) {
-						fileName = fileName + ".pdf";
-						path =  fileName;
-						logger.info("BEFORE GENERATING PDF 1 :" + reportId);
-						JasperPrint jp = JasperFillManager.fillReport(jr, map, srcdataSource.getConnection());
-						logger.info("BEFORE GENERATING PDF 2 :" + path);
-						JasperExportManager.exportReportToPdfFile(jp, path);
-						logger.info("PDF File exported");
-					} else {
-						fileName = fileName + ".xlsx";
-						path =   fileName;
-						JasperPrint jp = JasperFillManager.fillReport(jr, map, srcdataSource.getConnection());
-						JRXlsxExporter exporter = new JRXlsxExporter();
-						exporter.setExporterInput(new SimpleExporterInput(jp));
-						exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(path));
-						exporter.exportReport();
-						logger.info("Excel File exported");
-					}
+cell.setHorizontalAlignment(
+ alignment);
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+table.addCell(cell);
+}
+	private void addBodyCell(PdfPTable table,
+            String text,
+            com.itextpdf.text.Font font,
+            int alignment) {
 
-		}
-		
-		outputFile = new File(path);
+PdfPCell cell =
+new PdfPCell(
+       new Phrase(text, font));
 
-		return outputFile;
+cell.setHorizontalAlignment(
+alignment);
 
-	}
+table.addCell(cell);
+}
+	
+	private void addDetailCell(PdfPTable table,
+            String text,
+            com.itextpdf.text.Font font,
+            int alignment,
+            boolean header) {
+
+PdfPCell cell =
+new PdfPCell(
+     new Phrase(text, font));
+
+cell.setHorizontalAlignment(
+alignment);
+
+if (header) {
+
+cell.setBackgroundColor(
+ BaseColor.LIGHT_GRAY);
+}
+
+table.addCell(cell);
+}
 	
 	public ByteArrayInputStream getDownloadFileExcel(String userid, String reportId, String fromdate, String todate, 
 			String dtltype, String filetype, String catgeory,String fileName ) throws FileNotFoundException, JRException, SQLException, ParseException {
