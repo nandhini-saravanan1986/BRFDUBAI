@@ -478,7 +478,7 @@ function addTableRows() {
 		
 		function ModifySubmit(a) {
 		    var asondate = a.getAttribute("data-fromDate");
-		    alert(asondate);
+		   // alert(asondate);
 		    var formData = {
 		        brf201_SUMMARY_ENTITY_A: [],
 		        brf201_SUMMARY_ENTITY_B: [],
@@ -1073,6 +1073,9 @@ function addTableRows() {
 		    } else if (roleid === "IT") {
 		    	location.href = "/BRBS/itmodel";
 	        }
+		    else{
+		    	location.href = "/BRBS/halfyearly1";
+		    }
 		}
 		/*
 		function back(a) {
@@ -1108,7 +1111,7 @@ function addTableRows() {
 	</script>
 <script type="text/javascript">
 	function clickEdit(a) {
-			alert("edit");
+			//alert("edit");
 			$(".showInput").prop("readonly", false);
 			$('#cancelRecord').prop("disabled", false);
 		    $('#verify_btn').hide();
@@ -1880,7 +1883,7 @@ max-width: 1275px;
 					th:fragment="finuserapply">
 
 					<div class="table-responsive scrollable-table-container"
-						style="border-right: 1px; max-height: 100vh;">
+						style="border-right: 1px; max-height: 90vh;">
 						<table class="sticky-header-table table table-bordered">
 							<thead class="thead-light">
 								<tr class="text-left font-weight-bold">
@@ -3031,7 +3034,7 @@ max-width: 1275px;
 						th:if="${displaymode}=='summary' or ${displaymode}==null"
 						style="background-color: #386276";>
 						<button type="button" class="btn btn-primary text-white"
-							onclick="home(this);" title="Click to EDIT Records"
+							onclick="home(this);" 
 							th:attr="data-loginUser=${UserId}, data-roleId=${RoleId}"
 							id="homebtn">Home</button>
 						<button id="submitBtn" type="button"

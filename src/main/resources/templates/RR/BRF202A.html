@@ -213,6 +213,9 @@ PURPOSE		: T1 RBS REPORT
 		} else if (roleid === "HR") {
 			location.href = "/BRBS/hrmodel";
 		}
+		else{
+			location.href = "/BRBS/halfyearly1";
+		}
 	}
 /*
 	function back(a) {
@@ -868,7 +871,7 @@ input[type="date"]::placeholder {
 	function ModifySubmit(a) {
 		event.preventDefault();
 		var asondate = a.getAttribute("data-fromDate");
-		alert(asondate)
+		//alert(asondate)
 		var formData = {
 			brf202A_entitys : [],
 		};
@@ -1021,7 +1024,7 @@ input[type="date"]::placeholder {
 			url : './modifyBrf202A?asondate=' + asondate,
 			data : JSON.stringify(formData),
 			success : function(responseText) {
-				alert("Success");
+				//alert("Success");
 				$("#alertmsg").text(responseText);
 				$('#alert').modal("toggle");
 				showButton();
@@ -1086,7 +1089,7 @@ input[type="date"]::placeholder {
 
 		var r1_s_no = a.getAttribute("data-sl_no");
 
-		alert(r1_s_no); // Uncomment this line for debugging
+		//alert(r1_s_no); // Uncomment this line for debugging
 
 		$.ajax({
 			url : './Deletetobrf202',
