@@ -197,15 +197,18 @@ PURPOSE		: T1 RBS REPORT
 				location.href = "/BRBS/quarterly1";
 			} else if (roleid === "IT") {
 				location.href = "/BRBS/itmodel";
-			}
+			} else {
+	        	location.href = "/BRBS/quarterly1";
+            }
 		}
 
 		function back(a) {
-			var reportcode = a.getAttribute("data-reportcode");
-			var todate = a.getAttribute("data-todate");
-			/* alert(reportcode);
-			alert(todate); */
-			location.href = "/BRBS/BRFValidations?rptcode=" + reportcode + "&todate=" + todate;
+		    /* var reportcode = a.getAttribute("data-reportcode");
+		    var todate = a.getAttribute("data-todate"); */
+		    /* alert(reportcode);
+		    alert(todate); */
+		    /* location.href = "/BRBS/BRFValidations?rptcode=" + reportcode + "&todate=" + todate;  */
+			window.history.back();
 		}
 
 		/*]]>*/

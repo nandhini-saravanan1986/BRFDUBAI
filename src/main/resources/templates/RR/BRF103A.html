@@ -187,9 +187,9 @@ TESTING     : ARUN R -23.1.24
 
 	}
 
-	function back() {
-		window.history.back();
-	}
+	/* function back() {
+		window.history.back(); 
+	} */
 
 	function back1() {
 		var Callurl = /*[[@{'/Reports/'+${reportid}+'/Summary'(asondate=${asondate},fromdate=${fromdate},todate=${todate},currency=${currency},dtltype=${dtltype})}]]*/
@@ -654,7 +654,7 @@ TESTING     : ARUN R -23.1.24
 		});
 	}
 	function clickEditbutton() {
-		alert('EDIT DATA');
+		/* alert('EDIT DATA'); */
 		$('#verify_btn').hide();
 		$('.showInputBox').removeAttr("readonly");
 		$(".showtext").removeAttr("readonly");

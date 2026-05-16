@@ -196,7 +196,9 @@ TESTING     : ARUN.R
 				location.href = "/BRBS/quarterly1";
 			} else if (roleid === "HR") {
 				location.href = "/BRBS/hrmodel";
-			}
+			} else {
+				location.href = "/BRBS/quarterly1";
+            }
 		}
 
 		function back2(a) {
@@ -4442,7 +4444,7 @@ max-width: 1275px;
 								Download <span class="caret"></span>
 							</button>
 							<ul class="dropdown-menu" role="menu">
-								<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+								<!-- <li th:if="${displaymode}=='summary' or ${displaymode}==null">
 									<a class="text-primary" th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
@@ -4463,7 +4465,7 @@ max-width: 1275px;
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
 							            data-filetype='excel'" onclick="downloadexcel(this)">Excel</a>
-								</li>
+								</li> -->
 
 								<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 									<a class="text-primary" th:attr="data-reportid=${reportid}, 
@@ -6613,7 +6615,7 @@ max-width: 1275px;
 						th:attr="data-fromDate =${asondate}" onclick="verifySubmit(this);">Verify</button>
 					<button type="button" class="btn btn-xs btn-primary" id="btnBack_edit" style="display: none;"
 						onclick="CancelEdit(event)">Back</button>
-					<button type="button" class="btn btn-primary text-white" onclick="back2(this);"
+					<button type="button" class="btn btn-primary text-white" onclick="back();"
 						title="Click to EDIT Records" th:attr="data-reportcode=${reportid}, data-todate=${todate}"
 						id="btnBack">Back</button>
 				</div>

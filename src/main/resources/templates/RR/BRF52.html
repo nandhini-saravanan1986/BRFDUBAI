@@ -746,7 +746,7 @@ PURPOSE		: T1 RBS REPORT
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+							<!-- <li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a class="text-primary" th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
 							            data-fromdate=${fromdate}, 
@@ -767,7 +767,7 @@ PURPOSE		: T1 RBS REPORT
 							            data-secid=${secid}, 
 							            data-dtltype=${dtltype}, 
 							            data-filetype='excel'" onclick="downloadexcel(this)">Excel</a>
-							</li>
+							</li> -->
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary" th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 

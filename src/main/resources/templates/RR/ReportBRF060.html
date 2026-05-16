@@ -743,7 +743,7 @@ max-width: 1275px;
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+							<!-- <li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a class="text-primary"
 								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
@@ -768,7 +768,7 @@ max-width: 1275px;
 							            data-dtltype=${dtltype}, 
 							            data-filetype='excel'"
 								onclick="downloadexcel(this)">Excel</a>
-							</li>
+							</li> -->
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary"
 								th:attr="data-reportid=${reportid}, 
@@ -1167,7 +1167,7 @@ max-width: 1275px;
 					<button type="button" class="btn btn-xs btn-primary" id="btnHome"
 						onclick="home();">Home</button>
 					<button type="button" class="btn btn-xs btn-primary" id="btnBack"
-						onclick="back();">Back</button>
+						onclick="back1();">Back</button>
 				</div>
 				
 				<!-- -----------------------------------Details edit modal form----------------------------------------------------->
