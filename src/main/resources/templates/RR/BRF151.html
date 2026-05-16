@@ -633,7 +633,7 @@ function downloadexcel(button) {
 							Download <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li th:if="${displaymode}=='summary' or ${displaymode}==null">
+							<!-- <li th:if="${displaymode}=='summary' or ${displaymode}==null">
 								<a class="text-primary"
 								th:attr="data-reportid=${reportid}, 
 							            data-asondate=${asondate}, 
@@ -658,7 +658,7 @@ function downloadexcel(button) {
 							            data-dtltype=${dtltype}, 
 							            data-filetype='excel'"
 								onclick="downloadexcel(this)">Excel</a>
-							</li>
+							</li> -->
 
 							<li th:if="${displaymode} == 'summary' or ${displaymode} == null">
 								<a class="text-primary"
@@ -2067,39 +2067,39 @@ function downloadexcel(button) {
 			<!------------------------------ Report summary section ends it will shown only if summary button clicked------------------------->
 			<!------------------------------ Report Details section starts it will shown only if Details button clicked------------------------->
 			<div class="col-sm-12 customcol" th:if="${displaymode}=='detail'"
-				th:fragment="detail">
-				<div style="overflow-x: inherit; border-right: 1px solid #dee2e6"
-					th:class="${searchmsg == null}?'inner'">
-					<table th:if="${searchmsg} == null"
-						class="table table-bordered table-sm" style="width: 1498px"
-						id="detailtb">
-						<thead class="thead-light">
-							<tr style="text-align: center">
-								<th></th>
+		th:fragment="detail">
+		<div style="overflow-x: inherit; border-right: 1px solid #dee2e6"
+			th:class="${searchmsg == null}?'inner'">
+			<table th:if="${searchmsg} == null"
+				class="table table-bordered table-sm" style="width: 1498px"
+				id="detailtb">
+				<thead class="thead-light">
+					<tr style="text-align: center">
+						<th></th>
 
-								<th>CUST ID</th>
-								<th>ACCT NO</th>
-								<th>ACCT NAME</th>
-								<th>ACT BALANCE AMT LC</th>
-								<!-- <th>IND</th> -->
-								<th>REPORT_NAME_1</th>
-								<th>REPORT_LABEL_1</th>
-								<th>REPORT_ADDL_CRITERIA_1</th>
-								<th>REPORT_DATE</th>
+						<th>CUST ID</th>
+						<th>ACCT NO</th>
+						<th>ACCT NAME</th>
+						<th>ACCT BAL LC</th>
+						<!-- <th>IND</th> -->
+						<th>REPORT NAME 1</th>
+						<th>REPORT LABLE 1</th>
+						<th>REPORT ADDL CRITERIA 1</th>
+						<th>REPORT DATE</th>
 
-							</tr>
+					</tr>
 
-						</thead>
-						<tbody th:each="report,iterator : ${reportdetails}">
+				</thead>
+				<tbody th:each="report,iterator : ${reportdetails}">
 
 
-							<tr style="text-align: center: font-weight: bold;">
-								<!-- <td style="text-align: right;" th:text="${iterator.index + 1}"></td> -->
-								<td><a data-toggle="tooltip" class="editrec"
-									title="Click to Edit this Record"><i
-										th:classappend="${session.PERMISSIONS == 'W'}  ? addedit "
-										class="fas fa-edit"
-										th:attr="
+					<tr style="text-align: center; font-weight: bold;">
+						<!-- <td style="text-align: right;" th:text="${iterator.index + 1}"></td> -->
+						<td><a data-toggle="tooltip" class="editrec"
+							title="Click to Edit this Record"><i
+								th:classappend="${session.PERMISSIONS == 'W'}  ? addedit "
+								class="fas fa-edit"
+								th:attr="
 										data-cust_id=${report.cust_id},
 										data-foracid=${report.foracid},
 								        data-acct_name=${report.acct_name},																			
@@ -2108,35 +2108,121 @@ function downloadexcel(button) {
 										data-report_label_1=${report.report_label_1},
 										data-report_addl_criteria_1=${report.report_addl_criteria_1},
 										data-report_date=${#dates.format(report.report_date, 'dd-MM-yyyy')}"
-										onclick="editRecord(this)"></i></a></td>
+								onclick="editRecord(this)"></i></a></td>
 
-								<td th:text="${report.cust_id}"></td>
-								<td th:text="${report.foracid}"></td>
-								<td th:text="${report.acct_name}">CHENNAI</td>
-								<td style="text-align: right;"
-									th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 3, 'POINT')}">CHENNAI</td>
-								<!-- 	<td th:text="${report.remarks}"></td> -->
-								<td th:text="${report.report_name_1}"></td>
-								<td th:text="${report.report_label_1}">CHENNAI</td>
-								<td th:text="${report.report_addl_criteria_1}"></td>
-								<td th:text="${#dates.format(report.report_date, 'dd-MM-yyyy')}"></td>
+						<td th:text="${report.cust_id}"></td>
+						<td th:text="${report.foracid}"></td>
+						<td th:text="${report.acct_name}">CHENNAI</td>
+						<td style="text-align: right;"
+							th:text="${#numbers.formatDecimal(#strings.replace(#strings.replace(report.act_balance_amt_lc, '+', ''), '-', ''), 1, 'COMMA', 3, 'POINT')}">CHENNAI</td>
+						<!-- 	<td th:text="${report.remarks}"></td> -->
+						<td th:text="${report.report_name_1}"></td>
+						<td th:text="${report.report_label_1}">CHENNAI</td>
+						<td th:text="${report.report_addl_criteria_1}"></td>
+						<td th:text="${#dates.format(report.report_date, 'dd-MM-yyyy')}"></td>
 
 
 
-							</tr>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="card-footer text-center" style="background-color: #386276";>
+			<button type="button" class="btn btn-xs btn-primary" id="btnHome"
+				onclick="home();">Home</button>
+			<button type="button" class="btn btn-xs btn-primary" id="btnBack"
+				onclick="back1();">Back</button>
+		</div>
+		<!-- -----------------------------------Details edit modal form----------------------------------------------------->
+		<div class="modal fade" id="addedit" th:fragment="dataedit">
+			<div
+				class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+				<div class="modal-content">
 
-						</tbody>
-					</table>
-				</div>
-				<div class="card-footer text-center"
-					th:if="${displaymode}=='summary' or ${displaymode}==null"
-					style="background-color: #386276";>
-					<button type="button" class="btn btn-xs btn-primary" id="btnHome"
-						onclick="home();">Home</button>
-					<!-- <button type="button" class="btn btn-xs btn-primary"
-									id="btnBack" onclick="back();">Back</button> -->
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<h4 class="modal-title">Add/Edit Records</h4>
+						<button type="button" class="close" data-dismiss="modal">×</button>
+					</div>
+					<div class="modal-body" style="text-align: center">
+						<form id="dataedit" method="post">
+							<div class="form-group">
+
+								<div class="row">
+									<label class="col-sm-5">CUST ID</label> <input
+										class="form-control col-sm-5" id="cust_id" readonly />
+								</div>
+								<div class="row">
+									<label class="col-sm-5">Acct No</label> <input
+										class="form-control col-sm-5" id="foracid" readonly />
+								</div>
+								<div class="row">
+									<label class="col-sm-5">Acct Name</label> <input
+										class="form-control col-sm-5" id="acct_name" readonly />
+								</div>
+								<div class="row">
+									<label class="col-sm-5">ACCR BALANCE LC</label> <input
+										class="form-control col-sm-5" id="act_balance_amt_lc" />
+								</div>
+								<!-- <div class="row">
+											<label class="col-sm-5">IND</label> <input
+												class="form-control col-sm-5" id="remarks"  />
+										</div> -->
+
+
+								<div class="row">
+									<label class="col-sm-5">REPORT NAME 1</label> <input
+										class="form-control col-sm-5" id=report_name_1
+										name="report_name_1" />
+								</div>
+								<div class="row">
+									<label class="col-sm-5">REPORT LABLE 1</label> <input
+										class="form-control col-sm-5" id="report_label_1" />
+								</div>
+								<div class="row">
+									<label class="col-sm-5">REPORT ADDL CRITERIA 1</label> <input
+										class="form-control col-sm-5" id="report_addl_criteria_1" />
+								</div>
+
+								<div class="row">
+									<label class="col-sm-5">REPORT DATE</label> <input
+										class="form-control col-sm-5" id="report_date" readonly />
+								</div>
+							</div>
+						</form>
+						<div class="modal-footer">
+
+							<button type="button" class="btn btn-primary"
+								onclick="submitdataformedit(this);" id="edit">Submit</button>
+
+						</div>
+					</div>
 				</div>
 			</div>
+
+
+			<!-------------------------------------Details edit modal form----------------------------------------------------->
+			<div class="modal fade" id="datadelete">
+				<div
+					class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+					<div class="modal-content">
+						<div class="modal-body" style="text-align: center">
+							<button type="button" class="close" data-dismiss="modal">×</button>
+							Are you Sure want to delete?
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary"
+								onclick="submitdataformdelete(this);">Submit</button>
+							<button type="button" class="btn btn-primary"
+								data-dismiss="modal">Cancel</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		
+	</div>
 		</div>
 	</div>
 
