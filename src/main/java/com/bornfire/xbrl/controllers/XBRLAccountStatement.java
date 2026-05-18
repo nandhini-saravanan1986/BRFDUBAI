@@ -81,6 +81,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 
 import com.itextpdf.text.pdf.BaseFont;
+import com.bornfire.xbrl.util.EnglishToArabicNameTransliterator;
 import com.itextpdf.text.pdf.FontSelector;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -119,6 +120,9 @@ public class XBRLAccountStatement {
 	private static BaseFont ARABIC_BOLD;
 	private static BaseFont LATIN_REGULAR;
 	private static BaseFont LATIN_BOLD;
+
+	private static final char[] ARABIC_INDIC_DIGITS = { '\u0660', '\u0661', '\u0662', '\u0663', '\u0664', '\u0665',
+			'\u0666', '\u0667', '\u0668', '\u0669' };
 
 	static {
 		try {
@@ -500,13 +504,13 @@ public class XBRLAccountStatement {
 			String lblToDate = arabic ? "\u0625\u0644\u0649 \u062a\u0627\u0631\u064a\u062e" : "To Date";
 
 			addDetailCell(detailTable, lblAccountName, headerFont, textAlign, true, rtl);
-			addDetailCell(detailTable, accountName, normalFont, textAlign, false, rtl, arabic);
+			addDetailCell(detailTable, accountName, normalFont, textAlign, false, rtl, arabic, true);
 			addDetailCell(detailTable, lblAccountNumber, headerFont, textAlign, true, rtl);
-			addDetailCell(detailTable, accountNumber, normalFont, textAlign, false, rtl, arabic);
+			addDetailCell(detailTable, accountNumber, normalFont, textAlign, false, rtl, arabic, false);
 			addDetailCell(detailTable, lblFromDate, headerFont, textAlign, true, rtl);
-			addDetailCell(detailTable, fromdate, normalFont, textAlign, false, rtl, arabic);
+			addDetailCell(detailTable, fromdate, normalFont, textAlign, false, rtl, arabic, false);
 			addDetailCell(detailTable, lblToDate, headerFont, textAlign, true, rtl);
-			addDetailCell(detailTable, todate, normalFont, textAlign, false, rtl, arabic);
+			addDetailCell(detailTable, todate, normalFont, textAlign, false, rtl, arabic, false);
 			document.add(detailTable);
 			document.add(new Paragraph(" "));
 
@@ -543,25 +547,25 @@ public class XBRLAccountStatement {
 			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
 			for (TransactionInquiry t : tranList) {
-				addBodyCell(table, String.valueOf(sno++), normalFont, Element.ALIGN_CENTER, rtl, arabic);
+				addBodyCell(table, String.valueOf(sno++), normalFont, Element.ALIGN_CENTER, rtl, arabic, false);
 				addBodyCell(table, t.getValue_date() != null ? sdf.format(t.getValue_date()) : "-", normalFont,
-						textAlign, rtl, arabic);
+						textAlign, rtl, arabic, false);
 				addBodyCell(table, t.getTran_date() != null ? sdf.format(t.getTran_date()) : "-", normalFont,
-						textAlign, rtl, arabic);
-				addBodyCell(table, t.getTran_id(), normalFont, textAlign, rtl, arabic);
-				addBodyCell(table, t.getTran_particular(), normalFont, textAlign, rtl, arabic);
+						textAlign, rtl, arabic, false);
+				addBodyCell(table, t.getTran_id(), normalFont, textAlign, rtl, arabic, true);
+				addBodyCell(table, t.getTran_particular(), normalFont, textAlign, rtl, arabic, true);
 
 				if ("D".equalsIgnoreCase(t.getPart_tran_type())) {
-					addBodyCell(table, t.getTran_amt().toString(), normalFont, numberAlign, rtl, arabic);
-					addBodyCell(table, "0.00", normalFont, numberAlign, rtl, arabic);
+					addBodyCell(table, t.getTran_amt().toString(), normalFont, numberAlign, rtl, arabic, false);
+					addBodyCell(table, "0.00", normalFont, numberAlign, rtl, arabic, false);
 					closingBalance = closingBalance.subtract(t.getTran_amt());
 				} else {
-					addBodyCell(table, "0.00", normalFont, numberAlign, rtl, arabic);
-					addBodyCell(table, t.getTran_amt().toString(), normalFont, numberAlign, rtl, arabic);
+					addBodyCell(table, "0.00", normalFont, numberAlign, rtl, arabic, false);
+					addBodyCell(table, t.getTran_amt().toString(), normalFont, numberAlign, rtl, arabic, false);
 					closingBalance = closingBalance.add(t.getTran_amt());
 				}
 
-				addBodyCell(table, closingBalance.toString(), normalFont, numberAlign, rtl, arabic);
+				addBodyCell(table, closingBalance.toString(), normalFont, numberAlign, rtl, arabic, false);
 			}
 
 			PdfPCell closingCell = new PdfPCell(new Phrase(lblFinalClosing, headerFont));
@@ -573,9 +577,11 @@ public class XBRLAccountStatement {
 			}
 			table.addCell(closingCell);
 
+			String closingAmountText = arabic ? formatArabicPdfValue(closingBalance.toString(), false)
+					: closingBalance.toString();
 			PdfPCell amountCell = new PdfPCell(
-					arabic ? createBilingualPhrase(closingBalance.toString(), ARABIC_HEADER_FONT_SIZE, true)
-							: new Phrase(closingBalance.toString(), headerFont));
+					arabic ? createBilingualPhrase(closingAmountText, ARABIC_HEADER_FONT_SIZE, true)
+							: new Phrase(closingAmountText, headerFont));
 			amountCell.setHorizontalAlignment(numberAlign);
 			table.addCell(amountCell);
 
@@ -614,7 +620,12 @@ public class XBRLAccountStatement {
 
 	private void addBodyCell(PdfPTable table, String text, com.itextpdf.text.Font font, int alignment, boolean rtl,
 			boolean bilingual) {
-		Phrase phrase = resolvePhrase(text, font, bilingual, false);
+		addBodyCell(table, text, font, alignment, rtl, bilingual, false);
+	}
+
+	private void addBodyCell(PdfPTable table, String text, com.itextpdf.text.Font font, int alignment, boolean rtl,
+			boolean bilingual, boolean transliterateLatin) {
+		Phrase phrase = resolvePhrase(text, font, bilingual, false, transliterateLatin);
 		PdfPCell cell = new PdfPCell(phrase);
 		cell.setHorizontalAlignment(alignment);
 		if (rtl) {
@@ -635,7 +646,12 @@ public class XBRLAccountStatement {
 
 	private void addDetailCell(PdfPTable table, String text, com.itextpdf.text.Font font, int alignment,
 			boolean header, boolean rtl, boolean bilingual) {
-		Phrase phrase = resolvePhrase(text, font, bilingual, header);
+		addDetailCell(table, text, font, alignment, header, rtl, bilingual, false);
+	}
+
+	private void addDetailCell(PdfPTable table, String text, com.itextpdf.text.Font font, int alignment,
+			boolean header, boolean rtl, boolean bilingual, boolean transliterateLatin) {
+		Phrase phrase = resolvePhrase(text, font, bilingual, header, transliterateLatin);
 		PdfPCell cell = new PdfPCell(phrase);
 		cell.setHorizontalAlignment(alignment);
 		if (header) {
@@ -645,6 +661,78 @@ public class XBRLAccountStatement {
 			cell.setRunDirection(PdfWriter.RUN_DIRECTION_RTL);
 		}
 		table.addCell(cell);
+	}
+
+	/** Converts Western digits and decimal separators to Eastern Arabic forms (٠–٩). */
+	private String toArabicIndicDigits(String value) {
+		if (value == null || value.isEmpty()) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder(value.length());
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if (c >= '0' && c <= '9') {
+				sb.append(ARABIC_INDIC_DIGITS[c - '0']);
+			} else if (c == '.') {
+				sb.append('\u066B');
+			} else if (c == ',') {
+				sb.append('\u066C');
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+
+	private boolean containsLatinLetter(String value) {
+		if (value == null) {
+			return false;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean containsArabicLetter(String value) {
+		if (value == null) {
+			return false;
+		}
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+			if (block == Character.UnicodeBlock.ARABIC || block == Character.UnicodeBlock.ARABIC_SUPPLEMENT
+					|| block == Character.UnicodeBlock.ARABIC_EXTENDED_A) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Phonetic Latin → Arabic script for names (no harakat / vowel marks). */
+	private String transliterateLatinToArabic(String value) {
+		if (value == null || value.isEmpty()) {
+			return value;
+		}
+		if (!containsLatinLetter(value) || containsArabicLetter(value)) {
+			return value;
+		}
+		return EnglishToArabicNameTransliterator.transliterate(value);
+	}
+
+	/**
+	 * Arabic PDF formatting: optional Latin transliteration, then Eastern Arabic
+	 * digits for all numbers.
+	 */
+	private String formatArabicPdfValue(String value, boolean transliterateLatin) {
+		if (value == null) {
+			return "";
+		}
+		String result = transliterateLatin ? transliterateLatinToArabic(value) : value;
+		return toArabicIndicDigits(result);
 	}
 
 	/**
@@ -667,10 +755,12 @@ public class XBRLAccountStatement {
 		return selector.process(text != null ? text : "");
 	}
 
-	private Phrase resolvePhrase(String text, com.itextpdf.text.Font font, boolean bilingual, boolean bold) {
+	private Phrase resolvePhrase(String text, com.itextpdf.text.Font font, boolean bilingual, boolean bold,
+			boolean transliterateLatin) {
 		if (bilingual) {
 			float size = font != null ? font.getSize() : ARABIC_DATA_FONT_SIZE;
-			return createBilingualPhrase(text, size, bold);
+			String formatted = formatArabicPdfValue(text, transliterateLatin);
+			return createBilingualPhrase(formatted, size, bold);
 		}
 		return new Phrase(text != null ? text : "", font);
 	}
